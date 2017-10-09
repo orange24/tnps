@@ -1,0 +1,276 @@
+what,kind,bundleId,bundleVersion,description,time
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401350968819
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401350969715
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401350975487
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401350976135
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401350979536
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401350990028
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401350994123
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401350994754
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401350995329
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401350996803
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401350998760
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351000454
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351001621
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351081569
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351137412
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401351139142
+executed,command,org.eclipse.wst.sse.ui,1.2.5.v201108191505,"org.eclipse.wst.sse.ui.toggle.comment",1401351154338
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401351154857
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401351156087
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351156145
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351157579
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351159224
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351159580
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351160512
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351162495
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351163128
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351163693
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351164614
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351165157
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351165609
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351165834
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.redo",1401351169398
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.redo",1401351169865
+executed,command,org.eclipse.wst.sse.ui,1.2.5.v201108191505,"org.eclipse.wst.sse.ui.toggle.comment",1401351175245
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401351175889
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401351176936
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351176986
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351177104
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.paste",1401351179826
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351181429
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351181540
+executed,command,org.eclipse.ui.workbench.texteditor,3.6.1.r361_v20100714-0800,"org.eclipse.ui.edit.text.delete.line",1401351184833
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401351185433
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401351186480
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351186546
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351192999
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401351208775
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351285510
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351548121
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401351550186
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.paste",1401351555351
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401351558981
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401351560070
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351560121
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351560996
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351561530
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351561617
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351562451
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351563071
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351564221
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351564845
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401351565590
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401351566690
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351566738
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351580120
+activated,view,org.eclipse.ui.navigator.resources,3.4.202.M20101124-0800,"org.eclipse.ui.navigator.ProjectExplorer",1401351582115
+executed,command,org.eclipse.team.svn.ui,1.1.3.I20140206-1700,"org.eclipse.team.svn.ui.command.UpdateCommand",1401351591897
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351592220
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351596846
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401351599475
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351599912
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351619246
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401351620470
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351623782
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351680532
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401351681065
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351806112
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.findReplace",1401351806137
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351806652
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401351806759
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351807582
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351808827
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.copy",1401351810971
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401351812040
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.paste",1401351813262
+executed,command,org.eclipse.ui.workbench.texteditor,3.6.1.r361_v20100714-0800,"org.eclipse.ui.edit.text.delete.line",1401351816948
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401351817395
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401351818686
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351818724
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351820124
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351821088
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351886823
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.copy",1401351906386
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401351907172
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.redo",1401351909086
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.paste",1401351912531
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.delete",1401351915805
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.delete",1401351916069
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401351918045
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401351919307
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351919351
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351921144
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351921532
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351922042
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351922359
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351922470
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401351922725
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352076485
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401352170753
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352172066
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352172116
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352173206
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.copy",1401352174628
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.paste",1401352188052
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401352189841
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352191014
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352191061
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352192185
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401352210760
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352212108
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352212148
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352213462
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401352215685
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.copy",1401352218722
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401352219313
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.paste",1401352221037
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401352222113
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352223074
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352223121
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352224138
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.copy",1401352227181
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.paste",1401352232209
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.copy",1401352235218
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.paste",1401352237423
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.copy",1401352240573
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.paste",1401352241724
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.delete",1401352245991
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401352246846
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352248160
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352248200
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352249301
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401352280408
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352281482
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352281523
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352282550
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.paste",1401352315619
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401352317374
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401352318701
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352319992
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352320192
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352322818
+executed,command,org.eclipse.wst.sse.ui,1.2.5.v201108191505,"org.eclipse.wst.sse.ui.toggle.comment",1401352331319
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401352332123
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352333474
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352333586
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352334604
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.cut",1401352341737
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401352342272
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352343584
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352343624
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352344539
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401352353544
+executed,command,org.eclipse.ui.workbench.texteditor,3.6.1.r361_v20100714-0800,"org.eclipse.ui.edit.text.goto.lineEnd",1401352361352
+executed,command,org.eclipse.ui.workbench.texteditor,3.6.1.r361_v20100714-0800,"org.eclipse.ui.edit.text.goto.lineEnd",1401352366255
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.copy",1401352375639
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.paste",1401352382064
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.copy",1401352388537
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.paste",1401352397375
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401352400895
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352402213
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352402250
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352403116
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352403611
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352466697
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401352468651
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352474570
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352477354
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352485528
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352494221
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352497076
+executed,command,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.stop",1401352498487
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401352499386
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352506124
+executed,command,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.run",1401352523231
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352523282
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352523332
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352523983
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401352523988
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352524921
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352525788
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352530842
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352535137
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352536076
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352536477
+error,log,,,"Publishing failed with multiple errors",1401352540093
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352540699
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401352540705
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352543298
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352543532
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352546050
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352548821
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352550956
+error,log,,,"Could not delete D:\\Workspace\\TNPS project\\.metadata\\.plugins\\org.eclipse.wst.server.core\\tmp0\\wtpwebapps\\TKI\\WEB-INF\\lib\\sqljdbc4.jar. May be locked by another process.",1401352551537
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352551685
+error,log,,,"Could not delete D:\\Workspace\\TNPS project\\.metadata\\.plugins\\org.eclipse.wst.server.core\\tmp0\\wtpwebapps\\TKI\\WEB-INF\\lib\\sqljdbc4.jar. May be locked by another process.",1401352551857
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352553047
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352556030
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352557802
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352557820
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352557964
+error,log,,,"Resource is out of sync with the file system: '/TKI/WebContent/WEB-INF/classes/jdbc-uat.properties'.",1401352558804
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352565963
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401352566520
+activated,view,org.eclipse.ui.navigator.resources,3.4.202.M20101124-0800,"org.eclipse.ui.navigator.ProjectExplorer",1401352569387
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401352575220
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352577372
+executed,command,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.stop",1401352577431
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401352577807
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352578742
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401352578806
+activated,view,org.eclipse.ui.navigator.resources,3.4.202.M20101124-0800,"org.eclipse.ui.navigator.ProjectExplorer",1401352583754
+opened,editor,com.essiembre.eclipse.i18n.resourcebundle,0.8.0,"com.essiembre.eclipse.rbe.ui.editor.ResourceBundleEditor",1401352589741
+activated,editor,com.essiembre.eclipse.i18n.resourcebundle,0.8.0,"com.essiembre.eclipse.rbe.ui.editor.ResourceBundleEditor",1401352589789
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.file.save",1401352597479
+executed,command,org.eclipse.ui,3.6.2.M20110203-1100,"org.eclipse.ui.edit.undo",1401352598217
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401352600366
+closed,editor,com.essiembre.eclipse.i18n.resourcebundle,0.8.0,"com.essiembre.eclipse.rbe.ui.editor.ResourceBundleEditor",1401352600366
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352603321
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352604978
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352605891
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352606245
+error,log,,,"Publishing failed with multiple errors",1401352608286
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352622080
+executed,command,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.run",1401352626247
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401352626878
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352628612
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352636730
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352658943
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401352660125
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352665050
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352666058
+executed,command,org.eclipse.ui.ide,3.6.2.M20101201-0800,"org.eclipse.ui.project.cleanAction",1401352666069
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352666386
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352666901
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352699427
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352732304
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352733973
+executed,command,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.run",1401352741389
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401352741759
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352742663
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401352742805
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352744984
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401352767468
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352771458
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401352820526
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352821057
+activated,view,org.eclipse.ui.console,3.5.0.v20100526,"org.eclipse.ui.console.ConsoleView",1401352822578
+opened,view,org.eclipse.ui.ide,3.6.2.M20101201-0800,"org.eclipse.ui.views.ProblemView",1401352929408
+activated,view,org.eclipse.ui.ide,3.6.2.M20101201-0800,"org.eclipse.ui.views.ProblemView",1401352929478
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401352936514
+activated,view,org.eclipse.wst.server.ui,1.1.209.v20111005_1716,"org.eclipse.wst.server.ui.ServersView",1401352942182
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401353018828
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401353025820
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401353026251
+error,log,,,"Could not delete D:\\Workspace\\TNPS project\\.metadata\\.plugins\\org.eclipse.wst.server.core\\tmp0\\wtpwebapps\\TKI\\WEB-INF\\lib\\sqljdbc4.jar. May be locked by another process.",1401353030828
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401353161020
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401353164736
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401353168266
+error,log,,,"Could not delete D:\\Workspace\\TNPS project\\.metadata\\.plugins\\org.eclipse.wst.server.core\\tmp0\\wtpwebapps\\TKI\\WEB-INF\\lib\\sqljdbc4.jar. May be locked by another process.",1401353168763
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401353168868
+error,log,,,"Could not delete D:\\Workspace\\TNPS project\\.metadata\\.plugins\\org.eclipse.wst.server.core\\tmp0\\wtpwebapps\\TKI\\WEB-INF\\lib\\sqljdbc4.jar. May be locked by another process.",1401353169212
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401353222097
+activated,editor,org.eclipse.jst.jsp.ui,1.1.505.v201110211728,"org.eclipse.jst.jsp.core.jspsource.source",1401353249109
+deactivated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401353251158
+activated,workbench,org.eclipse.ui.workbench,3.6.2.M20110210-1200,"",1401353360752

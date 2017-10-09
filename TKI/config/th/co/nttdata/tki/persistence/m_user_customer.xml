@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+<sqlMap namespace="m_user_customer">
+
+	<select id="queryCustomer" parameterClass="th.co.nttdata.tki.bean.MUser" resultClass="th.co.nttdata.tki.bean.MCustomer" >
+		SELECT
+			mc.customerId
+			,mc.customerCode
+			,mc.customerName
+			,mc.remark
+			,CASE WHEN mu.username IS NULL then 0 ELSE 1 END as isCustomer
+		FROM m_customer mc left join m_user_customer mu on mc.customerId = mu.customerId and mu.username = #userName#
+		Order by mc.customerCode
+	</select>
+	
+	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.MUser">
+		<iterate property="custList">
+			<isNotNull property="custList[].customerId">
+				INSERT INTO m_user_customer VALUES (#userName#,#custList[].customerId#);
+			</isNotNull>
+		</iterate>
+	</insert>
+	
+	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.MUser">
+		<iterate property="userList">
+			<isNotEmpty property="userList[].userName">
+				DELETE FROM m_user_customer WHERE userName = #userList[].userName#
+			</isNotEmpty>
+		</iterate>
+	</delete>
+
+</sqlMap>

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="t_wip_stock_batch">
+
+	<select id="queryMinDate" resultClass="th.co.nttdata.tki.batch.bean.TWIPStock"  parameterClass="java.util.Map">
+		SELECT p.partid, ISNULL(p2.reportDate, DATEADD(d,-1,CONVERT(DATE,#executeDate#))) as reportDate
+		FROM m_part p
+		LEFT JOIN 
+		  (
+			  SELECT d.partId, MIN(d.reportdate) AS reportDate
+			  FROM (  
+			    SELECT mc.partid, mc.reportdate
+			    FROM t_dailymc mc 
+			    WHERE CONVERT(DATE,mc.lastupdate) >= DATEADD(d, -1, CONVERT(DATE, #executeDate#))
+			    UNION ALL 
+			    SELECT wkd.partid, wk.reportdate 
+			    FROM t_dailywk wk 
+			    LEFT OUTER JOIN t_dailywk_detail wkd ON wk.dailywkid = wkd.dailywkid
+			    WHERE CONVERT(DATE,wk.lastupdate) >= DATEADD(d, -1, CONVERT(DATE, #executeDate#))
+			    UNION ALL 
+			    SELECT mcwkd.partid, mcwk.reportdate
+			    FROM t_dailymcwk mcwk 
+			    LEFT OUTER JOIN t_dailymcwk_detail mcwkd ON mcwk.dailymcwkid = mcwkd.dailymcwkid
+			    WHERE CONVERT(DATE,mcwk.lastupdate) >= DATEADD(d, -1, CONVERT(DATE, #executeDate#))
+			    UNION ALL 
+			    SELECT adj.partid, adj.reportdate 
+			    FROM t_wip_stockadjust adj
+			    WHERE CONVERT(DATE,adj.lastupdate) >= DATEADD(d, -1, CONVERT(DATE, #executeDate#))
+		   ) d
+		  GROUP BY d.partid) p2
+		ON p.partid = p2.partid
+	</select>
+	
+	<delete id="delectWIPStock" parameterClass="th.co.nttdata.tki.batch.bean.TWIPStock">
+		DELETE FROM t_wip_stock
+		WHERE reportdate >= #reportDate#
+		AND partId = #partId#;
+	</delete>
+	
+	<insert id="insertQueryWIPStock" parameterClass="th.co.nttdata.tki.batch.bean.TWIPStock">
+		INSERT INTO	t_wip_stock(reportdate,wip,partid,ok,ng,pd,qty,prevstock,adjuststock,nextwipqty,currentstock)  
+  		SELECT #reportDate# AS reportDate,
+			   part.wip, part.partId,
+			   ISNULL(daily.ok,0) + ISNULL(pdadjust.ok,0) + ISNULL(rwadjust.ok,0) AS ok,
+			   ISNULL(daily.ng,0) + ISNULL(pdadjust.ng,0) + ISNULL(rwadjust.ng,0) AS ng,
+			   ISNULL(daily.pd,0) AS pd, 
+			   ISNULL(daily.qty,0) + ISNULL(pdadjust.qty,0) + ISNULL(rwadjust.qty,0) AS qty,
+			   ISNULL(prev.currentstock,0) AS prevStock,
+			   adjust.adjuststock AS adjustStock, 0, 0
+        FROM
+		<!-- Get all part from yesterday union today -->
+			(
+				SELECT DISTINCT s.wip, s.partid
+				FROM t_wip_stock s
+				WHERE s.reportdate = CONVERT(DATETIME,#reportDate#) - 1
+					AND partid =#partId#
+				UNION
+				SELECT DISTINCT ds.wip, ds.partid
+				FROM t_daily_summary ds
+					INNER JOIN m_part_wip w ON ds.wip = w.wip AND ds.partid = w.partid
+				WHERE ds.reportdate = #reportDate#
+			  	  	AND ds.reporttype = 1
+			      	AND w.iscalc = 1
+			      	AND ds.partid = #partId#
+				UNION
+				SELECT wip, partid
+				FROM t_wip_stockadjust
+				WHERE partid = #partId#
+				GROUP BY wip, partid 
+			) part
+
+        LEFT OUTER JOIN
+            <!-- Get actual daily sum by all shift (only reporttype and calc wip = 1)-->
+		   (
+		   		SELECT ds.wip, ds.partid, SUM(ds.ok) as ok, SUM(ds.ng) as ng,
+					SUM(ds.pd) as pd, SUM(ds.qty) as qty
+		    	FROM t_daily_summary ds
+		    		INNER JOIN m_part_wip w on ds.wip = w.wip AND ds.partid = w.partid
+	    		WHERE ds.reportdate = #reportDate#
+		      		AND ds.reporttype = 1
+		      		AND w.iscalc = 1
+		      		AND ds.partid = #partId#
+		   		 GROUP BY ds.wip, ds.partid
+		   	) daily
+		ON part.wip = daily.wip AND part.partid = daily.partid
+
+        LEFT OUTER JOIN
+			<!-- Get pending adjust -->
+			(
+				SELECT p.wip, p.partid, SUM(ISNULL(pa.ok,0)) as ok, SUM(ISNULL(pa.ng,0)) as ng,
+		           	0 as pd, SUM(ISNULL(pa.ok,0) + ISNULL(pa.ng,0)) as qty
+		    	FROM t_pending p
+		    		LEFT OUTER JOIN m_part_wip w on p.wip = w.wip AND p.partid = w.partid
+		    		LEFT OUTER JOIN t_pending_adjust pa on p.pdid = pa.pdid
+		    	WHERE pa.reportdate = #reportDate#
+		          	AND p.reporttype = 1
+		          	AND w.iscalc = 1
+		          	AND p.partid = #partId#
+		    	GROUP BY p.wip, p.partid
+		   	) pdadjust
+		ON part.wip = pdadjust.wip AND part.partid = pdadjust.partid
+
+        LEFT OUTER JOIN
+			<!-- Get rework adjust -->
+			(
+				SELECT pr.wip, p.partid, SUM(ISNULL(ra.ok,0)) as ok, SUM(ISNULL(ra.ng,0)) as ng,
+		           	0 as pd, SUM(ISNULL(ra.ok,0) + ISNULL(ra.ng,0)) as qty
+	    		FROM t_pending p
+				    LEFT OUTER JOIN m_part_wip w on p.wip = w.wip AND p.partid = w.partid
+				    LEFT OUTER JOIN t_pending_adjust pa on p.pdid = pa.pdid
+				    LEFT OUTER JOIN t_pending_rework pr on pa.pdadjustid = pr.pdadjustid
+				    LEFT OUTER JOIN t_rework_adjust ra on pr.pdreworkid = ra.pdreworkid
+			    WHERE pa.reportdate = #reportDate#
+			      	AND p.reporttype = 1
+			      	AND w.iscalc = 1
+			      	AND p.partid = #partId#
+		    	GROUP BY pr.wip, p.partid
+		    ) rwadjust
+		ON part.wip = rwadjust.wip AND part.partid = rwadjust.partid
+
+        LEFT OUTER JOIN
+			<!-- Get previous stock from yesterday -->
+		   (
+		   		SELECT ws.wip, ws.partid, ISNULL(ws.adjuststock,ws.currentstock) as currentstock
+				FROM t_wip_stock ws
+				WHERE ws.reportdate = CONVERT(DATETIME,#reportDate#) - 1
+				AND partid = #partId#
+			) prev
+		ON part.wip = prev.wip AND part.partid = prev.partid
+		
+		LEFT OUTER JOIN
+			(
+				SELECT w.wip, w.partid, w.adjuststock
+				FROM t_wip_stockadjust w
+				WHERE 
+					exists (
+						SELECT 1 
+						FROM(
+							SELECT wip, partid, reportdate, MAX(wipstockadjustid) as wipstockadjustid
+							FROM t_wip_stockadjust
+							WHERE partid = #partId# and reportdate = #reportDate#
+							GROUP BY wip, partid, reportdate
+						) x
+						WHERE w.wip = x.wip and w.partid = x.partid and w.reportdate = x.reportdate and w.wipstockadjustid = x.wipstockadjustid
+					)
+			)adjust
+		ON part.partid = adjust.partid AND part.wip = adjust.wip
+	</insert>
+	
+	<select id="queryWipOrder" parameterClass="th.co.nttdata.tki.batch.bean.TWIPStock" resultClass="th.co.nttdata.tki.batch.bean.TWIPStock">
+		SELECT 	ws.reportDate,ws.wip, ws.partId, wp.wipOrder ,ws.ok,ws.prevStock	
+		FROM 	t_wip_stock ws
+				INNER JOIN m_part_wip wp ON ws.wip = wp.wip AND ws.partid = wp.partid
+		WHERE 	ws.reportdate = #reportDate#
+				AND ws.partId = #partId#
+				AND wp.iscalc = 1
+		ORDER BY partid,wp.wiporder
+	</select>
+	
+	<select id="queryFGId" resultClass="int" parameterClass="int">
+		SELECT 	TOP 1 fgid
+		FROM 	m_fg_part
+		WHERE 	partid = #value#
+				AND isactive = 1
+	</select>
+	
+	<select id="checkExistnextWIP" parameterClass="th.co.nttdata.tki.batch.bean.TWIPStock" resultClass="int" >
+		SELECT 	TOP 1 1 FROM m_part_wip 
+		WHERE 	partid = #partId# 
+				AND iscalc = 1 and wiporder > #wipOrder#
+	</select>
+	
+	<select id="queryMaxWIPOrder" resultClass="int" parameterClass="int">
+		SELECT 	MAX(wiporder) 
+		FROM 	m_part_wip pw
+				INNER JOIN m_part p on pw.partid = p.partid
+		WHERE 	p.partid = #value# and pw.iscalc = 1
+	</select>
+	
+	<select id="queryFGIn" parameterClass="th.co.nttdata.tki.batch.bean.TWIPStock" resultClass="int">
+		SELECT 	ISNULL(SUM(s.fgin),0) 
+		FROM 	t_fg_stock s
+				INNER JOIN m_fg_part fp on s.fgid = fp.fgid
+		WHERE 	s.reportDate = #reportDate#
+				AND fp.fgid = #fgId#
+	</select>
+	
+	<select id="queryNextWIP" parameterClass="th.co.nttdata.tki.batch.bean.TWIPStock" resultClass="java.lang.String">
+		SELECT 	TOP 1 wip
+		FROM 	m_part_wip 
+		WHERE 	partid = #partId# 
+				AND iscalc = 1 AND wiporder > #wipOrder#
+		ORDER BY wiporder
+	</select>
+	
+	<select id="queryQtyNextWip" parameterClass="th.co.nttdata.tki.batch.bean.TWIPStock" resultClass="int">
+		SELECT 	ISNULL(min(qty),0)
+		FROM 	t_wip_stock
+		WHERE 	reportdate = #reportDate#
+				AND wip = #nextWIP#
+				AND partid = #partId#
+	</select>
+	
+	<select id="queryAssyPart" parameterClass="th.co.nttdata.tki.batch.bean.TWIPStock" resultClass="int">
+		SELECT 	TOP 1 partid
+		FROM 	m_fg_part fg
+		WHERE 	fg.fgid = #fgId#
+				AND fg.isactive = 1
+				AND fg.partid != #partId#
+	</select>
+	
+	<update id="updateWIPStock" parameterClass="th.co.nttdata.tki.batch.bean.TWIPStock">
+		UPDATE 	t_wip_stock
+		SET 	nextwipqty = #nextWIPQty#,
+				currentstock = ISNULL(#prevStock#,0)+ISNULL(#ok#,0)-ISNULL(#nextWIPQty#,0)
+		WHERE 	reportdate = #reportDate#
+		  	  	AND wip = #wip#
+		      	AND partid = #partId#;
+	</update>
+	
+	<select id="queryAllPartWip" resultClass="th.co.nttdata.tki.batch.bean.TWIPStock"  parameterClass="java.util.Map">
+		SELECT DISTINCT MAX(reportdate) AS reportDate,partId,wip
+		FROM 	t_wip_stock
+		<dynamic prepend="WHERE">
+			<isNotEmpty property="partId"> partid = #partId#</isNotEmpty>
+		</dynamic>
+		GROUP BY partId,wip
+		HAVING MAX(reportdate) <![CDATA[ < ]]> #executeDate#
+	</select>
+	
+	<select id="queryLastStock" parameterClass="th.co.nttdata.tki.batch.bean.TWIPStock" resultClass="th.co.nttdata.tki.batch.bean.TWIPStock">
+		SELECT 	#reportDate# AS reportDate,wip,wip,partId,0 AS ok,0 AS ng,0 AS pd,0 AS qty,ISNULL(adjuststock,currentstock) AS prevStock,0 AS nextWIPQty,currentStock
+		FROM 	t_wip_stock
+		WHERE 	reportdate = #reportDate#
+				AND partid = #partId#
+				AND wip = #wip#	
+	</select>
+	
+	<insert id="insertAllWip" parameterClass="th.co.nttdata.tki.batch.bean.TWIPStock">
+		INSERT INTO	t_wip_stock(reportdate,wip,partid,ok,ng,pd,qty,prevstock,nextwipqty,currentstock)  
+		VALUES (#reportDate#,#wip#,#partId#,#ok#,#ng#,#pd#,#qty#,#prevStock#,#nextWIPQty#,#currentStock#)
+	</insert>
+	
+	<select id="checkIsIcalc" parameterClass="int" resultClass="int">
+		SELECT 1
+		FROM m_part_wip
+		WHERE partid = #value#
+		GROUP BY partid
+		having SUM(convert(int, isCalc)) > 0
+	</select>
+	<procedure id="selectWipStockCalculation" resultClass="int" parameterClass="java.util.Map">
+   		{ call SP_WIP_STOCK_BATCH_NEW(#runBy#,#executeDate#,#retCode#) } 
+	</procedure>
+</sqlMap>

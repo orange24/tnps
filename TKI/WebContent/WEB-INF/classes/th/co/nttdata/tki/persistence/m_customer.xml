@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_customer">
+	<sql id="querySelect">
+		SELECT
+			 c.createDate
+			,c.lastUpdate
+			,c.customerId
+			,c.createBy
+			,c.customerCode
+			,c.customerName
+			,c.updateBy
+			,c.remark
+			,c.vendorCode
+			,c.isbarcodeqty
+	</sql>
+	
+	<sql id="queryFrom">
+		FROM m_customer c
+<!-- 		INNER JOIN m_user_customer u ON u.customerId = c.customerId -->
+	</sql>
+
+	<sql id="queryProperties">		
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="customerCode"> c.customercode like #customerCode# + '%'</isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerName"> c.customername like #customerName# + '%'</isNotEmpty>
+			<isNotEmpty prepend="AND" property="updateBy"> u.userName = #updateBy# </isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="queryMCustomer" parameterClass="int" resultClass="th.co.nttdata.tki.bean.MCustomer" >
+		<include refid="querySelect"/>
+		FROM m_customer c 
+		WHERE c.customerId = #value#
+	</select>
+	
+	<select id="queryCustomer" parameterClass="th.co.nttdata.tki.bean.MCustomer" resultClass="th.co.nttdata.tki.bean.MCustomer">
+		<include refid="querySelect"/>
+		<include refid="queryFrom"/>
+		WHERE 1=1
+<!-- 		u.userName = #updateBy# -->
+			<isNotEmpty prepend="AND" property="customerId"> c.customerid = #customerId# </isNotEmpty>
+		Order by c.customerCode
+	</select>
+	
+	<select id="queryCustomerSearch" parameterClass="th.co.nttdata.tki.bean.MCustomer" resultClass="th.co.nttdata.tki.bean.MCustomer">
+		<include refid="querySelect"/>
+		<include refid="queryFrom"/>
+		<include refid="queryProperties"/>
+		Order by c.customerCode ASC
+	</select>
+	
+	<select id="count" parameterClass="th.co.nttdata.tki.bean.MCustomer" resultClass="int">
+		SELECT
+			count(*)
+		<include refid="queryFrom"/>
+		<include refid="queryProperties"/>
+	</select>
+	
+	<!-- TPIC -->
+	<select id="queryTpicCustomer" parameterClass="string" resultClass="th.co.nttdata.tki.bean.MCustomer">
+		SELECT c.cust as customerCode
+        FROM   tpics_xcust AS c
+	</select>
+	
+	<delete id="delete_cust" parameterClass="th.co.nttdata.tki.bean.MCustomer">
+		<iterate property="customerList">
+			<isNotEmpty property="customerList[].customerId">
+				DELETE FROM m_customer WHERE customerId = #customerList[].customerId#;
+			</isNotEmpty>
+		</iterate>
+	</delete>
+	
+	<update id="update_cust" parameterClass="th.co.nttdata.tki.bean.MCustomer">
+		<iterate property="customerList">			
+			UPDATE  m_customer 
+			SET 
+			customerCode = #customerList[].customerCode# ,
+			customerName = #customerList[].customerName# ,
+			vendorCode = #customerList[].vendorCode# ,
+			remark = #customerList[].remark# ,
+			isBarcodeQty = #customerList[].isBarcodeQty# ,
+			lastUpdate = GETDATE(),
+			updateBy = #updateBy#							
+			WHERE customerId = #customerList[].customerId#;
+		</iterate>
+	</update>
+	
+	<insert id="insert_cust" parameterClass="th.co.nttdata.tki.bean.MCustomer">
+		<iterate property="customerList">	
+		<isNotNull  property="customerList[].customerCode">		
+			INSERT INTO  m_customer 
+				(customerCode,customerName,
+				vendorCode,remark, isbarcodeqty, 
+				createDate,createBy,lastUpdate,updateBy) 
+			VALUES 
+				(#customerList[].customerCode#,#customerList[].customerName#,
+				#customerList[].vendorCode#,#customerList[].remark#, #customerList[].isBarcodeQty#,
+				GETDATE(),#createBy#,GETDATE(),#updateBy#);
+		</isNotNull>
+		</iterate>
+	</insert>
+	
+	<statement id="merge" parameterClass="th.co.nttdata.tki.bean.MCustomer" resultClass="integer">
+		<isNotEmpty property="customerCode">
+			MERGE INTO m_customer c 
+			USING (SELECT MAX(a.customerId) as customerId from 
+					(SELECT customerId FROM m_customer WHERE customerCode = #customerCode# 
+					 UNION ALL SELECT -1) a) oc
+			ON (c.customerId = oc.customerId)
+			WHEN MATCHED THEN 
+				UPDATE SET c.customerCode = #customerCode# 
+			WHEN NOT MATCHED THEN
+				INSERT(customerCode,customerName,createBy,updateBy)
+				VALUES(#customerCode#,#customerName#,#createBy#,#updateBy#)
+			OUTPUT INSERTED.customerId;
+		</isNotEmpty>
+	</statement>
+	
+	<sql id="querySelectTpic">
+		SELECT 
+			cust.cust as customerCode, 
+			cust.name as customerName
+	</sql>
+	
+	<sql id="queryFromTpic">
+		FROM tpics_xcust AS cust 
+	</sql>
+	
+	<sql id="queryPropertiesTpic">		
+		WHERE NOT EXISTS     
+		(SELECT 1 FROM m_customer mc WHERE mc.customerCode = cust.cust 
+		 AND mc.customerName = cust.name
+		) 
+		<isNotEmpty prepend="AND" property="customerCode"> cust like #customerCode# + '%'</isNotEmpty>
+		<isNotEmpty prepend="AND" property="customerName"> name like #customerName# + '%'</isNotEmpty>			
+	</sql>
+	
+	<sql id="orderByTpic">
+		Order by cust.cust
+	</sql>
+	
+	<select id="queryCustomerTpicSearch" parameterClass="th.co.nttdata.tki.bean.MCustomer" resultClass="th.co.nttdata.tki.bean.MCustomer">
+		<include refid="querySelectTpic"/>
+		<include refid="queryFromTpic"/>
+		<include refid="queryPropertiesTpic"/>	
+		<include refid="orderByTpic"/>		
+	</select>
+	
+	<select id="countTpic" parameterClass="th.co.nttdata.tki.bean.MCustomer" resultClass="int">
+		SELECT
+			count(*)
+		<include refid="queryFromTpic"/>	
+		<include refid="queryPropertiesTpic"/>
+	</select>
+	
+	<statement id="mergeCustomer" parameterClass="th.co.nttdata.tki.bean.MCustomer" resultClass="integer">
+		<iterate property="customerList">	
+		<isNotNull  property="customerList[].customerCode">
+			MERGE INTO m_customer mc
+			USING (SELECT #customerList[].customerCode# as custcode, #customerList[].customerName# as custname) c
+			ON (mc.customercode = c.custcode)
+			WHEN NOT MATCHED THEN
+				INSERT(customercode, customername, createby, updateby)
+				VALUES(c.custcode, c.custname, #createBy#,#updateBy#)
+			WHEN MATCHED THEN
+				UPDATE SET mc.customername = c.custname,mc.lastUpdate = GETDATE(),mc.updateBy = #updateBy#;		
+		</isNotNull>
+		</iterate>
+	</statement>
+	
+	<select id="select_export"  parameterClass="th.co.nttdata.tki.bean.filter.MCustomerFilter" resultClass="th.co.nttdata.tki.bean.MCustomer">
+		SELECT 	CUSTOMERID,
+				CUSTOMERCODE,CUSTOMERNAME
+     			 ,REMARK
+      			,vendorCode
+      			,CREATEDATE
+     			,CREATEBY
+      			,LASTUPDATE
+      			,UPDATEBY
+ 		FROM M_CUSTOMER
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="customerId"> CAST(CUSTOMERID AS VARCHAR(20)) like '%' +#customerId#+'%'</isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerCode"> CUSTOMERCODE like '%' +#customerCode#+'%'</isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerName"> customername like '%' +#customerName#+'%'</isNotEmpty>
+			<isNotEmpty prepend="AND" property="vendorCode"> vendorCode like '%' +#vendorCode#+'%'</isNotEmpty>
+			<isNotEmpty prepend="AND" property="remark"> remark like '%' +#remark#+'%'</isNotEmpty>
+			<isNotEmpty prepend="AND" property="createDate"> CONVERT(VARCHAR(15),createdate,103)+' '+CONVERT(VARCHAR(15),createdate,108) like '%' +#createDate#+'%'</isNotEmpty>
+			<isNotEmpty prepend="AND" property="lastUpdate"> CONVERT(VARCHAR(15),lastupdate,103)+' '+CONVERT(VARCHAR(15),lastupdate,108) like '%' +#lastUpdate#+'%'</isNotEmpty>
+			<isNotEmpty prepend="AND" property="createBy"> createBy like '%' +#createBy#+'%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="updateBy"> updateBy like '%' +#updateBy#+'%'</isNotEmpty>
+		</dynamic>
+		ORDER BY CUSTOMERCODE 
+	</select>
+	
+	<select id="select_customer" parameterClass="string" resultClass="th.co.nttdata.tki.bean.MCustomer">
+		SELECT 
+			c.CUSTOMERID AS customerId,
+      		c.CUSTOMERCODE AS customerCode,
+      		c.CUSTOMERNAME AS customerName
+		FROM 
+			M_CUSTOMER c
+		INNER JOIN M_USER_CUSTOMER uc on c.CUSTOMERID = uc.CUSTOMERID
+		WHERE uc.USERNAME = #param#
+		ORDER BY c.CUSTOMERCODE
+	</select>
+	
+	<select id="prdS03_select_customer" parameterClass="java.lang.Integer" resultClass="th.co.nttdata.tki.bean.MCustomer">
+		SELECT 
+	      	CUSTOMERID   AS customerId,
+	      	CUSTOMERCODE AS customerCode
+		FROM 
+			M_CUSTOMER 
+		ORDER BY 
+			CUSTOMERCODE
+	</select>
+</sqlMap>

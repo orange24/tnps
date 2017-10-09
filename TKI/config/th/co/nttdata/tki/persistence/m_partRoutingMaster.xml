@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    <sqlMap namespace="m_partRoutingMaster">
+    <select id="select_fg_part_wip" parameterClass="th.co.nttdata.tki.bean.PartRoutingMaster" resultClass="th.co.nttdata.tki.bean.PartRoutingMaster">
+        SELECT 
+ 				CFP.CUSTOMERID
+ 				,CFP.CUSTOMERCODE
+ 				,CFP.FGID
+ 				,CFP.FGNO
+ 				,CFP.FGNAME
+ 				,CFP.PARTID
+ 				,CFP.PARTNO
+ 				,CFP.PARTNAME
+ 				,PW.WIPORDER
+ 				,PW.WIP
+ 				,CONVERT(VARCHAR(10),PW.WIPORDER) +'.'+ PW.WIP  As process
+ 				,CONVERT(VARCHAR(10),PW.WIPORDER) +'.'+ case when PW.remark is null then '' else PW.remark end AS remark
+			  	,CONVERT(VARCHAR(10),PW.WIPORDER)+'.'+
+			   		CASE
+			      	WHEN	( PW.ISCALC = 1 ) 
+			      			THEN 'Yes'
+			    			ELSE  'No'    
+			    	END    	As wipCalc
+ 				,PW.ISCALC
+		FROM 	V_CUST_FG_PART CFP 
+				LEFT JOIN M_PART_WIP PW ON CFP.PARTID = PW.PARTID
+		WHERE 
+				CFP.CUSTOMERID = #customerId# 
+          		<isNotEmpty prepend="AND" property="fgNo">   CFP.FGNO LIKE	'%' +#fgNo#+ '%'</isNotEmpty>
+         	 	<isNotEmpty prepend="AND" property="fgName"> CFP.FGNAME LIKE '%' +#fgName#+ '%'</isNotEmpty>
+          		<isNotEmpty prepend="AND" property="partNo"> CFP.PARTNO LIKE '%' +#partNo#+ '%'</isNotEmpty>
+          		<isNotEmpty prepend="AND" property="partName"> CFP.PARTNAME LIKE '%' +#partName#+ '%'</isNotEmpty>
+		ORDER BY CFP.CUSTOMERCODE,CFP.FGNO,CFP.PARTNO,PW.WIPORDER
+    </select>
+    <select id="select_part_wip" resultClass="th.co.nttdata.tki.bean.PartRoutingMaster"  parameterClass="th.co.nttdata.tki.bean.PartRoutingMaster">
+    	    SELECT
+    	            PW.PARTID
+                   ,PW.WIP
+                   ,PW.WIPORDER
+                   ,WIP.WIP+':'+WIP.WIPNAME As PROCESS
+                   ,PW.remark AS remark
+                   ,PW.ISCALC 
+                   ,WIP.CREATEDATE
+                   ,WIP.LASTUPDATE
+                   FROM M_PART_WIP PW
+           INNER JOIN M_PART PART ON PART.PARTID = PW.PARTID
+           INNER JOIN M_WIP WIP ON WIP.WIP = PW.WIP
+           WHERE PW.PARTID = #partId#
+           ORDER BY PW.WIPORDER
+    </select>
+    <select id="select_process" resultClass="th.co.nttdata.tki.bean.PartRoutingMaster">
+             SELECT  
+                     WIP
+                    ,WIPNAME
+				    ,WIPTYPE
+				    ,WIP+':'+WIPNAME As PROCESS
+				    ,ISCALC
+				    ,REMARK
+				    ,CREATEDATE
+				    ,CREATEBY
+				    ,LASTUPDATE
+				    ,UPDATEBY
+			   FROM M_WIP
+				     ORDER BY WIP
+    </select>
+     <select id="select_row"  parameterClass="th.co.nttdata.tki.bean.PartRoutingMaster"  resultClass="th.co.nttdata.tki.bean.PartRoutingMaster">
+          SELECT 
+                 CUS.CUSTOMERID
+                ,CUS.CUSTOMERCODE
+				,FG.FGID
+			    ,FG.FGNO
+				,FG.FGNAME
+				,PART.PARTID
+				,PART.PARTNO
+				,PART.PARTNAME
+         FROM M_FG_PART FGP 
+			INNER JOIN M_PART PART ON PART.PARTID = FGP.PARTID
+			INNER JOIN M_FG FG ON FG.FGID = FGP.FGID
+			INNER JOIN M_FG_CUSTOMER FGC ON FGC.FGID = FGP.FGID
+			INNER JOIN M_CUSTOMER CUS ON CUS.CUSTOMERID = FGC.CUSTOMERID
+			WHERE 
+        FGC.CUSTOMERID = #customerId# 
+        <isNotEmpty prepend="AND" property="fgNo"> FG.FGNO LIKE	 #fgNo#+ '%'</isNotEmpty>
+        <isNotEmpty prepend="AND" property="fgName"> FG.FGNAME LIKE	 #fgName#+ '%'</isNotEmpty>
+        <isNotEmpty prepend="AND" property="partNo"> PART.PARTNO LIKE	 #partNo#+ '%'</isNotEmpty>
+        <isNotEmpty prepend="AND" property="partName"> PART.PARTNAME LIKE	 #partName#+ '%'</isNotEmpty>
+        <isNotEqual prepend="AND" compareProperty="partId"  compareValue="PART.PARTID">  PART.PARTID != #partId#  </isNotEqual>
+        ORDER BY FG.FGNO,PART.PARTNO
+    </select>
+    <select id="select_export" parameterClass="th.co.nttdata.tki.bean.filter.PartRoutingMasterFilter" resultClass="th.co.nttdata.tki.bean.filter.PartRoutingMasterFilter">
+    	 SELECT 
+                 CUS.CUSTOMERID
+                 ,CUS.CUSTOMERCODE
+				 ,FG.FGID
+				 ,FG.FGNO
+				 ,FG.FGNAME
+				 ,PART.PARTID
+				 ,PART.PARTNO
+				 ,PART.PARTNAME
+				 ,PW.WIPORDER
+				 ,PW.WIP
+				 ,PW.remark
+				 ,CASE WHEN ( PW.ISCALC = 1 ) THEN 'Yes' ELSE  'No' END As isCalc  
+         FROM M_FG_PART FGP 
+		 INNER JOIN M_PART PART ON PART.PARTID = FGP.PARTID
+		 INNER JOIN M_FG FG ON FG.FGID = FGP.FGID
+		 INNER JOIN M_FG_CUSTOMER FGC ON FGC.FGID = FGP.FGID
+		 INNER JOIN M_CUSTOMER CUS ON CUS.CUSTOMERID = FGC.CUSTOMERID
+		 LEFT JOIN M_PART_WIP PW ON FGP.PARTID = PW.PARTID
+		 WHERE
+		       FGC.CUSTOMERID = #customerId#
+			<isNotEmpty prepend="AND" property="searchfgNo"> FG.FGNO LIKE	'%' +#searchfgNo#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="searchfgName"> FG.FGNAME LIKE	'%' +#searchfgName#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="searchpartNo"> PART.PARTNO LIKE	'%' +#searchpartNo#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="searchpartName"> PART.PARTNAME LIKE	'%' +#searchpartName#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerCode"> CUS.CUSTOMERCODE LIKE	'%' +#customerCode#+ '%' </isNotEmpty>
+            <isNotNull prepend="AND" property="fgNo"> FG.FGNO LIKE	'%' +#fgNo#+ '%' </isNotNull>
+			<isNotNull prepend="AND" property="fgName"> FG.FGNAME LIKE	'%' +#fgName#+ '%' </isNotNull>
+			<isNotNull prepend="AND" property="partNo"> PART.PARTNO LIKE	'%' +#partNo#+ '%' </isNotNull>
+			<isNotNull prepend="AND" property="partName"> PART.PARTNAME LIKE	'%' +#partName#+ '%' </isNotNull>
+			<isNotEmpty prepend="AND" property="process">  CAST(PW.WIPORDER AS VARCHAR(3))+'. '+ PW.WIP like '%' +#wip#+ '%'</isNotEmpty>  
+			<isNotEmpty prepend="AND" property="wipCalcList"> CAST(PW.WIPORDER AS VARCHAR(3))+'. '+ CAST(PW.WIPORDER AS VARCHAR(3)) like '%' +#isCalc#+ '%'</isNotEmpty>
+			ORDER BY FG.FGNO,PART.PARTNO,PW.WIPORDER   
+			              
+    </select>
+    <delete id="delete_part_wip" parameterClass="th.co.nttdata.tki.bean.PartRoutingMaster">   
+    	DELETE FROM      M_PART_WIP 
+        WHERE PARTID = #partId#
+    </delete>
+    <delete id="delete_mapping_dest" parameterClass="th.co.nttdata.tki.bean.PartRoutingMaster">
+       <isNotNull property="destinationPartId">
+         DELETE  FROM  m_part_wip  WHERE  partid = #destinationPartId#
+    </isNotNull>
+    </delete>
+    <insert id="insert_copy_row" parameterClass="th.co.nttdata.tki.bean.PartRoutingMaster">
+         INSERT INTO
+                    M_PART_WIP
+                    (PARTID,WIPORDER,WIP,remark,ISCALC) 
+                     SELECT  #destinationPartId#,PW.WIPORDER,PW.WIP,PW.remark,PW.ISCALC
+         FROM M_PART_WIP PW 
+                  WHERE PW.PARTID = #partId#
+    
+    </insert>
+    <insert id="insert_part_wip" parameterClass="th.co.nttdata.tki.bean.PartRoutingMaster">
+     	<iterate property="partRoutinglist">
+       		INSERT   INTO  M_PART_WIP
+                     (PARTID
+                      ,WIP
+                      ,WIPORDER
+                      ,remark
+                      ,ISCALC)
+                VALUES
+                      ( #partRoutinglist[].partId#
+                      ,#partRoutinglist[].wip#
+                      ,#partRoutinglist[].wipOrder#
+                      ,#partRoutinglist[].remark#
+                      ,#partRoutinglist[].isCalc#)
+    	</iterate>
+    </insert>
+    <select id="select_part_row"  parameterClass="th.co.nttdata.tki.bean.PartRoutingMaster"  resultClass="th.co.nttdata.tki.bean.PartRoutingMaster">
+        SELECT 
+                 CUSTOMERID
+                ,CUSTOMERCODE
+				,FGID
+			    ,FGNO
+				,FGNAME
+				,PARTID
+				,PARTNO
+				,PARTNAME
+         FROM v_cust_fg_part
+         WHERE customerid = #customerId# AND fg_isenable = 1 AND part_isenable = 1
+         ORDER BY FGNO,PARTNO
+    </select>
+    </sqlMap>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_menu">
+
+	<select id="queryAction" parameterClass="th.co.nttdata.tki.bean.MRole" resultClass="th.co.nttdata.tki.bean.MMenu">
+		SELECT
+			 m.enabled
+			,m.menuParantId
+			,m.menuId
+			,m.rank
+			,m.menuName
+			,m.menuUrl
+		FROM m_role_menu r, m_menu m
+		WHERE r.menuid = m.menuid AND r.roleid = #roleId#
+	</select>
+	
+	<resultMap class="th.co.nttdata.tki.bean.MMenu" id="parent-menu" groupBy="menuParentName">
+		<result property="menuParentName" column="menuParentName"/>
+		<result property="menuList" resultMap="m_menu.menu"/>
+	</resultMap>
+	
+	<resultMap class="th.co.nttdata.tki.bean.MMenu" id="menu">
+		<result property="menuName" column="menuName"/>
+		<result property="menuUrl" column="menuUrl"/>
+	</resultMap>
+	
+	<select id="queryMenu" parameterClass="th.co.nttdata.tki.bean.MMenu" resultMap="parent-menu">
+		SELECT m.menuId, m.menuName, m.menuUrl, m2.menuId as parentId, m2.menuName as menuParentName
+		  FROM [m_menu] m
+		 INNER JOIN m_role_menu rm ON m.menuid = rm.menuid
+		 INNER JOIN m_role r ON rm.roleid = r.roleid
+		 INNER JOIN m_user u on r.roleid = u.roleid 
+		 INNER JOIN m_menu m2 on m.menuparentid = m2.menuId 
+		 WHERE m.[enabled] = 1 AND u.username = #createBy#
+	  	 ORDER BY menuId
+	</select>
+</sqlMap>

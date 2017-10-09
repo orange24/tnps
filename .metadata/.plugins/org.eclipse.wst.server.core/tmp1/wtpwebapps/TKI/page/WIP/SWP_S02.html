@@ -1,0 +1,317 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title></title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../css/main.css" type="text/css" rel="stylesheet">
+<link href="../css/tab.css" type="text/css" rel="stylesheet">
+<link href="../css/jquery-ui-1.8.6.custom.css" type="text/css" rel="stylesheet" />	
+<script src="../js/standard_script.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<script src="../js/jquery-ui-1.8.6.custom.min.js" type="text/javascript"></script>
+<script language="javascript">
+//JQuery
+$(function(){
+			
+	function goTo(path){
+		window.location= path;
+	}	
+	  	
+	//initialze script run
+	$(document).ready(function() {
+  		$("#wipcode").focus();	
+		//$("#wipform").validate();
+		$(".table_border_collapse").fixedtableheader({ highlightrow: true, headerrowsize: 2 });
+	});	
+	
+			
+	//workercode onblur
+	$('#workercode').blur(function(){
+		var workercode = $('#workercode').val();
+		if(workercode == '001'){
+			$('#workername').text('Mr. ABC');	
+		}else{
+			$('#workername').html('<font color="red">Invalid Worker code : ' + workercode + '</font>');		
+		}
+	});
+	
+	//rptdate calendar
+	$('#rptdate').datepicker({	
+		dateFormat: 'dd/mm/yy'
+	});	
+	
+	//partno txt
+	var partnos = ["AL-L APASAHI-0001", "AL-L APASAHI-0002", "AL-L APASAHI-0003", "AL-R APASAHI-0001", "AL-R APASAHI-0002", "AL-R APASAHI-0003"];
+	$("#partno1").autocomplete({
+		source: partnos
+	});
+	
+	//partname txt
+	var partnames = ["L BODY A TYG504-103.", "L BODY B TYG504-104.", "R BODY A TYG4-101.", "R BODY A TYG3-101.", "R BODY B TYG3-102"];
+	$("#partname2").autocomplete({
+		source: partnames
+	});
+	
+	//wono txt
+	var wonos = ["A150801DX-1", "A150801DX-2", "A150802DX-1", "A150802DX-2", "A150803DX-1", "A150803DX-2", "A150804DX-1", "A150805DX-1", "A150806DX-1"];
+	$("#wono3").autocomplete({
+		source: wonos,
+		delay:0	
+	});
+	
+	$("#wono1").autocomplete({
+		source: wonos,
+		delay:0		
+	});
+	
+	$("#wono2").autocomplete({
+		source: wonos,
+		delay:0		
+	});
+		
+	//add row
+	$('#btngo').click(function(){		
+		var n = $('#rowadd').val();
+		for(var i = 0; i < n; i++){
+			$('#dynamictbl tbody>tr:last').clone(true).insertAfter('#dynamictbl tbody>tr:last');
+		}
+		
+	});
+	
+	//delete row
+	$('table td img.delete').click(function(){
+		if(confirm('Delete this row?')){
+    		$(this).parent().parent().remove();
+		}
+	});
+	
+	//partno onblur
+	$('#partno1').blur(function(){
+		var partno = $('#partno1').val();
+		if(partno == 'AL-L APASAHI-0001'){
+			$('#partname1').val('L BODY A TYG504-103.');	
+			$('#cust1').text('ASAHI');
+		}
+	});
+	
+	//partname onblur
+	$('#partname2').blur(function(){
+		var partname = $('#partname2').val();
+		if(partname == 'L BODY B TYG504-104.'){
+			$('#partno2').val('AL-L APASAHI-0002');
+			$('#cust2').text('ASAHI');	
+		}
+	});
+	
+	//partname onblur
+	$('#wono3').blur(function(){
+		var wono = $('#wono3').val();
+		if(wono == 'A150801DX-1'){
+			$('#partno3').val('AL-L APASAHI-0003');
+			$('#partname3').val('R BODY A TYG4-101.');
+			$('#cust3').text('ASAHI');	
+		}
+	});
+	
+	//ok onkeyup
+	$('#ok').keyup(function(){
+		var okqty = parseInt($('#ok').val());
+		var ngqty = parseInt($('#ng').val());
+		
+		if(!isNaN(okqty) && !isNaN(ngqty)){
+			$('#qty').val(okqty + ngqty);
+		}
+	});
+	
+	//ng onkeyup
+	$('#ng').keyup(function(){
+		var okqty = parseInt($('#ok').val());
+		var ngqty = parseInt($('#ng').val());
+		
+		if(!isNaN(okqty) && !isNaN(ngqty)){
+			$('#qty').val(okqty + ngqty);
+		}
+	});
+	
+	
+	
+			
+});
+</script>
+<style type="text/css">
+<!--
+	.style1 {
+	color: #FF0000
+	}
+	
+	.ui-autocomplete {
+		max-height: 100px;
+		overflow-y: auto;
+	}
+	/* IE 6 doesn't support max-height
+	 * we use height instead, but this forces the menu to always be this tall
+	 */
+	* html .ui-autocomplete {
+		height: 100px;
+	}
+-->
+</style>
+</head>
+<body>
+
+<form name="wipform" id="wipform" method="post" action="">
+  <table cellpadding="3" cellspacing="1" border="0" width="100%">
+    <tr>
+      <td ><ul id="navlist">
+        <li><a href="SWP_S01.html" >WIP Swap/Skip Adjustment</a></li>
+        <li><a href="SWP_S02.html" id="current">WIP Swap/Skip History</a></li>
+      </ul></td>
+    </tr>
+  </table>
+  <table width="100%" border="0" class="ui-state-error">
+    <tr>
+    <td ><div class="error_message">
+        <ul>
+          <li>Error message 1</li>
+          <li>Error message 2</li>
+        </ul>
+      </div></td>
+  </tr>
+</table>
+  <table width="100%" border="0" cellpadding="3" cellspacing="1">
+    <tr>
+      <td colspan="2"><table class="ui-widget ui-widget-content" cellpadding="3" cellspacing="1" width="100%" border="0">
+        <tr>
+          <th width="16%" ><span class="label">Report Date</span> From - To&nbsp;</th>
+          <td width="27%" ><input name="rptdate" type="text" id="rptdate" tabindex="3" size="10"/>
+            -
+            <input name="rptdate2" type="text" id="rptdate2" tabindex="3" size="10"/></td>
+          <th width="12%" ><span class="label">Customer</span></th>
+          <td width="45%" ><span class="border_all">
+            <select name="select3" id="select2">
+              <option>ALPINE (H)</option>
+              <option>AUTOLIV</option>
+              <option>EXEDY</option>
+              <option>EKK EAGLE</option>
+              <option>HANANO</option>
+              <option>MITSU</option>
+            </select>
+          </span></td>
+        </tr>
+        <tr>
+          <th >Part No</th>
+          <td ><span class="border_all">
+            <input name="partno4" type="text" id="partno4" tabindex="11"/>
+          </span></td>
+          <th >Part Name</th>
+          <td ><span class="border_all">
+            <input name="partno5" type="text" id="partno5" tabindex="11"/>
+          </span></td>
+        </tr>
+        <tr>
+          <th >Adjust WIP</th>
+          <td ><select name="wipcode" id="wipcode" tabindex="1">
+            <option selected="selected">-- All WIP --</option>
+            <option>Shot Blast</option>
+            <option>Machine</option>
+            <option>Finishing # 3</option>
+            <option>Chemical</option>
+            <option>Painting</option>
+            <option>Final # 3</option>
+          </select></td>
+          <th ><span class="label">Adjust Type</span></th>
+          <td ><input name="checkbox" type="checkbox" id="checkbox" checked="checked" />
+            Skip
+            <input name="checkbox2" type="checkbox" id="checkbox2" checked="checked" />
+            Swap</td>
+          </tr>
+      </table></td>
+    </tr>
+    <tr>
+      <td width="54%">Display
+        <select name="select2" id="select">
+          <option>10</option>
+          <option>20</option>
+          <option>50</option>
+          <option>100</option>
+        </select>
+        rows/page</td>
+      <td width="46%"><div align="right">
+        <input name="btnCreate2" type="submit" class="submit_button" id="btnCreate2" value="Search"  />
+      </div></td>
+    </tr>
+  </table>
+  <br />
+<table cellpadding="3" cellspacing="1" border="0" width="100%" class="tableBorder2">
+  <tr>
+    <td>
+    	10 Parts Found
+   	    <table width="100%" border="1" align="center" cellpadding="3" cellspacing="0" class="ui-widget ui-widget-content" id="dynamictbl">
+          <tr >
+            <th align="center" class="submit_button"><span >No.</span></th>
+            <th align="center" class="submit_button"><span >Date</span></th>
+            <th align="center" class="submit_button"><span >Customer</span></th>
+            <th align="center" class="submit_button"><span >Part No</span></th>
+            <th align="center" class="submit_button"><span >Part Name</span></th>
+            <th align="center" class="submit_button"><span >Adjust Type</span></th>
+            <th align="center" class="submit_button"><span >Adjust WIP</span></th>
+            <th align="center" class="submit_button"><span >Qty</span></th>
+            <th align="center" class="submit_button"><span >Reason</span></th>
+            <th align="center" class="submit_button"><span >Adjust By</span></th>
+            <th align="center" class="submit_button"><span >Adjust Date</span></th>
+          </tr>
+          <tr >
+            <td align="center" class="border_all">1.</td>
+            <td align="center" class="border_all">dd/mm/yyyy</td>
+            <td align="center" class="border_all">Cust A</td>
+            <td class="border_all">Part A</td>
+            <td class="border_all">Part Name A</td>
+            <td class="border_all"><div align="center">Swap</div></td>
+            <td align="left" class="border_all"><div align="center">
+              Process A
+            &lt;--&gt; Process B</div></td>
+            <td align="center" class="border_all">1,000</td>
+            <td class="border_all">xxxxxxxxxxxxxxxxxxxxxxxxxxx</td>
+            <td align="center" class="border_all">User A</td>
+            <td align="center" class="border_all">dd/mm/yyyy hh:mm:ss</td>
+          </tr>
+            <tr >
+              <td align="center" class="border_all">2.</td>
+              <td align="center" class="border_all">dd/mm/yyyy</td>
+              <td align="center" class="border_all">Cust B</td>
+              <td class="border_all">Part B</td>
+              <td class="border_all">Part Name B </td>
+              <td class="border_all"><div align="center">Skip</div></td>
+              <td align="left" class="border_all"><div align="center">Process C</div></td>
+              <td align="center" class="border_all">1,500</td>
+              <td class="border_all">xxxxxxxxxxxxxxxxxxxxxxxxxxx</td>
+              <td align="center" class="border_all">User B</td>
+              <td align="center" class="border_all">dd/mm/yyyy hh:mm:ss</td>
+            </tr>
+            <tr >
+              <td align="center" class="border_all">3.</td>
+              <td align="center" class="border_all">dd/mm/yyyy</td>
+              <td align="center" class="border_all">Cust C</td>
+              <td class="border_all">Part C</td>
+              <td class="border_all">Part Name C </td>
+              <td class="border_all"><div align="center">Swap</div></td>
+              <td align="left" class="border_all"><div align="center">Process B
+            &lt;--&gt; Process D</div></td>
+              <td align="center" class="border_all">2,000</td>
+              <td class="border_all">xxxxxxxxxxxxxxxxxxxxxxxxxx</td>
+              <td align="center" class="border_all">User A</td>
+              <td align="center" class="border_all">dd/mm/yyyy hh:mm:ss</td>
+            </tr>           
+        </table>
+  	</td>
+  </tr>
+  <tr>
+    <td><div align="right">
+      <div align="right">Pages <a href="#">&lt;&lt;</a> <a href="#">&lt;</a> 1 <a href="#">2</a> <a href="#">3</a> <a href="#">&gt;</a> <a href="#">&gt;&gt;</a></div>
+    </div></td>
+    </tr>
+</table>
+</form>
+</body>
+</html>

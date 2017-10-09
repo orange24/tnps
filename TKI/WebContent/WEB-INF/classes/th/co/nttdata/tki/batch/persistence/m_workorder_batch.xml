@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="m_workorder_batch">
+	<statement id="insertMWorkOrder" parameterClass="java.util.Map">
+		MERGE INTO m_workorder w
+		USING 
+			(SELECT 
+				 p.partid
+				,w.wono
+				,w.startlot
+				,w.endlot
+				,w.lotqty
+				,w.woqty
+				,CONVERT(DATE,w.lotdate,112) as wodate
+			FROM tpics_workorder w
+			INNER JOIN m_part p on w.partno = p.partno) v
+		ON (w.partid = v.partid AND w.workorderno = v.wono)
+		WHEN MATCHED THEN
+			UPDATE SET 
+				 w.startlot = v.startlot
+				,w.endlot = v.endlot
+				,w.lotqty = v.lotqty
+				,w.workorderqty = v.woqty
+				,w.workorderdate = v.wodate
+				,w.lastupdate = CONVERT(DATE,#executeDate#)
+				,w.updateby = 'SYSTEM'
+				
+		WHEN NOT MATCHED THEN
+			INSERT (partid,workorderno,startlot,endlot,lotqty,workorderqty,workorderdate,createby,updateby)
+			VALUES (
+				 v.partid
+				,v.wono
+				,v.startlot
+				,v.endlot
+				,v.lotqty
+				,v.woqty
+				,v.wodate
+				,'SYSTEM'
+				,'SYSTEM'
+			);	
+	</statement>
+</sqlMap>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_machine">
+
+	<select id="queryMachine" parameterClass="th.co.nttdata.tki.bean.MMachine" resultClass="th.co.nttdata.tki.bean.MMachine">
+		SELECT
+			 endDate
+			,startDate
+			,createDate
+			,lastUpdate
+			,machineId
+			,createBy
+			,machineName
+			,machineNo
+			,machineCost 
+			,remark
+			,updateBy
+			,wip
+		FROM m_machine
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="machineId"> machineid = #machineId# </isNotEmpty>	
+			<isNotEmpty prepend="AND" property="machineNo"> machineNo = #machineNo# </isNotEmpty>	
+			<isNotEmpty prepend="AND" property="machineName"> machineName = #machineName# </isNotEmpty>			
+			<isNotEmpty prepend="AND" property="wip"> wip = #wip# </isNotEmpty>
+		</dynamic>
+		ORDER BY machineName
+	</select>
+	<select id="queryCheck" parameterClass="th.co.nttdata.tki.bean.MMachine" resultClass="th.co.nttdata.tki.bean.MMachine">
+		SELECT
+			 endDate
+			,startDate
+			,createDate
+			,lastUpdate
+			,machineId
+			,createBy
+			,machineName
+			,machineNo
+			,remark
+			,updateBy
+			,wip
+		FROM m_machine
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="createDate"> machineid != #machineId# </isNotEmpty>		
+			<isNotEmpty prepend="AND" property="machineNo"> machineNo = #machineNo# </isNotEmpty>	
+			<isNotEmpty prepend="AND" property="machineName"> machineName = #machineName# </isNotEmpty>			
+			<isNotEmpty prepend="AND" property="wip"> wip = #wip# </isNotEmpty>
+		</dynamic>		
+	</select>
+	<sql id="queryProperties">
+		FROM m_machine m inner join m_wip w  on m.wip = w.wip
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="wip"> m.wip = #wip# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="machineNo"> m.machineno like '%'+#machineNo#+'%'</isNotEmpty>
+		</dynamic>
+	</sql>
+	<select id="queryMachineList" parameterClass="th.co.nttdata.tki.bean.MMachine" resultClass="th.co.nttdata.tki.bean.MMachine">
+		SELECT
+			 m.endDate
+			,m.startDate
+			,m.machineName
+			,m.machineId
+			,m.machineNo
+			,m.machineCost
+			,m.remark
+			,m.wip+' : '+w.wipname as wip
+			,m.createdate
+			,m.createby
+			,m.lastupdate
+			,m.updateby 
+			<include refid="queryProperties"/>	
+			ORDER BY m.machineNo, m.startDate
+	</select>
+	<select id="count" parameterClass="th.co.nttdata.tki.bean.MMachine" resultClass="int">
+		SELECT
+			count(*)
+		<include refid="queryProperties"/>
+	</select>
+	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.MMachine">
+		insert into m_machine(machineno,machinename,wip,remark,startdate,enddate,machinecost,createby,updateby)
+		values (#machineNo#,#machineName#,#wip#,#remark#,#startDate#,#endDate#,#machineCost#,#createBy#,#updateBy#) 
+	</insert>
+	<select id="endDateMax" parameterClass="th.co.nttdata.tki.bean.MMachine" resultClass="th.co.nttdata.tki.bean.MMachine">
+		select MAX(enddate) as enddate
+		from m_machine 
+		where machineno = #machineNo# 
+		and wip = #wip#
+		<isNotEmpty prepend="AND" property="machineId"> machineid != #machineId# </isNotEmpty>	
+	</select>
+	<update id="update" parameterClass="th.co.nttdata.tki.bean.MMachine">
+		update m_machine 
+		set	endDate = #endDate#
+			,startDate = #startDate#
+			,machineName = #machineName#
+			,machinecost = #machineCost#
+			,remark = #remark#
+			,lastupdate = GETDATE()
+			,updateby =  #updateBy#
+		where machineid	= #machineId#
+	</update>
+	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.MMachine">
+		<iterate property="machineList">
+			<isNotEmpty property="machineList[].machineId">
+				DELETE FROM m_machine WHERE machineid = #machineList[].machineId#
+			</isNotEmpty>
+		</iterate>	
+	</delete>
+	
+	<select id="queryMachineActive" parameterClass="th.co.nttdata.tki.bean.MMachine" resultClass="th.co.nttdata.tki.bean.MMachine">
+		SELECT
+			 endDate
+			,startDate
+			,createDate
+			,lastUpdate
+			,machineId
+			,createBy
+			,machineName
+			,machineNo
+			,machineCost 
+			,remark
+			,updateBy
+			,wip
+		FROM m_machine
+		WHERE endDate  <![CDATA[ >= ]]> getDate()
+			<isNotEmpty prepend="AND" property="machineId"> machineid = #machineId# </isNotEmpty>	
+			<isNotEmpty prepend="AND" property="machineNo"> machineNo = #machineNo# </isNotEmpty>	
+			<isNotEmpty prepend="AND" property="machineName"> machineName = #machineName# </isNotEmpty>			
+			<isNotEmpty prepend="AND" property="wip"> wip = #wip# </isNotEmpty>
+		ORDER BY machineName
+	</select>
+	<select id="select_mapping" parameterClass="th.co.nttdata.tki.bean.MMachine" resultClass="th.co.nttdata.tki.bean.MMachine">
+       SELECT *
+		FROM (
+			SELECT                 
+			 cfp.CUSTOMERID                
+			,cfp.CUSTOMERCODE                
+			,mp.MACHINEID                
+			,mp.PARTID                
+			,cfp.PARTNO + ' : ' + cfp.PARTNAME as part     
+			,ROW_NUMBER() over (partition by cfp.PARTID order by cfp.CUSTOMERCODE )  rn 
+			FROM    m_machine_part mp        
+			LEFT JOIN v_cust_fg_part  cfp  on     cfp.partid = mp.partid        
+			WHERE  mp.machineid = #machineId#
+		) x
+		WHERE x.rn = 1
+		ORDER BY x.part;
+	</select>
+	<select id="select_wip" resultClass="th.co.nttdata.tki.bean.MMachine">
+	  SELECT   wip   FROM  m_wip  ORDER BY  wip ASC;
+	</select>
+	<select id="select_copy_search" parameterClass="th.co.nttdata.tki.bean.MMachine" resultClass="th.co.nttdata.tki.bean.MMachine">
+	   SELECT
+               mac.WIP         
+              ,mac.MACHINEID   
+              ,mac.MACHINENO   
+             ,mac.MACHINENAME 
+             ,mac.REMARK     
+       FROM  m_machine   mac
+       WHERE  mac.wip = #wipDialog# AND mac.machineid <![CDATA[ <> ]]> #sourceMachineId#
+       ORDER BY mac.MACHINENO
+      
+	</select>
+	<select id="select_cust" parameterClass="th.co.nttdata.tki.bean.MMachine" resultClass="th.co.nttdata.tki.bean.MMachine">
+	  SELECT 
+          cust.CUSTOMERID
+          ,cust.CUSTOMERCODE
+      FROM m_customer cust
+      ORDER BY cust.customercode
+	</select>
+	<select id="select_part" parameterClass="th.co.nttdata.tki.bean.MMachine" resultClass="th.co.nttdata.tki.bean.MMachine">
+	   SELECT 
+             cfp.PARTID
+             ,cfp.PARTNO +' : '+ cfp.PARTNAME as PART
+       FROM v_cust_fg_part  cfp
+       where cfp.CUSTOMERID = #customerId#
+      ORDER BY cfp.PARTNO
+	
+	</select>
+	<insert id="insert_copy_mapping" parameterClass="th.co.nttdata.tki.bean.MMachine">
+	insert into m_machine_part (machineid,partid)
+               select #machineId#,mp.partid from m_machine_part mp where mp.machineid = #sourceMachineId#
+	</insert>
+	<insert id="insert_mapping"   parameterClass="th.co.nttdata.tki.bean.MMachine">
+	 <iterate property="machineList">   
+	     INSERT INTO   m_machine_part
+                       (partid
+                       ,machineid)
+         VALUES
+                        (#machineList[].partId#
+                        ,#machineList[].machineId#)
+    </iterate>
+	</insert>
+	<delete id="delete_partmapping" parameterClass="th.co.nttdata.tki.bean.MMachine">
+		DELETE FROM m_machine_part
+      	WHERE machineid = #sourceMachineId#
+	</delete>
+	<delete id="delete_mapping" parameterClass="th.co.nttdata.tki.bean.MMachine">
+	 <isNotEmpty property="machineId">
+		DELETE     FROM   m_machine_part   WHERE   machineid = #machineId#
+      </isNotEmpty>	
+	</delete>
+	
+	<!-- PRP S01 Screen -->
+	<select id="select_machine_by_wip" parameterClass="java.lang.String" resultClass="th.co.nttdata.tki.bean.MMachine">
+		SELECT 
+				machineId, 
+				machineNo, 
+				machineNo +' : '+machinename AS machineName
+		FROM 
+				m_machine
+		WHERE
+				wip = #param#
+		ORDER BY
+				machineNo
+	</select>
+	<select id="select_Machine_diecastplandate" parameterClass="th.co.nttdata.tki.bean.MMachine" resultClass="th.co.nttdata.tki.bean.MMachine">
+		SELECT 
+				machineId AS machineId,
+				machineNo AS machineNo
+		FROM 
+				m_machine
+		WHERE
+				wip = #wip# 
+		<isNotEmpty prepend="AND" property="diecastPlanDate">  
+			CONVERT(DATE,startdate,103) <![CDATA[ <= ]]> CONVERT(DATE,#diecastPlanDate#,120) and 
+			CONVERT(DATE,enddate,103) <![CDATA[ >= ]]> CONVERT(DATE,#diecastPlanDate#,120) 
+		</isNotEmpty>
+		ORDER BY
+				machineNo
+	</select>
+</sqlMap>

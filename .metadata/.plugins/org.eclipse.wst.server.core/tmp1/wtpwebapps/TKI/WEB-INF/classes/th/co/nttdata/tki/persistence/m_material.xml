@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_material">
+
+	<select id="queryMaterial" parameterClass="th.co.nttdata.tki.bean.MMaterial" resultClass="th.co.nttdata.tki.bean.MMaterial">
+		SELECT 
+			nMaterialId AS materialId
+			,sMaterialCode AS materialCode
+			,sMaterialName AS materialName
+			,nMaterialUnitCost AS materialCost
+		FROM (
+			SELECT nMaterialId
+		      ,sMaterialCode
+		      ,sMaterialName
+		      ,nMaterialUnitCost
+		      ,materialGroup
+		      ,dCreatedDate
+		      ,sUserCreatedBy
+		      ,dUpdatedDate
+		      ,sUserUpdatedBy
+		      , case when UPPER(sMaterialCode) = 'OTHER' then 1 else 0 end AS ST
+		      , LEFT(sMaterialCode,2) AS matSortA
+		      , case when UPPER(sMaterialCode) = 'OTHER' then
+					9999
+				ELSE		
+					SUBSTRING ( sMaterialCode ,3 , LEN(sMaterialCode) )
+				END AS matSortB
+		  FROM m_material
+		)  tbl
+		order by tbl.ST, tbl.matSortA, tbl.matSortB
+	</select>
+	
+	<update id="update" parameterClass="th.co.nttdata.tki.bean.MMaterial">
+		<iterate property="materialList">			
+			UPDATE  m_material 
+			SET 
+			nMaterialUnitCost = #materialList[].materialCost# 
+			WHERE nMaterialId = #materialList[].materialId#;
+		</iterate>
+	</update>
+	
+	<!-- Get all material information from DB used by PRT_S01 -->
+	<select id="prtS01GetMaterial" parameterClass="th.co.nttdata.tki.bean.MMaterial" resultClass="th.co.nttdata.tki.bean.MMaterial">
+  		SELECT 
+			nMaterialId AS materialId
+			,sMaterialCode AS materialCode
+			,sMaterialCode + ' : ' + sMaterialName AS materialName
+			,nMaterialUnitCost AS materialCost
+		FROM (
+			SELECT nMaterialId
+		      ,sMaterialCode
+		      ,sMaterialName
+		      ,nMaterialUnitCost
+		      ,materialGroup
+		      ,dCreatedDate
+		      ,sUserCreatedBy
+		      ,dUpdatedDate
+		      ,sUserUpdatedBy
+		      , case when UPPER(sMaterialCode) = 'OTHER' then 1 else 0 end AS ST
+		      , LEFT(sMaterialCode,2) AS matSortA
+		      , case when UPPER(sMaterialCode) = 'OTHER' then
+					9999
+				ELSE		
+					SUBSTRING ( sMaterialCode ,3 , LEN(sMaterialCode) )
+				END AS matSortB
+		  FROM m_material
+		)  tbl
+		order by tbl.ST, tbl.matSortA, tbl.matSortB
+	</select>
+	
+</sqlMap>

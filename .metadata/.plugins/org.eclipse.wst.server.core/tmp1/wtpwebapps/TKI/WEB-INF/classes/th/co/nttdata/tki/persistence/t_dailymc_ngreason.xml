@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_dailymc_ngreason">
+
+	<select id="query" parameterClass="th.co.nttdata.tki.bean.TDailyMCNGReason" resultClass="th.co.nttdata.tki.bean.TDailyMCNGReason">
+		SELECT
+			 dailyMCId
+			,ng
+			,reasonId
+			,reportTime
+		FROM t_dailymc_ngreason
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="dailyMCId"> dailymcid = #dailyMCId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportTime"> reporttime = #reportTime# </isNotEmpty>
+		</dynamic>
+		ORDER BY reportTime, reasonId 
+	</select>
+
+	<insert id="insert" parameterClass="list">
+		<iterate>
+			INSERT INTO t_dailymc_ngreason(dailymcid, ng, reasonid, reporttime) VALUES(#[].dailyMCId#, #[].ng#, #[].reasonId#, #[].reportTime#);
+		</iterate>
+	</insert>
+
+	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.TDailyMC">
+		DELETE FROM t_dailymc_ngreason WHERE dailymcid = #dailyMCId#
+	</delete>
+</sqlMap>

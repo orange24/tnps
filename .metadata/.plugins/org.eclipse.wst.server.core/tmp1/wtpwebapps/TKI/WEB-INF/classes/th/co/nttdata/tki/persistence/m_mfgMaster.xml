@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="m_mfgMaster">
+	<select id="select_Init" parameterClass="th.co.nttdata.tki.bean.FgMaster"
+		resultClass="th.co.nttdata.tki.bean.FgMaster">
+		SELECT
+				 FG.FGID                         AS fgId
+				,FG.FGNO                         AS fgNo
+				,FG.FGNAME                       AS fgName
+				,FG.SNPFG                        AS snpFG
+				,FG.UOM                          AS uom
+				,FG.WEIGHT                       AS weight
+				,FG.PRICE                        AS price
+				,FG.currency					 AS currency
+				,FG.VENDORFGNO                   AS vendorFgNo
+				,FG.ISENABLE                     AS isenable
+				,FG.CLASSIFYBUSINESSID           AS classifyBusinessId
+				,CLA.CLASSIFYBIZ                 AS classifyBiz
+				,FG.PLACEID                      AS placeId
+				,PLA.PLACE                       AS place
+				,FG.SUBBUSINESSID                AS subBusinessId
+				,SUB.SUBBUSINESS                 AS subBusiness
+				,FG.REMARK                       AS remark
+				,FG.CREATEDATE                   AS createDate
+				,FG.CREATEBY                     AS createBy
+				,FG.LASTUPDATE                   AS lastUpdate
+				,FG.UPDATEBY                     AS updateBy
+		FROM    M_FG FG
+		LEFT JOIN M_CLASSIFY_BUSINESS CLA ON CLA.CLASSIFYBUSINESSID = FG.CLASSIFYBUSINESSID
+		LEFT JOIN M_PLACE PLA ON PLA.PLACEID = FG.PLACEID
+		LEFT JOIN M_SUBBUSINESS SUB ON SUB.SUBBUSINESSID = FG.SUBBUSINESSID
+		ORDER BY FG.FGNO
+    </select>
+    <select id="select_search" resultClass="th.co.nttdata.tki.bean.FgMaster">
+		     SELECT 
+                   CUS.CUSTOMERID
+                  ,CUS.CUSTOMERCODE
+                  ,FG.FGID
+                  ,FG.FGNO
+                  ,FG.FGNAME
+                  ,FG.CREATEDATE
+                  ,FG.LASTUPDATE 
+           FROM   M_FG_CUSTOMER     FGC 
+           INNER  JOIN M_FG         FG     ON FG.FGID = FGC.FGID
+           INNER  JOIN M_CUSTOMER   CUS    ON CUS.CUSTOMERID = FGC.CUSTOMERID
+           WHERE 
+                    FGC.CUSTOMERID = #customerId# 
+           ORDER BY FG.FGNO
+    </select>
+    <select id="select_part" resultClass="th.co.nttdata.tki.bean.FgMaster">
+              SELECT  
+                       FGID						AS fgId
+ 				      ,FGNO						AS fgNo
+				      ,FGNAME					AS fgName
+				      ,SNPFG					AS snpFG
+				      ,UOM						AS uom
+				      ,WEIGHT					AS weight
+				      ,PRICE					AS price
+				      ,VENDORFGNO				AS vendorFgNo
+				      ,ISENABLE					AS isenable
+				      ,FG.CLASSIFYBUSINESSID	AS classifyBusinessId
+				      ,CLA.CLASSIFYBIZ			AS classifyBiz
+				      ,FG.PLACEID				AS placeId
+				      ,PLA.PLACE				AS place
+				      ,FG.SUBBUSINESSID			AS subBusinessId
+				      ,SUB.SUBBUSINESS			AS subBusiness
+            FROM      M_FG  FG
+            LEFT JOIN M_CLASSIFY_BUSINESS CLA ON CLA.CLASSIFYBUSINESSID = FG.CLASSIFYBUSINESSID
+            LEFT JOIN M_PLACE PLA ON PLA.PLACEID = FG.PLACEID
+            LEFT JOIN M_SUBBUSINESS SUB ON SUB.SUBBUSINESSID = FG.SUBBUSINESSID
+            WHERE NOT EXISTS (SELECT 1 FROM M_FG_CUSTOMER M WHERE M.FGID = FG.FGID)
+           ORDER BY FG.FGNO
+    </select>
+	<select id="select_uom_auto" resultClass="th.co.nttdata.tki.bean.FgMaster">
+		SELECT
+		            UOM     AS uom
+		           ,UOMDESC AS uomDesc
+		FROM  M_UOM
+		ORDER BY UOM
+    </select>
+	<select id="select_classify" resultClass="th.co.nttdata.tki.bean.FgMaster">
+		SELECT
+		            CLASSIFYBUSINESSID AS classifyBusinessId
+					,CLASSIFYBIZ       AS classifyBiz
+					,DESCRIPTION       AS description
+		FROM M_CLASSIFY_BUSINESS
+		ORDER BY CLASSIFYBIZ
+    </select>
+	<select id="select_place" resultClass="th.co.nttdata.tki.bean.FgMaster">
+		SELECT
+				 PLACEID AS placeId
+				,PLACE AS place
+				,DESCRIPTION AS description
+		FROM   M_PLACE
+		ORDER BY PLACE
+    </select>
+	<select id="select_subbusiness" resultClass="th.co.nttdata.tki.bean.FgMaster">
+		SELECT
+				 SUBBUSINESSID AS subBusinessId
+				,SUBBUSINESS   AS subBusiness
+				,DESCRIPTION   AS description
+		FROM    M_SUBBUSINESS
+		ORDER BY SUBBUSINESS
+    </select>
+	<select id="select_export" resultClass="th.co.nttdata.tki.bean.filter.FgMasterFilter"  parameterClass="th.co.nttdata.tki.bean.filter.FgMasterFilter">
+		SELECT       
+					 FG.FGID             
+					,FG.FGNO			  
+					,FG.FGNAME			   
+					,FG.SNPFG
+					,FG.UOM
+					,FG.WEIGHT
+					,FG.PRICE
+					,FG.CURRENCY
+					,FG.VENDORFGNO
+					,FG.ISENABLE
+					,FG.CLASSIFYBUSINESSID
+					,CLA.CLASSIFYBIZ
+					,FG.PLACEID
+					,PLA.PLACE
+					,FG.SUBBUSINESSID
+					,SUB.SUBBUSINESS
+					,FG.REMARK
+					,FG.CREATEDATE
+					,FG.CREATEBY
+					,FG.LASTUPDATE
+					,FG.UPDATEBY
+		FROM M_FG FG
+		LEFT JOIN M_CLASSIFY_BUSINESS CLA ON CLA.CLASSIFYBUSINESSID = FG.CLASSIFYBUSINESSID
+		LEFT JOIN M_PLACE PLA ON PLA.PLACEID = FG.PLACEID
+		LEFT JOIN M_SUBBUSINESS SUB ON SUB.SUBBUSINESSID = FG.SUBBUSINESSID
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="fgId"> CAST(FG.FGID AS	VARCHAR(20)) LIKE '%' +#fgId#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgNo"> FG.FGNO LIKE	'%' +#fgNo#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgName"> FG.FGNAME LIKE	'%' +#fgName#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="snpFG"> CAST(FG.SNPFG AS VARCHAR(20)) LIKE '%' +#snpFG#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="uom"> FG.UOM LIKE '%' +#uom#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="weight"> CAST(FG.WEIGHT AS	VARCHAR(20)) LIKE '%' +#weight#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="price"> CAST(FG.PRICE AS	VARCHAR(20)) LIKE '%' +#price#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="vendorFgNo"> FG.VENDORFGNO LIKE	'%' +#vendorFgNo#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="isenable"> CAST(ISENABLE AS	VARCHAR(1)) LIKE '%' +#isenable#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="classifyBiz"> CLA.CLASSIFYBIZ LIKE	'%' +#classifyBiz#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="place"> PLA.PLACE LIKE	'%' +#place#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="subBusiness"> SUB.SUBBUSINESS LIKE '%' +#subBusiness#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="createDate"> CONVERT(VARCHAR(15),createdate,103)+''+CONVERT(VARCHAR(15),createdate,108) like '%' +#createDate#+'%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="lastUpdate"> ONVERT(VARCHAR(15),lastupdate,103)+''+CONVERT(VARCHAR(15),lastupdate,108) like '%' +#lastUpdate#+'%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="createBy"> createBy like '%'+#createBy#+'%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="updateBy"> updateBy like '%'+#updateBy#+'%' </isNotEmpty>
+		</dynamic>
+		ORDER BY FG.FGNO
+	</select>
+	<insert id="insert_cust" parameterClass="th.co.nttdata.tki.bean.FgMaster">
+	<iterate property="fgMasterList">
+		INSERT INTO M_FG
+						(FGNO
+						,FGNAME
+						,SNPFG
+						,UOM
+						,WEIGHT
+						,PRICE
+						,CURRENCY
+						,VENDORFGNO
+						,ISENABLE
+						,CLASSIFYBUSINESSID
+						,PLACEID
+						,SUBBUSINESSID
+						,CREATEDATE
+						,CREATEBY
+						,LASTUPDATE
+						,UPDATEBY)
+		VALUES
+						(#fgMasterList[].fgNo#
+						,#fgMasterList[].fgName#
+						,#fgMasterList[].snpFG#
+						,#fgMasterList[].uom#
+						,#fgMasterList[].weight#
+						,#fgMasterList[].price#
+						,#fgMasterList[].currency#
+						,#fgMasterList[].vendorFgNo#
+						,#fgMasterList[].isenable#
+						,#fgMasterList[].classifyBusinessId#
+						,#fgMasterList[].placeId#
+						,#fgMasterList[].subBusinessId#
+						, GETDATE()
+						,#fgMasterList[].createBy#
+						,GETDATE()
+						,#fgMasterList[].updateBy#)
+	</iterate>
+    </insert>
+     <insert id="insert_fg_part_mapping" parameterClass="th.co.nttdata.tki.bean.FgMaster">
+          <iterate property="fgMasterList">
+    		INSERT INTO   M_FG_CUSTOMER
+                         ( FGID
+                          ,CUSTOMERID)
+             VALUES
+                       (#fgMasterList[].fgId#
+                       ,#fgMasterList[].customerId#)
+          </iterate>
+    </insert>
+	<update id="update_cust" parameterClass="th.co.nttdata.tki.bean.FgMaster">
+	  <iterate property="fgMasterList">
+		UPDATE  M_FG
+		        SET  FGNO               = #fgMasterList[].fgNo#
+					,FGNAME             = #fgMasterList[].fgName#
+					,SNPFG              = #fgMasterList[].snpFG#
+					,UOM                = #fgMasterList[].uom#
+					,WEIGHT             = #fgMasterList[].weight#
+					,PRICE              = #fgMasterList[].price#
+					,CURRENCY			= #fgMasterList[].currency#
+					,VENDORFGNO         = #fgMasterList[].vendorFgNo#
+					,ISENABLE           = #fgMasterList[].isenable#
+					,CLASSIFYBUSINESSID = #fgMasterList[].classifyBusinessId#
+					,PLACEID            = #fgMasterList[].placeId#
+					,SUBBUSINESSID      = #fgMasterList[].subBusinessId#
+					,LASTUPDATE         = GETDATE()
+					,UPDATEBY           = #fgMasterList[].updateBy#
+		WHERE   FGID = #fgMasterList[].fgId#
+		</iterate>
+    </update>
+	<delete id="delete_cust" parameterClass="th.co.nttdata.tki.bean.FgMaster">
+	  <iterate property="fgMasterList">
+	     <isNotNull   property="fgMasterList[].fgId"> 
+		     DELETE  FROM   M_FG   WHERE  FGID = #fgMasterList[].fgId#
+		</isNotNull>
+	  </iterate>
+   </delete>
+   <delete id="delete_fg_part_mapping" parameterClass="th.co.nttdata.tki.bean.FgMaster">
+       <iterate property="fgMasterList">
+	        DELETE FROM   M_FG_CUSTOMER   WHERE CUSTOMERID = #fgMasterList[].customerId#
+	   </iterate>
+   </delete>
+   <select id="selectAllFg" resultClass="th.co.nttdata.tki.bean.FgMaster">
+   		SELECT fgId,
+		       fgNo, 
+		       fgName 
+		FROM   m_fg 
+   </select>
+   <select id="select_currency" resultClass="th.co.nttdata.tki.bean.FgMaster">
+		SELECT
+		            currency     AS currency
+		           ,currencydesc AS currencyDesc
+		FROM  M_CURRENCY
+		order by default_flag desc,currency
+    </select>
+</sqlMap>

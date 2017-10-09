@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_user_access_wip">
+
+	<select id="queryWip" parameterClass="th.co.nttdata.tki.bean.MUser" resultClass="th.co.nttdata.tki.bean.MWip">
+		SELECT
+			 w.isCalc
+			,w.lastUpdate
+			,w.wipType
+			,w.remark
+			,w.updateBy
+			,w.wip
+			,w.wipName
+		FROM m_user_access_wip u, m_wip w
+		WHERE u.wip = w.wip AND u.username = #userName#
+	</select>
+	
+	<select id="queryAllWip" parameterClass="th.co.nttdata.tki.bean.MUser" resultClass="th.co.nttdata.tki.bean.MWip">
+		SELECT
+			 w.wip
+			,w.wipName
+			,w.isCalc
+			,w.lastUpdate
+			,w.wipType
+			,w.remark
+			,w.updateBy
+			,CASE WHEN u.username IS NULL then 0 ELSE 1 END as accessWip
+		FROM m_wip w left join m_user_access_wip u on w.wip = u.wip AND u.username = #userName#
+		ORDER BY w.wip
+	</select>
+	
+	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.MUser">
+		<iterate property="accessWip">
+			<isNotNull property="accessWip[].wip">
+				INSERT INTO m_user_access_wip VALUES (#userName#,#accessWip[].wip#);
+			</isNotNull>
+		</iterate>
+	</insert>
+	
+	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.MUser">
+		<iterate property="userList">
+			<isNotEmpty property="userList[].userName">
+				DELETE FROM m_user_access_wip WHERE userName = #userList[].userName#
+			</isNotEmpty>
+		</iterate>
+	</delete>
+</sqlMap>

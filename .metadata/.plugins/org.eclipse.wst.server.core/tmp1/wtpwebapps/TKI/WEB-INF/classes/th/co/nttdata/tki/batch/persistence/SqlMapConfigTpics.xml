@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMapConfig     
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+
+  	<settings
+    	cacheModelsEnabled="false"
+		enhancementEnabled="true"
+        useStatementNamespaces="true"
+        />
+
+  	<sqlMap resource="th/co/nttdata/tki/batch/persistence/cbom_batch.xml"/>
+  	<sqlMap resource="th/co/nttdata/tki/batch/persistence/cust_fg_part_batch.xml"/>
+  	<sqlMap resource="th/co/nttdata/tki/batch/persistence/workorder_batch.xml"/>
+  	<sqlMap resource="th/co/nttdata/tki/batch/persistence/xcust_batch.xml"/>
+  	<sqlMap resource="th/co/nttdata/tki/batch/persistence/xsect_batch.xml"/>
+  	<sqlMap resource="th/co/nttdata/tki/batch/persistence/XBAIK_batch.xml"/>
+  	<sqlMap resource="th/co/nttdata/tki/batch/persistence/XITEM_batch.xml"/>
+  	<sqlMap resource="th/co/nttdata/tki/batch/persistence/clotseqno_batch.xml"/>
+  	
+</sqlMapConfig>

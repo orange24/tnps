@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="Ss_dataexch3_batch">
+	<select id="selectByRcvStaCd" parameterClass="string" resultClass="th.co.nttdata.tki.batch.bean.SsDataExch3">
+		SELECT data_cd        AS dataCd,
+		       data_no        AS dataNo,
+		       ent_sys_cd     AS entSysCd,
+		       ent_sys_date   AS entSysDate,
+		       rcv_sta_cd     AS rcvStaCd,
+		       rcv_sys_date   AS rcvSysDate,
+		       rcv_comment    AS rcvComment,
+		       data_area      AS dataArea,
+		       LEN(data_area) AS dataLength
+		FROM   ss_dataexch3
+		WHERE  rcv_sta_cd = #value#
+	</select>
+
+	<update id="updateStatusCode" parameterClass="th.co.nttdata.tki.batch.bean.SsDataExch3">
+		UPDATE ss_dataexch3
+		SET    rcv_sta_cd = #rcvStaCd#
+		WHERE  data_cd = #dataCd#
+		       AND data_no = #dataNo#
+		       AND ent_sys_cd = #entSysCd#
+	</update>
+</sqlMap>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="t_pending_batch">
+
+	<insert id="insertFromDailyMC" parameterClass="java.util.Date">
+		<!-- Insert data from dailymc -->
+		MERGE INTO t_pending pd
+		USING (	
+			SELECT mc.reportdate, mc.reporttype, mc.wip, mc.partid, mc.customerid, SUM(ISNULL(d.pd,0)) as pd
+			, (select top 1 t.lotno from t_dailymc_lot t inner join t_dailymc m on m.dailymcid = t.dailymcid
+				where m.reportdate = mc.reportdate and m.reporttype = mc.reporttype and m.wip = mc.wip 
+				and m.customerid = mc.customerid ) as workorderno
+			FROM t_dailymc mc
+			INNER JOIN t_dailymc_detail d ON mc.dailymcid = d.dailymcid		
+			WHERE mc.reportdate = #value# AND d.reporttime IN (25,26) <!-- 25=Day, 26=Night -->	
+			GROUP BY mc.reportdate, mc.reporttype, mc.wip, mc.partid,mc.customerid
+			HAVING SUM(ISNULL(d.pd,0)) > 0	
+		) dmc	
+		ON (pd.reportdate = dmc.reportdate AND pd.reporttype = dmc.reporttype AND pd.wip = dmc.wip AND pd.partid = dmc.partid AND pd.customerid = dmc.customerid AND pd.workorderno = dmc.workorderno)
+		WHEN NOT MATCHED THEN
+			INSERT(reportdate,reporttype,wip,partid,customerid,pd,workorderno)	
+			VALUES(dmc.reportdate, dmc.reporttype, dmc.wip, dmc.partid, dmc.customerid, dmc.pd, dmc.workorderno)
+		WHEN MATCHED THEN
+			UPDATE SET pd.pd = dmc.pd;
+	</insert>
+	
+	<insert id="insertFromDailyWK" parameterClass="java.util.Date">
+		<!-- Insert data from dailywk --> 
+        MERGE INTO t_pending pd
+		USING (SELECT wk.reportdate, wk.reporttype, wk.wip, wkd.partid, wkd.customerid, wkd.workorderno, wkd.lotno,
+				   SUM(ISNULL(wkd.pd,0)) as pd
+				FROM t_dailywk wk 
+				INNER JOIN t_dailywk_detail wkd ON wk.dailywkid = wkd.dailywkid
+				WHERE wk.reportdate = #value#
+				GROUP BY wk.reportdate, wk.reporttype, wk.wip, wkd.partid, wkd.customerid, wkd.workorderno, wkd.lotno
+				HAVING SUM(ISNULL(wkd.pd,0)) > 0) dwk	
+		ON (pd.reportdate = dwk.reportdate AND pd.reporttype = dwk.reporttype AND pd.wip = dwk.wip AND pd.partid = dwk.partid AND pd.customerid = dwk.customerid AND pd.workorderno = dwk.workorderno AND pd.lotno = dwk.lotno)
+		WHEN NOT MATCHED THEN
+			INSERT(reportdate,reporttype,wip,partid,customerid,workorderno, lotno, pd)	
+			VALUES(dwk.reportdate, dwk.reporttype, dwk.wip, dwk.partid, dwk.customerid, dwk.workorderno, dwk.lotno, dwk.pd)
+		WHEN MATCHED THEN
+			UPDATE SET pd.pd = dwk.pd;
+	</insert>
+	
+	<insert id="insertFromDailyMCWK" parameterClass="java.util.Date">
+	 <!-- Insert data from t_dailymcwk -->
+        MERGE INTO t_pending pd
+		USING (SELECT mcwk.reportdate, mcwk.reporttype, mcwk.wip, mcwkd.partid, mcwkd.customerid, mcwkd.workorderno, mcwkd.lotno, SUM(ISNULL(mcwkd.pd,0)) as pd
+			FROM t_dailymcwk mcwk 
+			INNER JOIN t_dailymcwk_detail mcwkd ON mcwk.dailymcwkid = mcwkd.dailymcwkid
+			WHERE mcwk.reportdate = #value#
+			GROUP BY mcwk.reportdate, mcwk.reporttype, mcwk.wip, mcwkd.partid, mcwkd.customerid, mcwkd.workorderno, mcwkd.lotno
+			HAVING SUM(ISNULL(mcwkd.pd,0)) > 0) dwkmc	
+		ON (pd.reportdate = dwkmc.reportdate AND pd.reporttype = dwkmc.reporttype AND pd.wip = dwkmc.wip AND pd.partid = dwkmc.partid AND pd.customerid = dwkmc.customerid AND pd.workorderno = dwkmc.workorderno AND pd.lotno = dwkmc.lotno)
+		WHEN NOT MATCHED THEN
+			INSERT(reportdate,reporttype,wip,partid,customerid,workorderno, lotno, pd)	
+			VALUES(dwkmc.reportdate, dwkmc.reporttype, dwkmc.wip, dwkmc.partid, dwkmc.customerid, dwkmc.workorderno, dwkmc.lotno, dwkmc.pd)
+		WHEN MATCHED THEN
+			UPDATE SET pd.pd = dwkmc.pd;
+	</insert>
+
+</sqlMap>

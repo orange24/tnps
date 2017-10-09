@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+<sqlMap namespace="v_daily_monthlysales">
+
+	<resultMap class="th.co.nttdata.tki.bean.VDailyMonthlySales" id="dailyMS" groupBy="sCustomerDeptCode,sCustomerId,dReportDate">
+		<result property="sCustomerId"/>
+		<result property="sCode"/>
+		<result property="sCustomerName"/>
+		<result property="sCustomerDeptCode" column="sCustomerDeptCode"/>
+		<result property="sPartName" column="sPartName"/>
+		<result property="dReportDate" column="dReportDate"/>
+		<result property="vDailyMonthlySalesList" resultMap="v_daily_monthlysales.dailyMSDetail"/>
+	</resultMap>
+	
+	<resultMap class="th.co.nttdata.tki.bean.VDailyMonthlySales" id="dailyMSDetail">		
+		<result property="nSalesQty" column="nSalesQty"/>
+		<result property="nSaleUnitPrice" column="nSaleUnitPrice"/>
+		<result property="nPrice" column="nPrice"/>
+		<result property="sCareerSheetNo" column="sCareerSheetNo"/>
+		<result property="sCategory" column="sCategory"/>
+		<result property="sReportTypeName" column="sReportTypeName"/>
+	</resultMap>
+
+	<select id="queryV_Daily_MonthlySales" parameterClass="th.co.nttdata.tki.bean.VDailyMonthlySales" resultMap="dailyMS">
+		SELECT 	TOP $maxRecord$
+	      		sCustomerId
+	      		,sCode
+	      		,sCustomerName
+	      		,sCustomerDeptCode
+	      		,sPartName
+	      		,nSalesQty
+	      		,nSaleUnitPrice
+	      		,nPrice
+	      		,sCareerSheetNo
+	      		,sCategory
+	      		,dReportDate
+	      		,sReportTypeName
+	  	FROM 	V_08_Daily_MonthlySales
+	  	<dynamic prepend="WHERE">
+		  	<isNotEmpty prepend="AND" property="reportDateFr"> dReportDate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+		  	<isNotEmpty prepend="AND" property="reportDateTo"> dReportDate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+		  	<isNotEmpty prepend="AND" property="sCareerSheetNo"> sCareerSheetNo LIKE '%'+ #sCareerSheetNo# +'%'</isNotEmpty>
+		  	<isNotEmpty prepend="AND" property="sPartNo"> sCustomerDeptCode LIKE '%'+ #sPartNo# +'%'</isNotEmpty>
+		  	<isNotEmpty prepend="AND" property="sPartName"> sPartName LIKE '%'+ #sPartName# +'%'</isNotEmpty>
+		  	<isNotEmpty prepend="AND" property="sCustomerId"> sCustomerId = #sCustomerId#</isNotEmpty>
+		</dynamic>
+	  	ORDER BY dReportDate,sCode,sCustomerDeptCode, sPartName, scareersheetno
+	</select>
+	
+	<select id="countMRDC_R07" resultClass="Integer">
+		SELECT 
+			COUNT(*)
+		FROM V_08_Daily_MonthlySales
+	</select>
+	
+	<select id="sizeV_Daily_MonthlySales" parameterClass="th.co.nttdata.tki.bean.VDailyMonthlySales" resultClass="th.co.nttdata.tki.bean.VDailyMonthlySales">
+		SELECT 	TOP $maxRecord$
+	      		sCustomerId
+	      		,sCode
+	      		,sCustomerName
+	      		,sCustomerDeptCode
+	      		,sPartName
+	      		,nSalesQty
+	      		,nSaleUnitPrice
+	      		,nPrice
+	      		,sCareerSheetNo
+	      		,sCategory
+	      		,dReportDate
+	  	FROM 	V_08_Daily_MonthlySales
+	  	<dynamic prepend="WHERE">
+		  	<isNotEmpty prepend="AND" property="reportDateFr"> dReportDate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+		  	<isNotEmpty prepend="AND" property="reportDateTo"> dReportDate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+		  	<isNotEmpty prepend="AND" property="sCareerSheetNo"> sCareerSheetNo LIKE '%'+ #sCareerSheetNo# +'%'</isNotEmpty>
+		  	<isNotEmpty prepend="AND" property="sPartNo"> sCustomerDeptCode LIKE '%'+ #sPartNo# +'%'</isNotEmpty>
+		  	<isNotEmpty prepend="AND" property="sPartName"> sPartName LIKE '%'+ #sPartName# +'%'</isNotEmpty>
+		  	<isNotEmpty prepend="AND" property="sCustomerId"> sCustomerId = #sCustomerId#</isNotEmpty>
+		</dynamic>
+	  	ORDER BY dReportDate,sCode,sCustomerDeptCode, sPartName, scareersheetno
+	</select>
+	
+	<resultMap class="th.co.nttdata.tki.bean.VDailyMonthlySales" id="orderMap" groupBy="id">
+		<result property="id" column="id"/>
+		<result property="dDeliveryDate" column="dDeliveryDate"/>
+		<result property="sCustomerId" column="sCustomerId"/>
+		<result property="sCustomerCode" column="sCustomerCode"/>
+		<result property="sCustomerName" column="sCustomerName"/>
+		<result property="sPartNo" column="sPartNo"/>
+		<result property="sPartName" column="sPartName"/>
+		<result property="sMaterial" column="sMaterial"/>
+		<result property="sOrderReceiptType" column="sOrderReceiptType"/>
+		<result property="nOrderReceiptionUnitPrice" column="nOrderReceiptionUnitPrice"/>
+		<result property="nOrderReceiptionPrice" column="nOrderReceiptionPrice"/>
+		<result property="nUnitWeight" column="nUnitWeight"/>
+		<result property="nOrderReceiptionQty" column="nOrderReceiptionQty"/>
+		<result property="vDailyMonthlySalesList" resultMap="v_daily_monthlysales.saleMap"/>
+	</resultMap>
+	<resultMap class="th.co.nttdata.tki.bean.VDailyMonthlySales" id="saleMap">	
+		<result property="dReportDate" column="dAcceptanceInspectionDate"/>
+		<result property="nDeliveryQty" column="nDeliveryQty"/>
+		<result property="nProcessingCost" column="nProcessingCost"/>
+		<result property="nMaterialCost" column="nMaterialCost"/>
+		<result property="sCareerSheetNo" column="sCareerSheetNo"/>
+	</resultMap>
+	
+	<select id="queryMRDC_R06" parameterClass="th.co.nttdata.tki.bean.VDailyMonthlySales" resultMap="orderMap">
+		SELECT TOP $maxRecord$
+		   CAST(dDeliveryDate AS VARCHAR) + ':' + CAST(sCustomerId AS VARCHAR) + ':' + sPartNo AS id
+	      ,dDeliveryDate
+	      ,dAcceptanceInspectionDate
+	      ,sCustomerId
+	      ,sCustomerCode
+	      ,sCustomerName
+	      ,sPartNo
+	      ,sPartName
+	      ,sOrderReceiptType
+	      ,nUnitWeight
+	      ,nOrderReceiptionQty
+	      ,nDeliveryQty
+	      ,nProcessingCost
+	      ,sMaterial
+	      ,nMaterialCost
+	      ,sCareerSheetNo
+	      ,nOrderReceiptionUnitPrice
+	      ,nOrderReceiptionPrice
+  		FROM V_07_SalesOrderDetail
+  		<dynamic prepend="WHERE">
+  			<isNotEmpty prepend="AND" property="reportDateFr"> dDeliveryDate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="reportDateTo"> dDeliveryDate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="sCustomerId"> sCustomerId = #sCustomerId# </isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="sCareerSheetNo"> sCareerSheetNo LIKE '%'+ #sCareerSheetNo# +'%'</isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="sPartNo"> sPartNo LIKE '%'+ #sPartNo# +'%'</isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="sPartName"> sPartName LIKE '%'+ #sPartName# +'%'</isNotEmpty>
+  		</dynamic>
+  		ORDER BY dDeliveryDate, sCustomerCode, sCustomerName, sPartNo
+	</select>
+	
+	<select id="countMRDC_R06" resultClass="Integer">
+		SELECT 
+			COUNT(*)
+		FROM V_07_SalesOrderDetail
+	</select>
+	
+	<select id="sizeMRDC_R06" parameterClass="th.co.nttdata.tki.bean.VDailyMonthlySales" resultClass="th.co.nttdata.tki.bean.VDailyMonthlySales">
+		SELECT TOP $maxRecord$
+		   CAST(dDeliveryDate AS VARCHAR) + ':' + CAST(sCustomerId AS VARCHAR) + ':' + sPartNo AS id
+	      ,dDeliveryDate
+	      ,dAcceptanceInspectionDate
+	      ,sCustomerId
+	      ,sCustomerCode
+	      ,sCustomerName
+	      ,sPartNo
+	      ,sPartName
+	      ,sOrderReceiptType
+	      ,nUnitWeight
+	      ,nOrderReceiptionQty
+	      ,nDeliveryQty
+	      ,nProcessingCost
+	      ,sMaterial
+	      ,nMaterialCost
+	      ,sCareerSheetNo
+	      ,nOrderReceiptionUnitPrice
+	      ,nOrderReceiptionPrice
+  		FROM V_07_SalesOrderDetail
+  		<dynamic prepend="WHERE">
+  			<isNotEmpty prepend="AND" property="reportDateFr"> dDeliveryDate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="reportDateTo"> dDeliveryDate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="sCustomerId"> sCustomerId = #sCustomerId# </isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="sCareerSheetNo"> sCareerSheetNo LIKE '%'+ #sCareerSheetNo# +'%'</isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="sPartNo"> sPartNo LIKE '%'+ #sPartNo# +'%'</isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="sPartName"> sPartName LIKE '%'+ #sPartName# +'%'</isNotEmpty>
+  		</dynamic>
+  		ORDER BY dDeliveryDate, sCustomerCode, sCustomerName, sPartNo
+	</select>
+
+</sqlMap>

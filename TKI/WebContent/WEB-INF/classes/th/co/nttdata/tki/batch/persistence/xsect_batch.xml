@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="xsect_batch">
+	<select id="query" resultClass="th.co.nttdata.tki.batch.bean.TpicsXSect">
+		SELECT BUMO,NAME,BUNR,BUSHO
+		FROM XSECT
+		<!-- WHERE (BUNR = 'PROCESS' OR BUNR = 'MACHINE') OR BUSHO = 'Outsource'  -->
+	</select>
+</sqlMap>

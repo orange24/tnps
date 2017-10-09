@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                value="%p [%t] %c{1}.%M(%L) | %m%n"/>
+        </layout>
+    </appender>
+	<appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
+		<errorHandler class="org.apache.log4j.helpers.OnlyOnceErrorHandler" />
+		<param name="File" value="E:/logs/TKI.log" />
+		<param name="Append" value="true" />
+		<param name="DatePattern" value="'.'yyyyMMdd" />
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="[%d{dd/MM/yyyy HH\:mm\:ss}] %-5p [%c.%M(),%4L] - %m%n" />
+		</layout>
+	</appender>
+    <!-- Suppress success logging from InteractiveAuthenticationSuccessEvent -->
+
+	<logger name="org.springframework">
+        <level value="ERROR"/>
+ 		<appender-ref ref="FILE"/>
+    </logger>
+	<logger name="java.sql">
+		<level value="INFO"/>
+		<appender-ref ref="CONSOLE"/>
+	</logger>
+    <logger name="th.co.nttdata.tki">
+		<level value="INFO" />
+		<appender-ref ref="CONSOLE"/>
+	</logger>
+	<logger name="java.sql.ResultSet">
+		<level value="ERROR" />
+		<appender-ref ref="FILE"/>
+	</logger>
+
+    <!-- End iBatis -->
+
+</log4j:configuration>

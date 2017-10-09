@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_nirvana_sync_master">
+	<select id="queryNirS01" parameterClass="th.co.nttdata.tki.bean.MNirvanaSyncMaster"
+			resultClass="th.co.nttdata.tki.bean.MNirvanaSyncMaster">
+		SELECT sync_id       AS syncId,
+		       nir.sync_date AS syncDate,
+		       CASE nir.sync_status
+		         WHEN 'N' THEN 'New'
+		         WHEN 'S' THEN 'Success'
+		         WHEN 'E' THEN 'Error'
+		         WHEN 'F' THEN 'Fixed'
+		         ELSE ''
+		       END           AS syncStatus,
+		       nir.err_desc  AS errDesc,
+		       nir.data_cd   AS dataCd,
+		       nir.data_no   AS dataNo,
+		       CASE nir.trans_type
+		         WHEN 'I' THEN 'Insert'
+		         WHEN 'U' THEN 'Update'
+		         WHEN 'D' THEN 'Delete'
+		         ELSE ''
+		       END           AS transType,
+		       nir.fgno,
+		       nir.fgname,
+		       nir.uomid,
+		       nir.weight,
+		       nir.currency,
+		       nir.price,
+		       nir.customercode,
+		       nir.customername,
+		       nir.createdate,
+		       nir.lastupdate,
+		       nir.updateby
+		FROM   m_nirvana_sync_master nir
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="syncDateFrom">
+				CONVERT(DATE, nir.sync_date, 103) <![CDATA[ >= ]]>
+				CONVERT(DATE, #syncDateFrom#, 120)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="syncDateTo">
+				CONVERT(DATE, nir.sync_date, 103) <![CDATA[ <= ]]>
+				CONVERT(DATE, #syncDateTo#, 120)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="transType">
+				nir.trans_type = #transType#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="syncStatus">
+				nir.sync_status = #syncStatus#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgNo">
+				nir.fgno LIKE '%'+ #fgNo# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgName">
+				nir.fgname LIKE '%'+ #fgName# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerCode">
+				nir.customercode LIKE '%'+ #customerCode# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerName">
+				nir.customername LIKE '%'+ #customerName# + '%'
+			</isNotEmpty>
+		</dynamic>
+		ORDER  BY nir.data_no DESC
+	</select>
+
+	<update id="updateSyncStatus" parameterClass="th.co.nttdata.tki.bean.MNirvanaSyncMaster">
+		<iterate property="mNirvanaSyncMasterList">
+			UPDATE  m_nirvana_sync_master
+			SET
+				sync_status = #syncStatus# ,
+				lastUpdate = GETDATE(),
+				updateBy = #updateBy#
+			WHERE sync_id = #mNirvanaSyncMasterList[].syncId#;
+		</iterate>
+	</update>
+
+	<sql id="sqlSelectNirR02">
+		SELECT 'ADM'        AS divisionId,
+               'NON'        AS project,
+               SUM(f.fgin)  AS fgIn,
+               f.reportdate AS transDate,
+               fg.fgno      AS itemId,
+               'WH-FG'      AS whsId,
+               'N/A'        AS binId,
+               fg.uom       AS uomId
+	</sql>
+
+	<sql id="sqlNirR02">
+		FROM   t_fg_detail AS f
+		       INNER JOIN m_customer AS c
+		               ON f.customerid = c.customerid
+		       INNER JOIN m_fg AS fg
+		               ON f.fgid = fg.fgid
+		WHERE (f.fgout IS NULL OR f.fgout = 0)
+			AND f.reporttype = 1
+			<isNotEmpty prepend="AND" property="reportDateFr">
+				CONVERT(DATE, f.reportdate, 103) <![CDATA[ >= ]]>
+				CONVERT(DATE, #reportDateFr#, 103)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo">
+				CONVERT(DATE, f.reportdate, 103) <![CDATA[ <= ]]>
+				CONVERT(DATE, #reportDateTo#, 103)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerId"> f.customerid = #customerId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgName"> fg.fgname LIKE #fgName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgNo"> fg.fgno LIKE #fgNo# + '%' </isNotEmpty>
+			<isGreaterThan prepend="AND" property="reportType" compareValue="0"> f.reportType = #reportType#
+			</isGreaterThan>
+			<isNotEmpty prepend="AND" property="nirvanaExportStatus"> f.exported = #nirvanaExportStatus# </isNotEmpty>
+	</sql>
+
+	<select id="queryNirR02" parameterClass="th.co.nttdata.tki.bean.FgStockNirvana"
+			resultClass="th.co.nttdata.tki.bean.FgStockNirvana">
+		SELECT *
+		FROM   (SELECT ROW_NUMBER()
+				         OVER (
+				           ORDER BY fgdetail.transdate DESC) AS rowNumber,
+				       fgdetail.*
+				FROM   (
+						<!-- Value of FG in is positive. -->
+						<include refid="sqlSelectNirR02"/>
+						<include refid="sqlNirR02"/>
+						AND f.fgin <![CDATA[ > ]]> 0
+						GROUP  BY f.reportdate,
+				                  fg.fgno,
+				                  fg.uom
+
+				        UNION ALL
+						<!-- Value of FG in is negative. -->
+				        <include refid="sqlSelectNirR02"/>
+						<include refid="sqlNirR02"/>
+						AND f.fgin <![CDATA[ < ]]> 0
+						GROUP  BY f.reportdate,
+				                  fg.fgno,
+				                  fg.uom
+				       ) fgdetail
+				) fgStock
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="fromRecord">
+				fgStock.rownumber <![CDATA[ >= ]]>
+				#fromRecord#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="toRecord">
+				fgStock.rownumber <![CDATA[ <= ]]>
+				#toRecord#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<select id="countNirR02Rows" resultClass="Integer">
+		SELECT COUNT(data.id)
+		FROM   (
+				<!-- Value of FG in is positive. -->
+				SELECT 1 AS id
+				<include refid="sqlNirR02"/>
+				AND f.fgin <![CDATA[ > ]]> 0
+				GROUP  BY f.reportdate,
+		                  fg.fgno,
+		                  fg.uom
+
+		        UNION ALL
+				<!-- Value of FG in is negative. -->
+		        SELECT 1 AS id
+				<include refid="sqlNirR02"/>
+				AND f.fgin <![CDATA[ < ]]> 0
+				GROUP  BY f.reportdate,
+		                  fg.fgno,
+		                  fg.uom
+			) data
+	</select>
+</sqlMap>

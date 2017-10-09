@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_lotno">
+
+	<select id="select_lotno_auto" parameterClass="String" resultClass="th.co.nttdata.tki.bean.TLotNo">
+		SELECT TOP (50) LOTNO
+      		,DCPLANID
+      		,WORKORDERNO
+	        ,LOTQTY
+	        ,PRINTSTATUS
+	        ,PRINTDATE
+	        ,PRINTBY
+	  	FROM T_LOTNO
+	  	WHERE LOTNO like  '%'+#lotNo#+'%'
+	</select>
+	
+	<delete id="delete_lotno" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
+		<iterate property="planList">
+			<isNotNull  property="planList[].dcPlanId">
+				DELETE FROM T_LOTNO WHERE DCPLANID = #planList[].dcPlanId#
+			</isNotNull>
+		</iterate>
+	</delete>
+	
+	<insert id="insert_lotno" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
+		<iterate property="planList">
+			<isNotNull  property="planList[].dcPlanId">
+			INSERT INTO T_LOTNO_GENTMP
+		           (LOTNO
+		           ,DCPLANID
+		           ,WORKORDERNO
+		           ,LOTQTY
+		           ,PRINTSTATUS)
+		     VALUES
+		           (#planList[].lotNo#
+		           ,#planList[].dcPlanId#
+		           ,#planList[].workOrderNo#
+		           ,#planList[].quantity#
+		           ,0)
+			</isNotNull>
+		</iterate>
+	</insert>
+	
+	<delete id="prdS03_delete_lotno" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
+		<iterate property="planList">
+			<isNotNull  property="planList[].lotNo">
+				DELETE FROM T_LOTNO WHERE LOTNO = #planList[].lotNo#
+			</isNotNull>
+		</iterate>
+	</delete>
+	
+	<select id="select_print" parameterClass="th.co.nttdata.tki.bean.TDCPlan" resultClass="th.co.nttdata.tki.bean.TDCPlan">
+		SELECT 
+			LOT.LOTNO 		 AS lotNo, 
+			CONVERT(VARCHAR(20), DCP.DCPLANDATE, 103) AS dcPlanDate,
+			CUS.CUSTOMERCODE AS customerCode,
+			CUS.CUSTOMERNAME AS customerName,
+			PART.PARTNO 	 AS partNo,
+			PART.PARTNAME    AS partName,
+			PART.snp_wip	 AS snpWip,
+			LOT.LOTQTY       AS quantity,
+			PW.WIPORDER      AS wipOrder,
+			CASE WHEN PW.remark IS NULL OR RTRIM(LTRIM(PW.remark)) = '' then WIP.WIP +' : '+WIP.WIPNAME ELSE PW.remark END AS wip,
+			REA.REASONNAME   AS reasonName,
+			MD.MOLDNO		 AS moldNo,
+			MD.CAVNO		 AS cavNo
+  		FROM 
+  			T_LOTNO LOT
+  		INNER JOIN 
+  			T_DCPLAN DCP ON DCP.DCPLANID = LOT.DCPLANID
+  		INNER JOIN 
+  			M_WORKORDER WO ON WO.DCPLANID = DCP.DCPLANID
+  		LEFT JOIN 
+  			M_CUSTOMER CUS ON CUS.CUSTOMERID = DCP.CUSTOMERID
+  		LEFT JOIN 
+  			M_PART PART ON PART.PARTID = DCP.PARTID
+  		LEFT JOIN 
+  			M_PART_WIP PW ON PW.PARTID = DCP.PARTID
+  		LEFT JOIN 
+  			M_WIP WIP ON WIP.WIP = PW.WIP
+  		LEFT JOIN 
+  			M_REASON REA ON REA.REASONID = DCP.REASONID
+  		LEFT JOIN
+  			M_MOLD_DETAIL MD ON DCP.MOLDID = MD.MOLDID
+  		WHERE 
+  			LOT.LOTNO = #lotNo# 
+		ORDER BY 
+			PW.WIPORDER
+	</select>
+	<update id="update_print_status" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
+		UPDATE t_lotno SET printstatus = 1, printdate = GETDATE(), printby = #updateBy#
+		WHERE lotno = #lotNo#
+	</update>
+</sqlMap>

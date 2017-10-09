@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build-si" name="TNPS_P5">
+
+    <typedef resource="com/googlecode/svntask/svntask.xml">
+    	<classpath>
+    		<pathelement path="./ext-lib/svnkit.jar"/>
+    		<pathelement path="./ext-lib/svntask.jar"/>
+    	</classpath>
+    </typedef>
+
+    <property environment="env"/>
+    <property name="ECLIPSE_HOME" value="/Volumes/Data/eclipse 3.5.2"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6.0"/>
+    <property name="source" value="1.6.0"/>
+	<property name="SW_VERSION" value="version 4.0"/>
+	<property name="JBOSS_DEPLOY" value="/Volumes/Data/TKI/jboss-5.0.1.GA/server/default" />
+
+    <path id="Web App Libraries.libraryclasspath">
+        <pathelement location="ext-lib/servlet-api.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/batch-runner.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/com.springsource.org.aopalliance-1.0.0.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/com.springsource.org.aspectj.weaver_1.6.10.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/commons-collections-3.2.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/commons-dbcp-1.4.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/commons-io-1.4.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/commons-lang-2.6.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/commons-logging-1.1.1.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/commons-pool-1.5.5.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/ibatis-2.3.4.726.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/ibatis-sqlmap-2.3.4.726.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/jackson-all-1.7.1.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/jstl-api-1.2.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/jstl-impl-1.2.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/log4j-1.2.16.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.aop-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.asm-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.beans-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.context-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.context.support-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.core-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.expression-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.jdbc-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.orm-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.test-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.transaction-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.web-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/org.springframework.web.servlet-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/poi-3.7-20101029.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/spring-security-config-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/spring-security-core-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/spring-security-taglibs-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/spring-security-web-3.0.5.RELEASE.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/standard-1.1.2.jar"/>
+    	<pathelement location="WebContent/WEB-INF/lib/commons-beanutils-1.8.3.jar"/>
+    	<pathelement location="WebContent/WEB-INF/lib/iReport.jar"/>
+    	<pathelement location="WebContent/WEB-INF/lib/itext-2.1.7.jar"/>
+    	<pathelement location="WebContent/WEB-INF/lib/jasperreports-5.2.0.jar"/>
+    	<pathelement location="WebContent/WEB-INF/lib/jasperreports-fonts.jar"/>
+    	<pathelement location="WebContent/WEB-INF/lib/jxl.jar"/>
+        <pathelement location="WebContent/WEB-INF/lib/commons-fileupload-1.1.1.jar"/>
+    </path>
+
+    <path id="TKI.classpath">
+        <pathelement location="WebContent/WEB-INF/classes"/>
+        <path refid="Web App Libraries.libraryclasspath"/>
+    </path>
+
+	<target depends="cleanall,build-subprojects,build-project" name="build-si">
+    	<svn>
+    		<info path="." revisionproperty="build.revision"/>
+    	</svn>
+    	<tstamp>
+    		<format property="build.time" pattern="MMM, dd yyyy - HH:mm"/>
+    	</tstamp>
+    	<echo message="version ${build.revision}"/>
+
+    	<copy file="config/jdbc-si.properties" tofile="WebContent/WEB-INF/classes/jdbc.properties" overwrite="true"/>
+		<copy file="config/settings-si.properties" tofile="WebContent/WEB-INF/classes/settings.properties" overwrite="true"/>
+    	<replace file="WebContent/WEB-INF/classes/th/co/nttdata/messages.properties">
+    		<replacefilter token="@softwareVersion@" value="${SW_VERSION}.${build.revision} (Built on: ${build.time})"/>
+    	</replace>
+    	
+		<exec executable="net" failonerror="false">
+			<arg value="stop" />
+			<arg value="&quot;JBoss Application Server 5.1&quot;" />
+		</exec>
+		<delete file="${JBOSS_DEPLOY}/deploy/${ant.project.name}.war" failonerror="false" />
+		<delete dir="${JBOSS_DEPLOY}/work/jboss.web/localhost/${ant.project.name}" failonerror="false" />
+		<delete dir="${JBOSS_DEPLOY}/tmp" failonerror="false" />
+		<war destfile="${JBOSS_DEPLOY}/deploy/${ant.project.name}.war" basedir="WebContent" webxml="WebContent/WEB-INF/web.xml">
+		    	</war>
+		<exec executable="net" failonerror="false">
+			<arg value="start" />
+			<arg value="&quot;JBoss Application Server 5.1&quot;" />
+		</exec>
+	</target>
+    <target depends="cleanall,build-subprojects,build-project" name="build-prod">
+    	<svn>
+    		<info path="." revisionproperty="build.revision"/>
+    	</svn>
+    	<tstamp>
+    		<format property="build.time" pattern="MMM, dd yyyy - HH:mm"/>
+    	</tstamp>
+    	<echo message="version ${build.revision}"/>
+
+    	<copy file="config/jdbc-prod.properties" tofile="WebContent/WEB-INF/classes/jdbc.properties" overwrite="true"/>
+    	<copy file="config/settings-prod.properties" tofile="WebContent/WEB-INF/classes/settings.properties" overwrite="true"/>
+    	<replace file="WebContent/WEB-INF/classes/th/co/nttdata/messages.properties">
+    		<replacefilter token="@softwareVersion@" value="${SW_VERSION}.${build.revision} (Built on: ${build.time})"/>
+    	</replace>
+    	<war destfile="${env.USERPROFILE}/Desktop/${ant.project.name}.war" basedir="WebContent" webxml="WebContent/WEB-INF/web.xml">
+    	</war>
+    </target>
+    <target depends="cleanall,build-subprojects,build-project" name="build-UAT">
+    	<svn>
+    		<info path="." revisionproperty="build.revision"/>
+    	</svn>
+    	<tstamp>
+    		<format property="build.time" pattern="MMM, dd yyyy - HH:mm"/>
+    	</tstamp>
+    	<echo message="version ${build.revision}"/>
+
+    	<copy file="config/jdbc-uat.properties" tofile="WebContent/WEB-INF/classes/jdbc.properties" overwrite="true"/>
+    	<copy file="config/settings-prod.properties" tofile="WebContent/WEB-INF/classes/settings.properties" overwrite="true"/>
+    	<replace file="WebContent/WEB-INF/classes/th/co/nttdata/messages.properties">
+    		<replacefilter token="@softwareVersion@" value="${SW_VERSION}.${build.revision} (Built on: ${build.time})"/>
+    	</replace>
+    	<replace file="WebContent/WEB-INF/classes/log4j.xml">
+    		<replacefilter token="/logs/TKI.log" value="/logs/TKI_UAT.log"/>
+    	</replace>
+    	<war destfile="${env.USERPROFILE}/desktop/${ant.project.name}_UAT.war" basedir="WebContent" webxml="WebContent/WEB-INF/web.xml">
+    	</war>
+    </target>
+	<target name="build-batch">
+
+		<property name="batch.path" value="${env.USERPROFILE}/Desktop/tki-batch"/>
+
+    	<path id="lib.path.ref">
+			<fileset dir="WebContent/WEB-INF/lib">
+				<include name="batch-runner.jar"/>
+				<include name="com.springsource.org.*.jar"/>
+				<include name="commons-dbcp-*.jar"/>
+				<include name="commons-lang-*.jar"/>
+				<include name="commons-logging-*.jar"/>
+				<include name="commons-pool-*.jar"/>
+				<include name="ibatis*.jar"/>
+				<include name="jtds-*.jar"/>
+				<include name="log4j-*.jar"/>
+				<include name="org.springframework.aop-*.jar"/>
+				<include name="org.springframework.asm-*.jar"/>
+				<include name="org.springframework.beans-*.jar"/>
+				<include name="org.springframework.context-*.jar"/>
+				<include name="org.springframework.core-*.jar"/>
+				<include name="org.springframework.expression-*.jar"/>
+				<include name="org.springframework.jdbc-*.jar"/>
+				<include name="org.springframework.orm-*.jar"/>
+				<include name="org.springframework.transaction-*.jar"/>
+				<include name="sqljdbc4.jar"/>
+				<include name="jasperreports-*.jar"/>
+				<include name="itext-*.jar"/>
+				<include name="iReport.jar"/>
+			</fileset>
+    	</path>
+    	<manifestclasspath property="lib.list" jarfile="WebContent/WEB-INF/lib">
+    		<classpath refid="lib.path.ref" />
+    	</manifestclasspath>
+    	<echo message="${lib.list}"/>
+
+		<delete dir="${batch.path}" failonerror="false"/>
+		<delete dir="${batch.path}-si" failonerror="false"/>
+		<delete dir="${batch.path}-prod" failonerror="false"/>
+		<delete dir="${batch.path}-uat" failonerror="false"/>
+		<mkdir dir="${batch.path}"/>
+		<mkdir dir="${batch.path}-si"/>
+		<mkdir dir="${batch.path}-prod"/>
+		<mkdir dir="${batch.path}-uat"/>
+
+		<copy todir="${batch.path}-si">
+			<fileset dir="WebContent/WEB-INF" includes="${lib.list}"/>
+		</copy>
+		<copy todir="${batch.path}-prod">
+			<fileset dir="WebContent/WEB-INF" includes="${lib.list}"/>
+		</copy>
+		<copy todir="${batch.path}-uat">
+			<fileset dir="WebContent/WEB-INF" includes="${lib.list}"/>
+		</copy>
+		<copy todir="${batch.path}">
+			<fileset dir="batch">
+				<exclude name="**/*.java"/>
+			</fileset>
+		</copy>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="${batch.path}" source="${source}" target="${target}" includeantruntime="false">
+            <src path="batch"/>
+            <classpath refid="TKI.classpath"/>
+        </javac>
+		<copy tofile="${batch.path}/jdbc.properties" file="config/jdbc-si.properties" overwrite="true"/>
+		<copy tofile="${batch.path}/settings.properties" file="config/settings-si.properties" overwrite="true"/>
+		<jar basedir="${batch.path}" destfile="${batch.path}-si/tki-batch.jar">
+			<manifest>
+				<attribute name="Main-Class" value="th.co.nttdata.batch.BatchRunner"/>
+				<attribute name="Class-Path" value="${lib.list}"/>
+			</manifest>
+		</jar>
+		<copy tofile="${batch.path}/jdbc.properties" file="config/jdbc-prod.properties" overwrite="true"/>
+		<copy tofile="${batch.path}/settings.properties" file="config/settings-prod.properties" overwrite="true"/>
+		<jar basedir="${batch.path}" destfile="${batch.path}-prod/tki-batch.jar">
+			<manifest>
+				<attribute name="Main-Class" value="th.co.nttdata.batch.BatchRunner"/>
+				<attribute name="Class-Path" value="${lib.list}"/>
+			</manifest>
+		</jar>
+		<copy tofile="${batch.path}/jdbc.properties" file="config/jdbc-uat.properties" overwrite="true"/>
+		<copy tofile="${batch.path}/settings.properties" file="config/settings-prod.properties" overwrite="true"/>
+		<jar basedir="${batch.path}" destfile="${batch.path}-uat/tki-batch.jar">
+			<manifest>
+				<attribute name="Main-Class" value="th.co.nttdata.batch.BatchRunner"/>
+				<attribute name="Class-Path" value="${lib.list}"/>
+			</manifest>
+		</jar>
+	</target>
+    <target name="init">
+        <mkdir dir="WebContent/WEB-INF/classes"/>
+        <copy includeemptydirs="false" todir="WebContent/WEB-INF/classes">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="WebContent/WEB-INF/classes">
+            <fileset dir="business">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="WebContent/WEB-INF/classes">
+            <fileset dir="config">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="WebContent/WEB-INF/classes">
+            <fileset dir="batch">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="WebContent/WEB-INF/classes"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="WebContent/WEB-INF/classes" source="${source}" target="${target}" includeantruntime="false">
+            <src path="business"/>
+            <classpath refid="TKI.classpath"/>
+        </javac>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="WebContent/WEB-INF/classes" source="${source}" target="${target}" includeantruntime="false">
+            <src path="config"/>
+            <classpath refid="TKI.classpath"/>
+        </javac>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="WebContent/WEB-INF/classes" source="${source}" target="${target}" includeantruntime="false">
+            <src path="src"/>
+            <classpath refid="TKI.classpath"/>
+        </javac>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="WebContent/WEB-INF/classes" source="${source}" target="${target}" includeantruntime="false">
+            <src path="batch"/>
+            <classpath refid="TKI.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+</project>

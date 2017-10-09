@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_part_wip">
+
+	<select id="queryPartInWip" parameterClass="th.co.nttdata.tki.bean.MPart" resultClass="th.co.nttdata.tki.bean.MPart">
+		SELECT
+			 p.createDate
+			,p.lastUpdate
+			,v.customerId
+			,v.partId
+			,p.createBy
+			,v.partName
+			,v.partNo
+			,p.remark
+			,p.updateBy
+			,pw.wip
+			,w.wipname
+		FROM v_cust_fg_part v INNER JOIN m_part_wip pw ON v.partid = pw.partid
+		INNER JOIN m_part p ON v.partid = p.partid INNER JOIN m_wip w on pw.wip = w.wip
+		INNER JOIN m_user_access_wip a ON w.wip = a.wip 
+		WHERE a.username = #updateBy# 
+			<isNotEmpty prepend="AND" property="wip"> pw.wip = #wip# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partId"> pw.partid = #partId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerId"> v.customerid = #customerId# </isNotEmpty>
+		ORDER BY v.partName,v.partNo
+	</select>
+
+	<resultMap class="th.co.nttdata.tki.bean.MPartWip" id="part-wip">
+		<result property="wip.wip" column="wip"/>
+		<result property="wip.wipName" column="wipName"/>
+		<result property="wip.wipOrder" column="wipOrder"/>
+		<result property="wip.isCalc" column="isCalc"/>
+	</resultMap>
+	
+	<select id="queryPartWip" parameterClass="integer" resultMap="part-wip">
+		SELECT pw.wip, w.wipName, pw.wipOrder, pw.isCalc
+		FROM m_part_wip pw INNER JOIN m_wip w ON pw.wip = w.wip 
+		WHERE pw.partId = #value# ORDER BY wipOrder
+	</select>
+	
+	<update id="update" parameterClass="th.co.nttdata.tki.bean.MPart">
+		<iterate property="wipList">
+			UPDATE m_part_wip SET isCalc = #wipList[].wip.isCalc:BOOLEAN# WHERE partId = #partId# 
+			AND wip = #wipList[].wip.wip# AND wipOrder = #wipList[].wip.wipOrder#;
+		</iterate>
+	</update>
+	
+	<statement id="merge" parameterClass="th.co.nttdata.tki.bean.MPart" resultClass="integer">
+		<isNotEmpty property="wipList">
+			DELETE FROM m_part_wip WHERE partId = #partId#;
+		</isNotEmpty>
+		<isNotEmpty property="partId">
+			<iterate property="wipList">
+				INSERT INTO m_part_wip(partId,wip,wipOrder,tpicsOrder,isCalc)
+				VALUES(#partId#,#wipList[].wip.wip#,#wipList[].wip.wipOrder#,#wipList[].tpicsOrder#,
+					(SELECT isCalc FROM m_wip WHERE wip = #wipList[].wip.wip#));
+			</iterate>
+		</isNotEmpty>
+	</statement>
+	
+	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.MPart">
+		<iterate property="partList">
+			<isNotEmpty property="partList[].partId">
+				DELETE FROM m_part_wip WHERE partid = #partList[].partId#
+			</isNotEmpty>
+		</iterate>
+	</delete>
+	
+	<select id="queryPartInWipEnable" parameterClass="th.co.nttdata.tki.bean.MPart" resultClass="th.co.nttdata.tki.bean.MPart">
+		SELECT
+			 p.createDate
+			,p.lastUpdate
+			,v.customerId
+			,v.partId
+			,p.createBy
+			,v.partName
+			,v.partNo
+			,p.remark
+			,p.updateBy
+			,pw.wip
+			,w.wipname
+		FROM v_cust_fg_part v INNER JOIN m_part_wip pw ON v.partid = pw.partid
+		INNER JOIN m_part p ON v.partid = p.partid INNER JOIN m_wip w on pw.wip = w.wip
+		INNER JOIN m_user_access_wip a ON w.wip = a.wip 
+		WHERE a.username = #updateBy# 
+		AND v.part_isenable = 1
+			<isNotEmpty prepend="AND" property="wip"> pw.wip = #wip# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partId"> pw.partid = #partId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerId"> v.customerid = #customerId# </isNotEmpty>
+		ORDER BY v.partName,v.partNo
+	</select>
+</sqlMap>

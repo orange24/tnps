@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_mold_shot_batch" >
+	
+	<select id="queryMinReportDateDC" resultClass="th.co.nttdata.tki.batch.bean.MMoldShot" parameterClass="java.util.Map">
+		SELECT MIN(reportdate) AS reportDate, moldId, moldNo
+		FROM t_dailymc 
+		WHERE lastupdate <![CDATA[ >= ]]> CONVERT(DATE, #executeDate#)
+		GROUP BY moldid, moldno
+	</select>
+	
+	<select id="queryMinReportDateFG" resultClass="java.util.Date" parameterClass="java.util.Map">
+		SELECT MIN(reportdate) 
+		FROM t_fg_detail 
+		WHERE lastupdate <![CDATA[ >= ]]> CONVERT(DATE, #executeDate#)
+	</select>
+	
+	<delete id="deleteTMoldHistoryDC" parameterClass="th.co.nttdata.tki.batch.bean.MMoldShot" >
+		DELETE FROM t_mold_dc_history 
+		WHERE reportdate <![CDATA[ >= ]]> #reportDate#
+			AND moldid = #moldId#
+			AND moldno = #moldNo#
+	</delete>
+	
+	<delete id="deleteTMoldHistoryFG" parameterClass="java.util.Date" >
+		DELETE FROM t_mold_fg_history 
+		WHERE reportdate <![CDATA[ >= ]]> #value#
+	</delete>
+	
+	<select id="selectDailyMC" parameterClass="th.co.nttdata.tki.batch.bean.MMoldShot" resultClass="th.co.nttdata.tki.batch.bean.MMoldShot">
+		SELECT reportDate, moldId, moldNo, SUM(totalDCShot) AS totalDCShot
+		FROM (
+				SELECT ISNULL(CEILING(CAST(SUM(td.qty) AS float) / tm.cavused), 0) AS totalDCShot, 
+					tm.reportdate, tm.moldid, tm.moldno
+				FROM t_dailymc_detail AS td 
+		      		INNER JOIN t_dailymc AS tm ON td.dailymcid = tm.dailymcid
+		      	WHERE (td.reporttime IN (25, 26)) 
+		      		AND (tm.reportdate = #reportDate#)
+		      		AND tm.moldid = #moldId#
+		      		AND tm.moldno = #moldNo#
+		      	GROUP BY tm.reportdate, tm.moldid, tm.moldno, tm.cavused
+		      ) AS dc
+		GROUP BY reportdate, moldid, moldno
+	</select>
+	
+	<insert id="insertMoldHistoryDC" parameterClass="th.co.nttdata.tki.batch.bean.MMoldShot" >
+		INSERT t_mold_dc_history (reportdate, moldid, moldno, totaldcshot) 
+		VALUES (#reportDate#, #moldId#, #moldNo#, #totalDCShot#); 
+	</insert>
+	
+	<insert id="insertMoldHistoryFG" parameterClass="th.co.nttdata.tki.batch.bean.MMoldShot" >
+		INSERT t_mold_fg_history (reportdate, moldid, moldno, totalfgsold) 
+		VALUES (#reportDate#, #moldId#, #moldNo#, #totalFGSold#); 
+	</insert>
+	
+	<update id="updateMoldDetail" parameterClass="th.co.nttdata.tki.batch.bean.MMoldShot" >
+		MERGE INTO m_mold_detail md 
+		USING (
+			SELECT moldid, moldno,
+			(
+				SELECT ISNULL(SUM(totaldcshot),0) AS totaldc 
+				FROM t_mold_dc_history 
+				WHERE t_mold_dc_history.moldid=#moldId# 
+					AND t_mold_dc_history.moldno=#moldNo# )+initialshot as totaldcshot , 
+			  		CASE 
+				 		WHEN initialshot+totaldcshot <![CDATA[ <= ]]> alertshot THEN 1 
+				 		WHEN initialshot+totaldcshot <![CDATA[ > ]]> alertshot 
+				 			AND initialshot+totaldcshot <![CDATA[ <= ]]> guaranteeshot  THEN 2 
+				 		WHEN initialshot+totaldcshot <![CDATA[ > ]]> guaranteeshot THEN 3 
+				 		ELSE 0 
+			  		END AS dcstatus 
+			FROM m_mold_detail 
+			WHERE moldid=#moldId# and moldno=#moldNo# 
+		) us 
+		ON (md.moldid = us.moldid AND md.moldno = us.moldno) 
+		WHEN MATCHED THEN 
+			UPDATE SET 
+				 md.totaldcshot = us.totaldcshot 
+				,md.dcstatus = us.dcstatus
+	</update>
+	
+	<update id="updateMoldDetailFG" >
+		MERGE INTO m_mold_detail md 
+		USING (			
+			SELECT ms.moldid, ms.moldno, (ms2.initialshot + ms.totalfg) AS totalfg, 
+				CASE 
+			 		WHEN ms2.initialshot + ms.totalfg <![CDATA[ <= ]]> alertshot THEN 1 
+			 		WHEN (ms2.initialshot + ms.totalfg <![CDATA[ > ]]> alertshot 
+			 			AND ms2.initialshot + ms.totalfg <![CDATA[ <= ]]> guaranteeshot) THEN 2 
+			 		WHEN ms2.initialshot + ms.totalfg <![CDATA[ > ]]> guaranteeshot THEN 3 
+			 		ELSE 0 
+		  		END AS fgstatus
+			FROM 	
+				(SELECT moldid, moldno ,ISNULL(SUM(totalfgsold),0) AS totalfg 
+				FROM t_mold_fg_history
+				GROUP BY moldid, moldno) ms
+			INNER JOIN m_mold_detail ms2 on ms.moldid = ms2.moldid and ms.moldno = ms2.moldno
+		) us 
+		ON (md.moldid = us.moldid AND md.moldno = us.moldno) 
+		WHEN MATCHED THEN 
+			UPDATE SET
+				 md.totalfgsold = us.totalfg
+				,md.fgstatus = us.fgstatus;
+	</update>
+	
+		
+	<insert id="insertMoldFGHistory" parameterClass="java.util.Date" >
+		
+	INSERT INTO t_mold_fg_history (reportdate, moldid, moldno, totalfgsold) 
+		SELECT 
+       		fgout.reportdate AS reportDate,
+       		dcp.moldid AS moldId,
+       		dcp.moldno AS moldNo,
+       		SUM(fgout.fgout) AS totalFGSold
+		FROM 
+			(SELECT reportdate
+				,fgid
+				,customerid
+				,lotno
+				,SUM([fgin]) AS fgin
+				,SUM([fgout]) AS fgout
+  			FROM t_fg_detail
+  			WHERE reportdate = #value#
+    			AND reporttype = 1 
+    			AND fgout IS NOT NULL
+  			GROUP BY reportdate, fgid, customerid, lotno
+  			) fgout
+  		INNER JOIN t_lotno t ON t.lotno = fgout.lotno
+  		INNER JOIN t_dcplan dcp ON dcp.dcplanid = t.dcplanid
+  		
+		GROUP BY fgout.reportdate, dcp.moldid, dcp.moldno
+	</insert>
+	
+	<insert id="insertMoldFGHistory_old" parameterClass="java.util.Date" >
+		INSERT INTO t_mold_fg_history (reportdate, moldid, moldno, totalfgsold) 
+		SELECT 
+       		fgout.reportdate AS reportDate,
+       		mc.moldid AS moldId,
+       		md.moldno AS moldNo,
+       		SUM(fgout.fgout) AS totalFGSold
+		FROM 
+			(SELECT reportdate
+				,fgid
+				,customerid
+				,SUBSTRING([lotno],1,11) AS lotno
+				,SUM([fgin]) AS fgin
+				,SUM([fgout]) AS fgout
+  			FROM t_fg_detail
+  			WHERE reportdate = #value#
+    			AND reporttype = 1 
+    			AND fgout IS NOT NULL
+  			GROUP BY reportdate, fgid, customerid, SUBSTRING(lotno,1,11)
+  			) fgout
+		INNER JOIN t_dailymc_lot mclot on fgout.lotno = mclot.lotno
+		INNER JOIN t_dailymc mc on mc.dailymcid = mclot.dailymcid     
+		INNER JOIN m_mold_part mp on mp.partid  = mc.partid and mp.moldid = mc.moldid
+		INNER JOIN m_mold_detail md on mp.moldid = md.moldid
+		WHERE fgout.reportdate between md.startdate and ISNULL(md.enddate,'9999-12-31')
+		GROUP BY fgout.reportdate, mc.moldid, md.moldno
+	</insert>
+	
+</sqlMap>

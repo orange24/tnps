@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Delete resource &apos;TKI/WebContent/page/CFG/DOC_S01.js&apos;" deleteContents="false" description="Delete resource &apos;TKI/WebContent/page/CFG/DOC_S01.js&apos;" element1="/TKI/WebContent/page/CFG/DOC_S01.js" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1504068957304"/>
+</session>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="m_leadtime_batch">
+	
+	<select id="queryLeadtime" resultClass="th.co.nttdata.tki.batch.bean.MLeadtime">
+		SELECT 	leadTimeId,wip,partId,stFromDate4,stToDate4,stFromDate5,stToDate5,stFromDate6,stToDate6
+		FROM 	m_leadtime
+		WHERE 	stFromDate4 IS NOT NULL OR stFromDate5 IS NOT NULL OR stFromDate6 IS NOT NULL
+	</select>	
+	
+	<select id="queryAvg" parameterClass="th.co.nttdata.tki.batch.bean.MLeadtime" resultClass="java.math.BigDecimal">
+		SELECT 	av.average
+		FROM(
+			SELECT AVG(mc) AS average
+			FROM(
+				SELECT	mc.wip, mcd.partid, (mcd.timeused*60/(ISNULL(mcd.ok,0) + ISNULL(mcd.ng,0))) AS mc
+				FROM 	t_dailymcwk mc INNER JOIN t_dailymcwk_detail mcd
+						ON mc.dailymcwkid = mcd.dailymcwkid
+				WHERE 	(mcd.timeused IS NOT NULL AND mcd.timeused > 0)
+						AND (ISNULL(mcd.ok,0) + ISNULL(mcd.ng,0)) > 0					
+						AND mc.reporttype = 1
+						<isNotEmpty property="wip" prepend="AND"> mc.wip = #wip#</isNotEmpty>
+						<isNotEmpty property="partId" prepend="AND"> mcd.partid = #partId#</isNotEmpty>						
+						<isNotEmpty property="stFromDate">
+							<isNotEmpty property="stToDate" prepend="AND">
+								mc.reportdate between #stFromDate# AND #stToDate#
+							</isNotEmpty>
+						</isNotEmpty>
+						<!-- AND mc.wip ='SB' AND mcd.partid = 135 -->
+						<!-- AND mc.reportdate between '2011-05-01 00:00:00.000' AND '2011-05-31 00:00:00.000' -->
+ 			) m 
+ 			HAVING AVG(mc) > 0
+		UNION 
+ 			SELECT AVG(wk) AS average
+ 			FROM(
+ 				SELECT 	wk.wip,wkd.partid,(wkd.timeused*60/(ISNULL(wkd.ok,0) + ISNULL(wkd.ng,0))) AS wk
+ 				FROM 	t_dailywk wk INNER JOIN t_dailywk_detail wkd
+ 						ON wk.dailywkid = wkd.dailywkid
+ 				WHERE 	(wkd.timeused IS NOT NULL AND wkd.timeused > 0)
+ 						AND (ISNULL(wkd.ok,0) + ISNULL(wkd.ng,0)) > 0
+ 						AND wk.reporttype = 1
+ 						<isNotEmpty property="wip" prepend="AND"> wk.wip = #wip#</isNotEmpty>
+						<isNotEmpty property="partId" prepend="AND"> wkd.partid = #partId#</isNotEmpty>
+						<isNotEmpty property="stFromDate">
+							<isNotEmpty property="stToDate" prepend="AND">
+								wk.reportdate between #stFromDate# AND #stToDate#
+							</isNotEmpty>
+						</isNotEmpty>
+ 						<!-- AND wk.wip = 'FL-1' AND wkd.partid = 862 -->
+ 						<!-- AND wk.reportdate BETWEEN '2011-05-01 00:00:00.000' AND '2011-05-31 00:00:00.000' -->
+ 			)w 
+ 			HAVING AVG(wk) > 0
+ 		) av
+ 
+	</select>
+	
+	<select id="queryDailly"  parameterClass="th.co.nttdata.tki.batch.bean.MLeadtime" resultClass="Integer">
+		SELECT 	ISNULL(SUM(ISNULL(dcd.ok,0)),0)
+ 		FROM 	t_dailymc dc INNER JOIN t_dailymc_detail dcd
+ 				ON dc.dailymcid = dcd.dailymcid
+ 		WHERE 	(dcd.qty IS NOT NULL AND dcd.qty > 0)
+ 				AND dcd.reporttime IN (25,26)
+ 				AND dc.reporttype = 1
+ 				<isNotEmpty property="wip" prepend="AND"> dc.wip = #wip#</isNotEmpty>
+				<isNotEmpty property="partId" prepend="AND"> dc.partid = #partId#</isNotEmpty>
+				<isNotEmpty property="stFromDate">
+					<isNotEmpty property="stToDate" prepend="AND">
+						dc.reportdate between #stFromDate# AND #stToDate#
+					</isNotEmpty>
+				</isNotEmpty>
+ 				<!-- AND dc.wip = 'ALDC' AND dc.partid = 152 -->
+ 				<!-- AND dc.reportdate BETWEEN '2011-05-01 00:00:00.000' AND '2011-05-31 00:00:00.000' --> 				
+ 		<!-- ORDER BY dc.dailymcid,dcd.reporttime -->
+	</select>
+	
+	<select id="queryDaillySize"  parameterClass="th.co.nttdata.tki.batch.bean.MLeadtime" resultClass="Integer">
+		SELECT 	count(*) 
+ 		FROM 	t_dailymc dc INNER JOIN t_dailymc_detail dcd
+ 				ON dc.dailymcid = dcd.dailymcid
+ 		WHERE 	(dcd.qty IS NOT NULL AND dcd.qty > 0)
+ 				AND dcd.reporttime IN (25,26)
+ 				AND dc.reporttype = 1
+ 				<isNotEmpty property="wip" prepend="AND"> dc.wip = #wip#</isNotEmpty>
+				<isNotEmpty property="partId" prepend="AND"> dc.partid = #partId#</isNotEmpty>
+				<isNotEmpty property="stFromDate">
+					<isNotEmpty property="stToDate" prepend="AND">
+						dc.reportdate between #stFromDate# AND #stToDate#
+					</isNotEmpty>
+				</isNotEmpty>
+	</select>
+	
+	<select id="queryStopMC" parameterClass="th.co.nttdata.tki.batch.bean.MLeadtime" resultClass="Integer">
+		SELECT 	ISNULL(SUM(ISNULL(stopminute,0)*60),0)
+		FROM 	t_dailymc_stopmc sc
+		WHERE 	stopminute IS NOT NULL
+		AND dailymcid IN 
+						(
+						 SELECT dc.dailymcId
+						 FROM 	t_dailymc dc 
+						 INNER JOIN t_dailymc_detail dcd ON dc.dailymcid = dcd.dailymcid
+						 WHERE 	(dcd.qty IS NOT NULL AND dcd.qty > 0)
+						 AND dcd.reporttime IN (25,26)
+						 AND dc.reporttype = 1
+						 <isNotEmpty property="wip" prepend="AND"> dc.wip = #wip#</isNotEmpty>
+						 <isNotEmpty property="partId" prepend="AND"> dc.partid = #partId#</isNotEmpty>
+						 <isNotEmpty property="stFromDate">
+							<isNotEmpty property="stToDate" prepend="AND">
+								dc.reportdate between #stFromDate# AND #stToDate#
+							</isNotEmpty>
+						 </isNotEmpty>
+						 )
+	</select>
+	
+	<update id="updateLeadtime" parameterClass="th.co.nttdata.tki.batch.bean.MLeadtime">
+		UPDATE 	m_leadtime
+		SET 	stResult4 = #stResult4#,
+				stResult5 = #stResult5#,
+				stResult6 = #stResult6#
+		WHERE 	leadTimeId = #leadTimeId#
+	</update>
+	
+</sqlMap>

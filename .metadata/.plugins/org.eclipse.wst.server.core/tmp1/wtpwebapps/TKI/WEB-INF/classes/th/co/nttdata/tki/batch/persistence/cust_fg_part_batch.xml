@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="cust_fg_part_batch">
+	<select id="query" resultClass="th.co.nttdata.tki.batch.bean.TpicsCustFgPart">
+		SELECT CUSTCODE,CUSTNAME,FGNO,FGNAME,PARTNO,PARTNAME
+		FROM v_tnps_cust_fg_part
+	</select>
+</sqlMap>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="tpics_cbom_batch">
+	<delete id="delete" >
+		delete from tpics_cbom
+	</delete>
+	
+	<insert id="insert" parameterClass="th.co.nttdata.tki.batch.bean.TpicsCbom" >
+		INSERT tpics_cbom ( cbom_fg,cbom_wc,cbom_level,cbom_usedqty,cbom_item,cbom_oyak,cbom_process) 
+		VALUES (#cbom_fg#,#cbom_wc#,#cbom_level#,#cbom_usedqty#,#cbom_item#,#cbom_oyak#,#cbom_process#);
+	</insert>
+</sqlMap>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_role_action">
+	<select id="queryMultiChoice" parameterClass="th.co.nttdata.tki.bean.MRole" resultClass="th.co.nttdata.tki.bean.MultiChoice">
+		SELECT
+			 m.actionId as id
+			,m.actionDesc as label
+			,CASE WHEN r.roleId IS NULL then 0 ELSE 1 END as choose
+		FROM m_action m left join m_role_action r on m.actionId = r.actionId AND r.roleId = #roleId#
+		ORDER BY m.actionName
+	</select>
+	
+	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.MRole">
+		<iterate property="actionList">
+			<isNotNull property="actionList[].id">
+				INSERT INTO m_role_action(roleId,actionId) VALUES (#roleId#, #actionList[].id#);
+			</isNotNull>
+		</iterate>
+	</insert>
+	
+	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.MRole">
+		<iterate property="roleList">
+			<isNotEmpty property="roleList[].roleId">
+				DELETE FROM m_role_action WHERE roleId = #roleList[].roleId#;
+			</isNotEmpty>
+		</iterate>
+	</delete>
+</sqlMap>

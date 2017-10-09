@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_role">
+
+	<select id="queryRole" parameterClass="th.co.nttdata.tki.bean.MRole" resultClass="th.co.nttdata.tki.bean.MRole">
+		SELECT
+			 isLocked
+			,createDate
+			,lastUpdate
+			,roleId
+			,createBy
+			,roleDesc
+			,roleName
+			,updateBy
+		FROM m_role
+		WHERE roleid = #roleId#
+	</select>
+	
+	<select id="queryComboBox" resultClass="th.co.nttdata.tki.bean.MRole">
+		SELECT
+			 roleId
+			,roleName
+		FROM m_role
+	</select>
+	
+	<sql id="queryProperties">
+		FROM m_role
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="roleName"> roleName like #roleName#+'%' </isNotEmpty>
+		</dynamic>	
+	</sql>
+	
+	<select id="query" parameterClass="th.co.nttdata.tki.bean.MRole" resultClass="th.co.nttdata.tki.bean.MRole">
+		SELECT
+			 roleId
+			,roleName
+			,roleDesc
+			,islocked AS isLocked
+		<include refid="queryProperties"/>
+		ORDER BY roleName
+	</select>
+	
+	<select id="count" parameterClass="th.co.nttdata.tki.bean.MRole" resultClass="int">
+		SELECT
+			count(*)
+		<include refid="queryProperties"/>
+	</select>
+		
+	<select id="countRoleName" parameterClass="string" resultClass="int">
+		SELECT
+			 count(roleId)
+		FROM m_role
+		WHERE roleName = #value#
+	</select>
+	
+	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.MRole">
+		INSERT INTO m_role(roleName, roleDesc, createBy, updateBy)
+		VALUES (#roleName#, #roleDesc#, #createBy#, #updateBy#)
+		<selectKey resultClass="int" >
+			SELECT @@IDENTITY AS roleId
+		</selectKey>
+	</insert>
+	
+	<update id="update" parameterClass="th.co.nttdata.tki.bean.MRole">
+		UPDATE m_role 
+		SET roleName  = #roleName#
+			,roleDesc   = #roleDesc#
+			,updateBy   = #updateBy#
+			,lastUpdate = GETDATE()
+		WHERE roleId     = #roleId#
+	</update>
+	
+	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.MRole">
+		<iterate property="roleList">
+			<isNotEmpty property="roleList[].roleId">
+				DELETE FROM m_role WHERE roleId = #roleList[].roleId#
+			</isNotEmpty>
+		</iterate>
+	</delete>
+</sqlMap>

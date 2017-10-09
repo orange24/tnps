@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="t_nir_export_total">
+	<select id="getExportTotalByMonth" parameterClass="int" resultClass="int">
+		SELECT export_total AS exportTotal
+		FROM   t_nir_export_total
+		WHERE  month = #value#
+	</select>
+
+	<delete id="deleteAllExportTotalData">
+		DELETE t_nir_export_total;
+	</delete>
+
+	<insert id="insertNewMonth" parameterClass="th.co.nttdata.tki.bean.TNirExportTotal">
+		INSERT t_nir_export_total(month,export_total ,last_update,update_by)
+		VALUES (#month#, #exportTotal#, GETDATE(), #updateBy#);
+	</insert>
+
+	<update id="updateExportTotal" parameterClass="th.co.nttdata.tki.bean.TNirExportTotal">
+		UPDATE t_nir_export_total
+		SET    export_total = #exportTotal#,
+		       last_update = GETDATE(),
+		       update_by = #updateBy#
+		WHERE  month = #month#;
+	</update>
+</sqlMap>

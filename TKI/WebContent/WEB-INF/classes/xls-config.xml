@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="DAL_R01ExcelView" class="th.co.nttdata.tki.excel.DAL_R01ExcelView">
+		<property name="url" value="xls/DAL_R01"/>
+	</bean>
+	<bean id="DAL_R02ExcelView" class="th.co.nttdata.tki.excel.DAL_R02ExcelView">
+		<property name="url" value="xls/DAL_R02"/>
+	</bean>
+	<bean id="DAL_R03ExcelView" class="th.co.nttdata.tki.excel.DAL_R03ExcelView">
+		<property name="url" value="xls/DAL_R03"/>
+	</bean>
+	<bean id="FNG_R01ExcelView" class="th.co.nttdata.tki.excel.FNG_R01ExcelView">
+		<property name="url" value="xls/FNG_R01"/>
+	</bean>
+	<bean id="FNG_R02ExcelView" class="th.co.nttdata.tki.excel.FNG_R02ExcelView">
+		<property name="url" value="xls/FNG_R02"/>
+	</bean>
+	<bean id="FNG_R03ExcelView" class="th.co.nttdata.tki.excel.FNG_R03ExcelView">
+		<property name="url" value="xls/FNG_R03"/>
+	</bean>
+	<bean id="FNG_R04ExcelView" class="th.co.nttdata.tki.excel.FNG_R04ExcelView">
+		<property name="url" value="xls/FNG_R04"/>
+	</bean>
+	<bean id="FNG_S07ExcelView" class="th.co.nttdata.tki.excel.FNG_S07ExcelView">
+		<property name="url" value="xls/FNG_S07"/>
+	</bean>
+	<bean id="DLV_R01ExcelView" class="th.co.nttdata.tki.excel.DLV_R01ExcelView">
+		<property name="url" value="xls/DLV_R01"/>
+	</bean>
+	<bean id="DLV_R02ExcelView" class="th.co.nttdata.tki.excel.DLV_R02ExcelView">
+		<property name="url" value="xls/DLV_R02"/>
+	</bean>
+	<bean id="MLD_R01ExcelView" class="th.co.nttdata.tki.excel.MLD_R01ExcelView">
+		<property name="url" value="xls/MLD_R01"/>
+	</bean>
+	<bean id="WIP_R01ExcelView" class="th.co.nttdata.tki.excel.WIP_R01ExcelView">
+		<property name="url" value="xls/WIP_R01"/>
+	</bean>
+	<bean id="WIP_R02ExcelView" class="th.co.nttdata.tki.excel.WIP_R02ExcelView">
+		<property name="url" value="xls/WIP_R02"/>
+	</bean>
+	<bean id="WIP_R03ExcelView" class="th.co.nttdata.tki.excel.WIP_R03ExcelView">
+		<property name="url" value="xls/WIP_R03"/>
+	</bean>
+	<bean id="WIP_R04ExcelView" class="th.co.nttdata.tki.excel.WIP_R04ExcelView">
+		<property name="url" value="xls/WIP_R04"/>
+	</bean>
+	<!-- P3 -->
+	<bean id="MRDC_R05ExcelView" class="th.co.nttdata.tki.excel.MRDC_R05ExcelView">
+		<property name="url" value="xls/MRDC_R05"/>
+	</bean>
+	<bean id="MRDC_R06ExcelView" class="th.co.nttdata.tki.excel.MRDC_R06ExcelView">
+		<property name="url" value="xls/MRDC_R06"/>
+	</bean>
+	<bean id="MRDC_R07ExcelView" class="th.co.nttdata.tki.excel.MRDC_R07ExcelView">
+		<property name="url" value="xls/MRDC_R07"/>
+	</bean>
+	<bean id="MRDC_R08ExcelView" class="th.co.nttdata.tki.excel.MRDC_R08ExcelView">
+		<property name="url" value="xls/MRDC_R08"/>
+	</bean>
+	<bean id="MRDC_R09ExcelView" class="th.co.nttdata.tki.excel.MRDC_R09ExcelView">
+		<property name="url" value="xls/MRDC_R09"/>
+	</bean>
+	<bean id="MRDC_R10ExcelView" class="th.co.nttdata.tki.excel.MRDC_R10ExcelView">
+		<property name="url" value="xls/MRDC_R10"/>
+	</bean>
+	<bean id="MRDC_R11ExcelView" class="th.co.nttdata.tki.excel.MRDC_R11ExcelView">
+		<property name="url" value="xls/MRDC_R11"/>
+	</bean>
+	<bean id="MRDC_R12ExcelView" class="th.co.nttdata.tki.excel.MRDC_R12ExcelView">
+		<property name="url" value="xls/MRDC_R12"/>
+	</bean>
+	<bean id="MRDC_R13ExcelView" class="th.co.nttdata.tki.excel.MRDC_R13ExcelView">
+		<property name="url" value="xls/MRDC_R13"/>
+	</bean>
+	<bean id="MRDC_R14ExcelView" class="th.co.nttdata.tki.excel.MRDC_R14ExcelView">
+		<property name="url" value="xls/MRDC_R14"/>
+	</bean>
+	<bean id="MRDC_R16ExcelView" class="th.co.nttdata.tki.excel.MRDC_R16ExcelView">
+		<property name="url" value="xls/MRDC_R16"/>
+	</bean>
+	<bean id="MRDC_R17ExcelView" class="th.co.nttdata.tki.excel.MRDC_R17ExcelView">
+		<property name="url" value="xls/MRDC_R17"/>
+	</bean>
+	<bean id="MRDC_R21ExcelView" class="th.co.nttdata.tki.excel.MRDC_R21ExcelView">
+		<property name="url" value="xls/MRDC_R21"/>
+	</bean>
+	<bean id="MRDC_R22ExcelView" class="th.co.nttdata.tki.excel.MRDC_R22ExcelView">
+		<property name="url" value="xls/MRDC_R22"/>
+	</bean>
+	<bean id="MRDC_R02ExcelView" class="th.co.nttdata.tki.excel.MRDC_R02ExcelView">
+		<property name="url" value="xls/MRDC_R02"/>
+	</bean>
+	<bean id="MRDC_R18ExcelView" class="th.co.nttdata.tki.excel.MRDC_R18ExcelView">
+		<property name="url" value="xls/MRDC_R18"/>
+	</bean>
+	<bean id="MRDC_R01ExcelView" class="th.co.nttdata.tki.excel.MRDC_R01ExcelView">
+		<property name="url" value="xls/MRDC_R01"/>
+	</bean>
+	<bean id="MRDC_R04ExcelView" class="th.co.nttdata.tki.excel.MRDC_R04ExcelView">
+		<property name="url" value="xls/MRDC_R04"/>
+	</bean>
+	<bean id="MRDC_R15ExcelView" class="th.co.nttdata.tki.excel.MRDC_R15ExcelView">
+		<property name="url" value="xls/MRDC_R15"/>
+	</bean>
+	<bean id="MRDC_R20ExcelView" class="th.co.nttdata.tki.excel.MRDC_R20ExcelView">
+		<property name="url" value="xls/MRDC_R20"/>
+	</bean>
+	<bean id="PRC_S01ExcelView" class="th.co.nttdata.tki.excel.PRC_S01ExcelView">
+		<property name="url" value="xls/PRC_S01"/>
+	</bean>
+	<bean id="PRT_S01ExcelView" class="th.co.nttdata.tki.excel.PRT_S01ExcelView">
+		<property name="url" value="xls/PRT_S01"/>
+	</bean>
+	<bean id="CUS_S01ExcelView" class="th.co.nttdata.tki.excel.CUS_S01ExcelView">
+		<property name="url" value="xls/CUS_S01"/>
+	</bean>
+	<bean id="PRD_S02ExcelView" class="th.co.nttdata.tki.excel.PRD_S02ExcelView">
+		<property name="url" value="xls/PRD_S02"/>
+	</bean>
+	<bean id="FGM_R01ExcelView" class="th.co.nttdata.tki.excel.FGM_R01ExcelView">
+		<property name="url" value="xls/FGM_R01"/>
+	</bean>
+	<bean id="S_PRT_S03ExcelView" class="th.co.nttdata.tki.excel.S_PRT_S03ExcelView">
+		<property name="url" value="xls/PRT_S03"/>
+	</bean>
+</beans>

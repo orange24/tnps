@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_workorder">
+	<select id="queryLotQty" resultClass="hashmap" parameterClass="string">
+		select w.endLot, w.lotQty, w.workorderqty%w.lotqty as endLotQty, p.partNo, p.partName, 
+		  sum(isnull(f.fgin,0)) as fgIn, sum(isnull(f.fgout, 0)) as fgOut
+		from m_workorder w inner join dbo.m_part p on w.partid = p.partid
+		left outer join t_fg_detail f on f.lotNo = #value#
+		where #value# between w.startlot and w.endlot
+		group by w.endLot, w.lotQty, w.workorderqty, p.partNo, p.partName		
+	</select>
+	
+	<select id="queryOnlyWoNo" resultClass="th.co.nttdata.tki.bean.MWorkOrder" parameterClass="th.co.nttdata.tki.bean.MWorkOrder">
+		SELECT DISTINCT top(50)
+			 w.workOrderNo			
+		FROM
+			m_workorder w
+			INNER JOIN m_fg_part fp ON w.partid = fp.partid
+			INNER JOIN m_fg_customer fc ON fp.fgid = fc.fgid
+		WHERE
+			w.workorderno like #workOrderNo# + '%'
+		<isNotEmpty prepend="AND" property="fgId"> fp.fgid = #fgId#</isNotEmpty>
+		<isNotEmpty prepend="AND" property="customerId"> fc.customerId = #customerId#</isNotEmpty>
+	</select>
+	
+	<select id="existsLotNo" resultClass="int" parameterClass="th.co.nttdata.tki.bean.MWorkOrder">
+		select count(w.workOrderNo)
+		  from m_workorder w
+		 inner join m_fg_part fp on w.partid = fp.partid 
+		 inner join m_fg_customer fc on fp.fgid = fc.fgid
+		 where fc.customerid = #customerId#
+		 <isNotEmpty property="workOrderNo"> and w.workOrderNo = #workOrderNo# </isNotEmpty>
+		 <isNotEmpty property="lotNo"> and #lotNo# between w.startlot and w.endlot </isNotEmpty> 
+		 <isNotEmpty property="partId"> and w.partId = #partId# </isNotEmpty>
+		 <isNotEmpty property="fgId"> and fp.fgid = #fgId# </isNotEmpty>		 
+	</select>
+	
+	<sql id="queryProperties">
+		from m_workorder mw ,m_part mp,m_fg_part mfp,m_fg_customer mfc,m_customer mc
+		where mw.partid = mp.partid
+		and mp.partid = mfp.partid
+		and mfp.fgid = mfc.fgid
+		and mfc.customerid = mc.customerid
+		<isGreaterThan prepend="AND" property="customerId" compareValue="0"> mc.customerid = #customerId#</isGreaterThan>
+		<isNotEmpty property="workOrderNo"> and mw.workorderno like #workOrderNo#+'%' </isNotEmpty>
+		<isNotEmpty property="partNo"> and mp.partno like #partNo#+'%' </isNotEmpty>	
+		<isNotEmpty property="partName"> and mp.partname like #partName#+'%' </isNotEmpty>
+		<isNotEmpty prepend="AND" property="workOrderDateFr"> CONVERT(DATE,mw.workorderdate,103) <![CDATA[ >= ]]>  CONVERT(DATE,#workOrderDateFr#,103) </isNotEmpty>
+		<isNotEmpty prepend="AND" property="workOrderDateTo"> CONVERT(DATE,mw.workorderdate,103) <![CDATA[ <= ]]>  CONVERT(DATE,#workOrderDateTo#,103) </isNotEmpty>
+	</sql>
+	
+	<select id="querySearch" resultClass="th.co.nttdata.tki.bean.MWorkOrder" parameterClass="th.co.nttdata.tki.bean.MWorkOrder" >
+		select 
+			mw.workorderdate AS workOrderDate,
+			mw.workorderid AS workOrderId,
+			mw.workorderno AS workOrderNo,
+			mw.startlot AS startLot,
+			mw.endlot AS endLot,
+			mc.customercode AS customerCode,
+			mp.partno AS partNo,
+			mp.partname AS partName,
+			mw.workorderqty AS workOrderQty
+			<include refid="queryProperties"/>
+	</select>
+	
+	<select id="count" parameterClass="th.co.nttdata.tki.bean.MWorkOrder" resultClass="int">
+		SELECT
+			count(*)
+		<include refid="queryProperties"/>
+	</select>
+	
+	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.MWorkOrder" >
+		<iterate property="mWorkOrderLst">
+			<isNotEmpty property="mWorkOrderLst[].workOrderId">
+				DELETE FROM m_workorder WHERE workorderid = #mWorkOrderLst[0].workOrderId#
+			</isNotEmpty>
+		</iterate>
+	</delete>
+	
+	<sql id="queryPropertiesTPics">
+		FROM tpics_workorder w
+		INNER JOIN m_part p on w.partno = p.partno 
+		INNER JOIN m_fg_part fgp on p.partid = fgp.partid 
+		INNER JOIN m_fg fg on fg.fgid = fgp.fgid 
+		INNER JOIN m_fg_customer fgc on fgc.fgid = fg.fgid 
+		INNER JOIN m_customer c on fgc.customerid = c.customerid 
+		WHERE NOT EXISTS (SELECT 1 FROM m_workorder m WHERE m.workorderno = w.wono AND m.partid = p.partid AND m.startlot = w.startlot) 
+		<isNotEmpty prepend="AND" property="workOrderDateFr"> w.lotdate <![CDATA[ >= ]]> #workOrderDateFr#</isNotEmpty>
+		<isNotEmpty prepend="AND" property="workOrderDateTo"> w.lotdate <![CDATA[ <= ]]> #workOrderDateTo#</isNotEmpty>
+		<isNotEmpty prepend="AND" property="workOrderNo"> w.wono like #workOrderNo#+'%' </isNotEmpty>
+	</sql>
+	
+	<select id="querySearchTPics" parameterClass="th.co.nttdata.tki.bean.MWorkOrder" resultClass="th.co.nttdata.tki.bean.MWorkOrder">
+		SELECT c.customercode AS customerCode, 
+			p.partid AS partId, 
+			p.partno AS partNo,
+			p.partname AS partName,
+			w.wono AS workOrderNo, 
+			w.startlot AS startLot,
+			w.endlot AS endLot, 
+			w.lotqty AS lotQty, 
+			w.woqty AS workOrderQty, 
+			CONVERT(datetime, w.lotdate) AS workOrderDate
+		<include refid="queryPropertiesTPics"/>
+		ORDER BY w.lotdate, c.customercode, p.partno, w.wono, w.startlot
+	</select>
+	
+	<select id="countTPics" parameterClass="th.co.nttdata.tki.bean.MWorkOrder" resultClass="int">
+		SELECT count(*)
+		<include refid="queryPropertiesTPics"/>
+	</select>
+	
+	<insert id="querySyncLot" parameterClass="th.co.nttdata.tki.bean.MWorkOrder">
+		<iterate property="mWorkOrderLst">
+			<isNotNull property="mWorkOrderLst[].partId">
+				insert into m_workorder ( partid,workorderno,startlot,endlot,lotqty,workorderqty,workorderdate,createby,updateby ) 
+					values(#mWorkOrderLst[].partId#,#mWorkOrderLst[].workOrderNo#,#mWorkOrderLst[].startLot#,
+					#mWorkOrderLst[].endLot#,#mWorkOrderLst[].lotQty#,#mWorkOrderLst[].workOrderQty#,
+					<isNotNull property="mWorkOrderLst[].workOrderDate">#mWorkOrderLst[].workOrderDate#</isNotNull>
+					<isNull property="mWorkOrderLst[].workOrderDate">NULL</isNull>,
+					<isNotEmpty property="mWorkOrderLst[].createBy">#mWorkOrderLst[].createBy#</isNotEmpty>
+					<isEmpty property="mWorkOrderLst[].createBy">NULL</isEmpty>,
+					<isNotEmpty property="mWorkOrderLst[].updateBy">#mWorkOrderLst[].updateBy#</isNotEmpty>
+					<isEmpty property="mWorkOrderLst[].updateBy">NULL</isEmpty>)
+			</isNotNull>
+		</iterate>
+	</insert>
+	
+	<delete id="deleteWorkOrder" parameterClass="th.co.nttdata.tki.bean.MPart">
+		<iterate property="partList">
+			<isNotEmpty property="partList[].partId">
+				DELETE FROM m_workorder WHERE partid = #partList[].partId#
+			</isNotEmpty>
+		</iterate>
+	</delete>
+	
+	<select id="queryWorkOrder" resultClass="th.co.nttdata.tki.bean.MWorkOrder" parameterClass="th.co.nttdata.tki.bean.MWorkOrder">
+		SELECT TOP 50 wo.workorderno
+		FROM m_workorder wo
+			INNER JOIN v_cust_fg_part v on wo.partid = v.partid
+		<isEqual property="reportType" compareValue="1">
+			INNER JOIN m_part_wip pw on v.partid = pw.partid
+		</isEqual>
+		<dynamic prepend="WHERE">
+			<isEqual prepend="AND" property="reportType" compareValue="1">pw.wip = #wip#</isEqual>
+			<isNotEmpty prepend="AND" property="customerId"> v.customerid = #customerId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partId"> v.partid = #partId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="workOrderNo"> wo.workorderno like #workOrderNo# + '%' </isNotEmpty>
+		</dynamic>
+		ORDER BY wo.workOrderNo	
+	</select>
+	
+	<select id="workOrderAutoComplete" resultClass="th.co.nttdata.tki.bean.MWorkOrder" parameterClass="th.co.nttdata.tki.bean.MWorkOrder">
+		SELECT TOP 50
+			 workorderno AS workOrderNo
+			,partid AS partId
+		FROM m_workorder 
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="partId"> partid = #partId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="workOrderNo"> workorderno like #workOrderNo# + '%' </isNotEmpty>
+		</dynamic>
+		GROUP BY workorderNo, partId
+		ORDER BY workOrderNo	
+	</select>
+	
+	<delete id="delete_workorder" parameterClass="th.co.nttdata.tki.bean.TDCPlan" >
+		<iterate property="planList">	
+			<isNotNull  property="planList[].dcPlanId">
+				DELETE FROM M_WORKORDER WHERE DCPLANID = #planList[].dcPlanId#
+			</isNotNull>
+		</iterate>
+	</delete>
+	
+	<insert id="insert_workorder" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
+			<isNotNull  property="dcPlanId">
+				MERGE dbo.m_workorder as wk
+				USING (
+				 Select   #partId#, #workOrderNo#, #workOrderNo#+#startLotNo#, #workOrderNo#+#endLotNo#, 
+		            #recordFound#, #quantity#, 
+		            GETDATE(), #dcPlanId#, GETDATE(), #createBy#, GETDATE(), #updateBy#
+				) as new (PARTID,WORKORDERNO ,STARTLOT,ENDLOT ,LOTQTY,WORKORDERQTY,WORKORDERDATE,DCPLANID
+				           ,CREATEDATE,CREATEBY,LASTUPDATE,UPDATEBY)
+				ON (wk.WORKORDERNO = new.WORKORDERNO)
+				When MATCHED THEN 
+				 UPDATE SET PARTID=new.PARTID, WORKORDERNO=new.WORKORDERNO ,STARTLOT=new.STARTLOT, ENDLOT=new.ENDLOT 
+				           ,LOTQTY=new.LOTQTY, WORKORDERQTY=new.WORKORDERQTY
+				           ,WORKORDERDATE=new.WORKORDERDATE, DCPLANID=new.DCPLANID
+				           ,CREATEDATE=new.CREATEDATE, CREATEBY=new.CREATEBY, LASTUPDATE=new.LASTUPDATE, UPDATEBY=new.UPDATEBY
+				When NOT MATCHED THEN 
+				 INSERT (PARTID,WORKORDERNO ,STARTLOT,ENDLOT ,LOTQTY,WORKORDERQTY,WORKORDERDATE,DCPLANID
+				           ,CREATEDATE,CREATEBY,LASTUPDATE,UPDATEBY)
+				     VALUES
+				           (new.PARTID, new.WORKORDERNO, new.STARTLOT, new.ENDLOT ,new.LOTQTY, new.WORKORDERQTY,
+				           new.WORKORDERDATE, new.DCPLANID
+				           ,new.CREATEDATE, new.CREATEBY, new.LASTUPDATE, new.UPDATEBY);
+			</isNotNull>
+	</insert>
+</sqlMap>

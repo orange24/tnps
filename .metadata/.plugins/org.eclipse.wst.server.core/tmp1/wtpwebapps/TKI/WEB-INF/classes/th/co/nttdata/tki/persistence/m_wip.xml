@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_wip">
+
+	<sql id="querySelect">
+		SELECT
+		 WIP.WIP
+		,WIP.WIPNAME
+		,WIP.WIPTYPE
+		,TY.WIPTYPENAME
+		,WIP.ISCALC
+		,WIP.REMARK
+		,WIP.CREATEDATE
+		,WIP.CREATEBY
+		,WIP.LASTUPDATE
+		,WIP.UPDATEBY
+		,WIP.ISENABLE
+		FROM M_WIP WIP
+		LEFT JOIN M_WIPTYPE TY ON TY.WIPTYPEID = WIP.WIPTYPE
+		ORDER BY WIP
+	</sql>
+	
+	<sql id="queryFrom">
+		FROM m_wip w
+		INNER JOIN m_user_access_wip a ON w.wip = a.wip
+		WHERE 1=1
+	</sql>
+	<sql id="queryProperties">
+		<isNotEmpty prepend="AND" property="wip"> w.wip like #wip# + '%'
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="wipName"> w.wipName like
+			#wipName# + '%'</isNotEmpty>
+	</sql>
+	<select id="queryWip" parameterClass="th.co.nttdata.tki.bean.MWip"
+		resultClass="th.co.nttdata.tki.bean.MWip">
+		SELECT
+			 isCalc
+			,createDate
+			,lastUpdate
+			,wipType
+			,createBy
+			,remark
+			,updateBy
+			,w.wip
+			,wipName
+		FROM m_wip w
+		INNER JOIN m_user_access_wip a ON w.wip = a.wip 
+		WHERE a.username = #updateBy# 
+		
+		<isNotEmpty prepend="AND" property="wip"> w.wip = #wip#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="wipType"> w.wiptype = #wipType#
+	</isNotEmpty> 
+	</select>
+	<select id="queryWipSearch" parameterClass="th.co.nttdata.tki.bean.MWip"
+		resultClass="th.co.nttdata.tki.bean.MWip">
+		<include refid="querySelect" />
+		<!-- <include refid="queryFrom"/> -->
+		<!-- <include refid="queryProperties"/> -->
+	</select>
+	<select id="count" parameterClass="th.co.nttdata.tki.bean.MWip"
+		resultClass="int">
+		SELECT
+		count(*)
+		<include refid="queryFrom" />
+		<include refid="queryProperties" />
+	</select>
+	<insert id="insertMwip" parameterClass="th.co.nttdata.tki.bean.MWip">
+		<iterate property="wipList">
+			INSERT INTO m_wip
+			( wip
+			 ,wipName
+			 ,wiptype
+			 ,iscalc
+			 ,remark
+			 ,createdate
+			 ,createby
+			 ,lastupdate
+			 ,updateby
+			 ,isenable
+			 )
+			VALUES
+			(
+			 #wipList[].wip#,#wipList[].wipName#,#wipList[].wipType#,#wipList[].isCalc#,
+			 #wipList[].remark# ,GETDATE(),#createBy#,GETDATE(),#updateBy#, #wipList[].isenable#)
+		</iterate>
+	</insert>
+	<update id="updateMwip" parameterClass="th.co.nttdata.tki.bean.MWip">
+		<iterate property="wipList">
+			UPDATE m_wip
+			SET
+			wipName = #wipList[].wipName#,
+			isCalc = #wipList[].isCalc#,
+			wipType = #wipList[].wipType#,
+			remark = #wipList[].remark# ,
+			lastUpdate = GETDATE(),
+			updateBy = #updateBy#,
+			isenable = #isenable#
+			WHERE wip = #wipList[].wip#
+		</iterate>
+	</update>
+	<delete id="deleteMwip" parameterClass="th.co.nttdata.tki.bean.MWip">
+		<iterate property="wipList">
+			DELETE FROM m_wip WHERE wip = #wipList[].wip#;
+		</iterate>
+	</delete>
+	<statement id="merge" parameterClass="th.co.nttdata.tki.bean.MWip"
+		resultClass="integer">
+		<iterate property="wipList">
+			<isNotEmpty property="wipList[].wip">
+				MERGE INTO m_wip w
+				USING (SELECT
+				MAX(a.wip) as wip from
+				(SELECT wip FROM m_wip WHERE wip = #wipList[].wip#
+				UNION ALL SELECT #wipList[].wip#) a) ow
+				ON (w.wip = ow.wip)
+				WHEN NOT
+				MATCHED THEN
+				INSERT(wip,wipName,wipType,isCalc,createBy,updateBy, isenable)
+				VALUES(#wipList[].wip#,#wipList[].wipName#,#wipList[].wipType#,1,#createBy#,#updateBy#, #isenable#);
+			</isNotEmpty>
+		</iterate>
+	</statement>
+	<sql id="querySelectTpic">
+		SELECT
+		x.bumo as wip,
+		x.name as wipName,
+		busho as wipGroup,
+		CASE busho
+		when 'DIE CAST' then 1
+		when 'SHOT BLAST' then 3
+		when 'MACHINE' then 3
+		else 2 end
+		as wipType
+	</sql>
+	<sql id="queryFromTpic">
+		FROM tpics_xsect AS x
+	</sql>
+	<sql id="queryPropertiesTpic">
+		WHERE (bunr = 'PROCESS' OR busho = 'Outsource')
+		AND NOT EXISTS
+		(SELECT 1 FROM m_wip mw
+		WHERE mw.wip = x.bumo AND mw.wipName = x.name AND mw.wipGroup = busho AND
+		mw.wipType = wipType
+		)
+		<isNotEmpty prepend="AND" property="wip"> bumo like #wip# + '%'
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="wipName"> name like #wipName# +
+			'%'</isNotEmpty>
+	</sql>
+	<sql id="orderByTpic">
+		ORDER BY x.bumo
+	</sql>
+	<select id="queryWipTpicSearch" parameterClass="th.co.nttdata.tki.bean.MWip"
+		resultClass="th.co.nttdata.tki.bean.MWip">
+		<include refid="querySelectTpic" />
+		<include refid="queryFromTpic" />
+		<include refid="queryPropertiesTpic" />
+		<include refid="orderByTpic" />
+	</select>
+	<select id="countTpic" parameterClass="th.co.nttdata.tki.bean.MWip"
+		resultClass="int">
+		SELECT
+		count(*)
+		<include refid="queryFromTpic" />
+		<include refid="queryPropertiesTpic" />
+	</select>
+	<select id="selectWip" parameterClass="th.co.nttdata.tki.bean.MWip"
+		resultClass="th.co.nttdata.tki.bean.MWip">
+		  SELECT 
+		          WIP.WIP
+                 ,WIP.WIPNAME
+                 ,TY.WIPTYPENAME
+                 ,WIP.ISCALC
+                 ,WIP.REMARK
+                 ,WIP.CREATEDATE
+                 ,WIP.CREATEBY
+                 ,WIP.LASTUPDATE
+                 ,WIP.UPDATEBY
+                 ,WIP.ISENABLE
+          FROM   M_WIP   WIP
+          LEFT JOIN M_WIPTYPE TY ON TY.WIPTYPEID = WIP.WIPTYPE
+         <dynamic prepend="WHERE">
+               <isNotEmpty prepend="AND" property="wip"> WIP.WIP like   '%'+ #wip# + '%'</isNotEmpty>
+		       <isNotEmpty prepend="AND" property="wipName"> WIP.WIPNAME like #wipName# + '%'</isNotEmpty>
+		       <isNotEmpty prepend="AND" property="isCalc"> WIP.ISCALC=#isCalc# </isNotEmpty>
+		       <isNotEmpty prepend="AND" property="wipTypeName"> TY.WIPTYPENAME like  '%'+ #wipTypeName# + '%'</isNotEmpty>
+		       <isNotEmpty prepend="AND" property="remark"> WIP.REMARK like   '%'+ #remark# + '%'</isNotEmpty>
+		       <isNotEmpty prepend="AND" property="createDate"> CONVERT(VARCHAR(15),createdate,103)+' '+CONVERT(VARCHAR(15),createdate,108) like '%' +#createDate#+'%'</isNotEmpty>
+     		   <isNotEmpty prepend="AND" property="lastUpdate"> CONVERT(VARCHAR(15),lastupdate,103)+' '+CONVERT(VARCHAR(15),lastupdate,108) like '%' +#lastUpdate#+'%'</isNotEmpty>
+		       <isNotEmpty prepend="AND" property="createBy"> createBy like '%' +#createBy#+'%' </isNotEmpty>
+			   <isNotEmpty prepend="AND" property="updateBy"> updateBy like '%' +#updateBy#+'%'</isNotEmpty>
+            </dynamic>
+             ORDER BY WIP.WIP
+        </select>
+	<select id="selectWipTypeName" resultClass="th.co.nttdata.tki.bean.MWip">
+		SELECT
+		       WIPTYPEID  as wipType
+		      ,WIPTYPENAME
+		FROM
+		M_WIPTYPE
+	
+	</select>
+	<statement id="mergeWip" parameterClass="th.co.nttdata.tki.bean.MWip"
+		resultClass="integer">
+		<iterate property="wipList">
+			<isNotNull property="wipList[].wip">
+				MERGE INTO m_wip mw
+				USING (
+				SELECT #wipList[].wip# as wipcode, #wipList[].wipName# as wipname,
+				CASE #wipList[].wipGroup#
+				when 'DIE CAST' then 1
+				when 'SHOT BLAST' then 3
+				when 'MACHINE' then 3
+				else 2 end
+				as wiptype,
+				#wipList[].wipGroup# as wipgroup
+				) w
+				ON (mw.wip = w.wipcode)
+				WHEN NOT MATCHED THEN
+				INSERT(wip,wipName,wipType,wipGroup,createBy,updateBy)
+				VALUES(w.wipcode,w.wipname,w.wiptype,w.wipgroup,#createBy#,#updateBy#)
+				WHEN MATCHED THEN
+				UPDATE SET mw.wipname = w.wipname,mw.wiptype =
+				w.wiptype,mw.wipgroup = w.wipgroup,mw.lastUpdate =
+				GETDATE(),mw.updateBy = #updateBy#;		
+		</isNotNull>
+		</iterate>
+	</statement>
+	<update id="updateMPartWip" parameterClass="th.co.nttdata.tki.bean.MWip">
+		MERGE INTO m_part_wip pw
+		USING (SELECT w.wip, w.iscalc FROM m_wip w) w
+		ON (pw.wip = w.wip)
+		WHEN MATCHED THEN
+		UPDATE SET pw.iscalc = w.iscalc; 
+	</update>
+	<select id="checkReason" resultClass="int"
+		parameterClass="th.co.nttdata.tki.bean.MWip">
+		SELECT count(wip)
+		FROM m_reason_wip
+		WHERE wip = #wip#
+	</select>
+	<select id="checkPart" resultClass="int" parameterClass="th.co.nttdata.tki.bean.MWip">
+		SELECT count(wip)
+		FROM m_part_wip
+		WHERE wip = #wip#
+	</select>
+	<select id="checkMachine" resultClass="int"
+		parameterClass="th.co.nttdata.tki.bean.MWip">
+		SELECT count(wip)
+		FROM m_machine
+		WHERE wip = #wip#
+	</select>
+	<select id="queryWIPFlFn" parameterClass="th.co.nttdata.tki.bean.MWip"
+		resultClass="th.co.nttdata.tki.bean.MWip">
+		SELECT w.wip,wipName
+		FROM m_wip w
+		INNER JOIN
+		m_user_access_wip a ON w.wip = a.wip
+		WHERE a.username = #updateBy# AND (w.wip like 'FL%' or w.wip like 'FN%')
+	</select>
+	<insert id="insertList" parameterClass="th.co.nttdata.tki.bean.MWip">
+		<iterate property="wipList">
+			Insert into m_wip
+			()
+			SET
+			isCalc = #wipList[].isCalc#,
+			wipType = #wipList[].wipType#,
+			remark = #wipList[].remark# ,
+			lastUpdate = GETDATE(),
+			updateBy = #updateBy#
+			WHERE wip = #wipList[].wip#;
+		</iterate>
+	</insert>
+	
+	<select id="select_wip_type3" resultClass="th.co.nttdata.tki.bean.MWip" parameterClass="th.co.nttdata.tki.bean.MWip">
+		SELECT 
+			wip 	AS wip,
+			wipName AS wipName
+		FROM 
+			m_wip
+		WHERE 
+			wipType = 1
+		ORDER BY
+			wip
+	</select>
+	<select id="selectWipFilter" parameterClass="th.co.nttdata.tki.bean.filter.MWipFilter"
+		resultClass="th.co.nttdata.tki.bean.MWip">
+		  SELECT 
+		          WIP.WIP
+                 ,WIP.WIPNAME
+                 ,TY.WIPTYPENAME
+                 ,WIP.ISCALC
+                 ,WIP.REMARK
+                 ,WIP.CREATEDATE
+                 ,WIP.CREATEBY
+                 ,WIP.LASTUPDATE
+                 ,WIP.UPDATEBY
+                 ,WIP.ISENABLE
+          FROM   M_WIP   WIP
+          LEFT JOIN M_WIPTYPE TY ON TY.WIPTYPEID = WIP.WIPTYPE
+         <dynamic prepend="WHERE">
+               <isNotEmpty prepend="AND" property="wip"> WIP.WIP like   '%'+ #wip# + '%'</isNotEmpty>
+		       <isNotEmpty prepend="AND" property="wipName"> WIP.WIPNAME like #wipName# + '%'</isNotEmpty>
+		       <isNotEmpty prepend="AND" property="isCalc"> WIP.ISCALC=#isCalc# </isNotEmpty>
+		       <isNotEmpty prepend="AND" property="wipTypeName"> TY.WIPTYPENAME like  '%'+ #wipTypeName# + '%'</isNotEmpty>
+		       <isNotEmpty prepend="AND" property="remark"> WIP.REMARK like   '%'+ #remark# + '%'</isNotEmpty>
+		       <isNotEmpty prepend="AND" property="createDate"> CONVERT(VARCHAR(15),createdate,103)+' '+CONVERT(VARCHAR(15),createdate,108) like '%' +#createDate#+'%'</isNotEmpty>
+     		   <isNotEmpty prepend="AND" property="lastUpdate"> CONVERT(VARCHAR(15),lastupdate,103)+' '+CONVERT(VARCHAR(15),lastupdate,108) like '%' +#lastUpdate#+'%'</isNotEmpty>
+		       <isNotEmpty prepend="AND" property="createBy"> createBy like '%' +#createBy#+'%' </isNotEmpty>
+			   <isNotEmpty prepend="AND" property="updateBy"> updateBy like '%' +#updateBy#+'%'</isNotEmpty>
+            </dynamic>
+             ORDER BY WIP.WIP
+        </select>
+</sqlMap>

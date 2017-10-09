@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_fg_detail">
+
+	<sql id="queryProperties">
+		FROM t_fg_detail AS f 
+		INNER JOIN m_customer AS c ON f.customerid = c.customerid 
+		INNER JOIN m_fg AS fg ON f.fgid = fg.fgid
+		LEFT JOIN t_lotno lot on lot.lotno = f.lotno
+		LEFT JOIN t_dcplan dcp on dcp.dcplanid = lot.dcplanid
+		<dynamic prepend="WHERE">					
+			<isNotEmpty prepend="AND" property="reportDateFr"> CONVERT(DATE,f.reportdate,103) <![CDATA[ >= ]]> CONVERT(DATE,#reportDateFr#,103) </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> CONVERT(DATE,f.reportdate,103) <![CDATA[ <= ]]> CONVERT(DATE,#reportDateTo#,103) </isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerId"> f.customerid = #customerId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgName"> fg.fgname LIKE #fgName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgNo"> fg.fgno LIKE #fgNo# + '%' </isNotEmpty>	
+			<isGreaterThan prepend="AND" property="reportType" compareValue="0"> f.reportType = #reportType# </isGreaterThan>
+		</dynamic>
+	</sql>
+
+	<select id="query" parameterClass="th.co.nttdata.tki.bean.TFG" resultClass="th.co.nttdata.tki.bean.TFGDetail">
+		SELECT
+			 f.createDate
+			,f.lastUpdate
+			,f.reportDate
+			,f.customerId
+			,f.fgIn
+			,f.fgOut
+			,f.fgId
+			,f.lotno + '-' + f.lot_seqno AS lotseqno
+			,f.reportType
+			,f.createBy
+			,f.updateBy
+			,c.customerCode
+			,fg.fgName
+			,fg.fgNo
+			,dcp.moldNo
+		<include refid="queryProperties"/>
+		ORDER BY f.lastUpdate DESC
+	</select>
+	
+	<select id="count" parameterClass="th.co.nttdata.tki.bean.TFG" resultClass="int">
+		SELECT
+			count(*)
+		<include refid="queryProperties"/>
+	</select>
+	
+	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TFG">
+		<iterate property="details">
+			INSERT INTO t_fg_detail(reportdate, customerid, fgin, fgout, fgid, lotno, reporttype, createby, updateby, lot_seqno) 
+			VALUES (#details[].reportDate#, #details[].customerId#, #details[].fgIn#, #details[].fgOut#, 
+				#details[].fgId#, #details[].workOrderNo#+#details[].lotNo#, #details[].reportType#, #updateBy#, #updateBy#, #details[].lotSeqNo#);
+		</iterate>
+	</insert>
+	<select id="selectFNG_R01" parameterClass="th.co.nttdata.tki.bean.TFG" resultClass="th.co.nttdata.tki.bean.TFGStock">
+		SELECT     
+			 d.reportDate
+			,d.customerId
+			,c.customerCode
+			,d.fgId
+			,f.fgNo
+			,f.fgName
+			,s.fgStock
+			,s.fgIn
+			,s.fgOut
+			,f.weight
+			,s.fgBalance
+			,mat.sMaterialName as material
+			,dcp.moldNo
+		FROM t_fg_stock AS s 
+		RIGHT OUTER JOIN m_customer AS c 
+		INNER JOIN t_fg_detail AS d 
+		INNER JOIN m_fg AS f 
+			ON d.fgid = f.fgid  
+			ON c.customerid = d.customerid 
+			ON s.customerid = d.customerid AND s.fgid = d.fgid AND s.reportdate = d.reportdate
+		INNER JOIN m_fg_part fgp
+			ON fgp.fgid = f.fgid
+		INNER JOIN m_part pt 
+			ON pt.partid = fgp.partid
+		LEFT JOIN m_material mat 
+			ON mat.nMaterialId = pt.materialid
+		LEFT JOIN t_lotno lot on lot.lotno = d.lotno
+		LEFT JOIN t_dcplan dcp on dcp.dcplanid = lot.dcplanid
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="reportDateFr"> CONVERT(DATE,d.reportdate,103) <![CDATA[ >= ]]> CONVERT(DATE,#reportDateFr#,103) </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> CONVERT(DATE,d.reportdate,103) <![CDATA[ <= ]]> CONVERT(DATE,#reportDateTo#,103) </isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerId"> d.customerid = #customerId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgName"> f.fgname LIKE #fgName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgNo"> f.fgno LIKE #fgNo# + '%' </isNotEmpty>	
+			<isGreaterThan prepend="AND" property="reportType" compareValue="0"> d.reportType = #reportType# </isGreaterThan>
+		</dynamic>
+		GROUP BY d.reportdate, d.customerid, c.customercode, d.fgid, f.fgno, f.fgname, s.fgstock, s.fgin, s.fgout, s.fgbalance, f.weight, mat.sMaterialName, dcp.moldNo
+		ORDER BY d.reportdate,  c.customercode,f.fgno
+	</select>
+	<select id="selectFNG_R01Detail" resultClass="th.co.nttdata.tki.bean.TFGDetail">
+		SELECT 	CONVERT(VARCHAR(10),reportDate,105)+ ':' +CAST(fgid AS VARCHAR)+ ':' +CAST(customerid AS VARCHAR)+ ':' +CAST(reporttype AS VARCHAR) AS reportTypeName,
+				reportDate,
+				fgId,
+				customerId,
+				reportType,
+				ISNULL(SUM(fgout),0) as fgOut
+  		FROM t_fg_detail
+  		group by reportdate, customerid, fgid, reporttype
+  		having ISNULL(SUM(fgout),0) > 0
+	</select>
+	<select id="selectReportType" resultClass="th.co.nttdata.tki.bean.TFGDetail">
+		SELECT 	report,
+				typecode AS reportType,
+				typename AS reportTypeName
+		FROM m_reportType
+		WHERE report = 'fgout'
+		ORDER BY typecode
+	</select>
+	
+	<select id="queryWoNoDetail" resultClass="th.co.nttdata.tki.bean.MWorkOrder" parameterClass="th.co.nttdata.tki.bean.MWorkOrder">		
+		SELECT	wo.workOrderNo, cust_fg.fgId, cust_fg.fgNo, cust_fg.fgName, SUM(wo.workorderqty) AS workOrderQty, cust_fg.customerId
+		FROM	dbo.v_cust_fg_part AS cust_fg INNER JOIN
+		        dbo.m_workorder AS wo ON cust_fg.partid = wo.partid
+		WHERE 	wo.workorderno = #workOrderNo# 
+		GROUP BY wo.workorderno, cust_fg.partid, cust_fg.fgid, cust_fg.fgno,cust_fg.fgName, cust_fg.customerid
+	</select>
+	
+	<select id="queryClotSeqNo" parameterClass="th.co.nttdata.tki.bean.MWorkOrder" resultClass="Integer">			
+		SELECT 	
+			Qty AS lotQty
+		FROM tpics_clotseqno
+		WHERE LotNo = #workOrderNo#+#lotNo# AND SeqNo = SUBSTRING(#lotSeqNo#,2,3)	
+	</select>		
+	<select id="select_check_lotseq"  resultClass="Integer" parameterClass="th.co.nttdata.tki.bean.TFGDetail">
+		SELECT 
+			case when (SUM($fgType$)+(#fgIn#)+(#fgOut#) <![CDATA[ > ]]> max(seq.lotseqqty)) 
+			or (SUM($fgType$)+(#fgIn#)+(#fgOut#) <![CDATA[ < ]]> 0) then 1 else 0 end 
+		FROM t_fg_detail fgd
+		LEFT JOIN t_lot_sequence seq ON seq.lotseqno = fgd.lotno+'-'+lot_seqno
+		WHERE lotno = #lotNo# AND lot_seqno = #lotSeqNo# 
+	</select>
+	<select id="select_check_not_exist" resultClass="Integer" parameterClass="th.co.nttdata.tki.bean.TFGDetail">
+		SELECT CASE WHEN COUNT(*)  <![CDATA[ > ]]> 0 THEN 0 ELSE 1 END is_not_exist  FROM t_lot_sequence seq
+		where seq.lotseqno = #lotNo#+'-'+#lotSeqNo#
+	</select>
+	<insert id="insertFgDetail" parameterClass="th.co.nttdata.tki.bean.TFG">
+		<iterate property="details">
+		merge t_fg_detail fgd
+		using (
+		      SELECT *, CASE WHEN(tmp.sum_fg  <![CDATA[ <= ]]>tmp.lotseqqty AND tmp.sum_fg <![CDATA[ >= ]]> 0) THEN 1 ELSE 0 END AS chk FROM(
+		      Select #details[].reportDate# as reportdate, #details[].customerId# as customerid, #details[].fgIn# as fgin, #details[].fgOut# as fgout,
+		            #details[].fgId# as fgid, #details[].workOrderNo#+#details[].lotNo# as lotno, #details[].reportType# as reporttype, #updateBy# as createby, #updateBy# as updateby, #details[].lotSeqNo# as lot_seqno
+		            , ISNULL((Select max(lotseqqty) from t_lot_sequence where lotseqno = #details[].workOrderNo#+#details[].lotNo#+'-'+#details[].lotSeqNo#),0) as lotseqqty
+		            ,ISNULL((Select SUM($details[].fgType$) from t_fg_detail where lotno = #details[].workOrderNo#+#details[].lotNo# AND lot_seqno = #details[].lotSeqNo#),0) +(#details[].fgIn#)+(#details[].fgOut#) as sum_fg
+		      ) tmp
+		      WHERE (tmp.sum_fg <![CDATA[ <= ]]> tmp.lotseqqty AND tmp.sum_fg  <![CDATA[ >= ]]>  0)
+		) dt (reportdate, customerid, fgin, fgout, fgid, lotno, reporttype, createby, updateby, lot_seqno, lotseqqty, sum_fg, chk)
+		ON fgd.lotno = dt.lotno AND fgd.lot_seqno = dt.lot_seqno  AND chk = 0
+		when not matched then
+		      INSERT (reportdate, customerid, fgin, fgout, fgid, lotno, reporttype, createby, updateby, lot_seqno)
+		      values(dt.reportdate, dt.customerid, dt.fgin, dt.fgout, dt.fgid, dt.lotno, dt.reporttype, dt.createby, dt.updateby, dt.lot_seqno);
+		</iterate>
+	</insert>	
+</sqlMap>

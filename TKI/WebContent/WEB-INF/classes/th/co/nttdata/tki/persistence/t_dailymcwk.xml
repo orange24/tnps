@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_dailymcwk">
+
+	<resultMap class="th.co.nttdata.tki.bean.TDailyMCWK" id="resultTDailyMCWK" >
+		<result property="reportDate" column="reportdate"/>
+		<result property="customerId" column="customerid"/>
+		<result property="customerCode" column="customercode"/>
+		<result property="wip" column="wip"/>
+		<result property="partId" column="partid"/>
+		<result property="partNo" column="partno"/>
+		<result property="partName" column="partname"/>
+		<result property="shiftName" column="shiftname"/>
+		<result property="machineNo" column="machineno"/>
+		<result property="machineName" column="machinename"/>
+		<result property="detailList" resultMap="t_dailymcwk.resultTDailyMCWKDetail"/>
+	</resultMap>
+
+	<resultMap class="th.co.nttdata.tki.bean.TDailyMCWKDetail" id="resultTDailyMCWKDetail">
+		<result property="ok" column="ok"/>
+		<result property="ng" column="ng"/>
+		<result property="pd" column="pd"/>
+		<result property="qty" column="qty"/>
+		<result property="manPower" column="manpower"/>
+		<result property="timeUsed" column="timeused"/>
+	</resultMap>
+
+	<select id="selectDAL_R02" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK" resultMap="resultTDailyMCWK" >
+		SELECT TOP $maxRecord$ 
+		 wk.reportdate,
+		 d.customerid, 
+		 c.customercode,  
+		 wk.wip, 
+		 d.partid, 
+		 p.partno, 
+		 p.partname,
+		 CASE wk.shift
+         	WHEN 'D' THEN 'Day'
+         	ELSE 'Night'
+		 END as shiftname, 
+		 mc.machineno, 
+		 mc.machinename, 
+		 ISNULL(SUM(d.ok),0) as ok, 
+		 ISNULL(SUM(d.ng),0) as ng, 
+		 ISNULL(SUM(d.pd),0) as pd, 
+		 ISNULL(SUM(d.qty),0) as qty, 
+		 CAST(ISNULL(SUM(d.timeused),0) AS NUMERIC(10, 2)) as timeused,  
+		 CAST(ISNULL(SUM(d.manpower),0) AS NUMERIC(10, 2)) as manpower 
+		FROM [t_dailymcwk_detail] d
+  		inner join t_dailymcwk wk on wk.dailymcwkid = d.dailymcwkid
+  		inner join m_customer c on d.customerid = c.customerid
+  		inner join m_part p on d.partid = p.partid
+  		inner join m_machine mc on wk.machineid = mc.machineid 
+  		<dynamic prepend="Where" >
+			<isNotEmpty prepend="AND" property="wip"> wk.wip = #wip# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="machineNo"> mc.machineno LIKE #machineNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="shifts">
+				wk.shift IN <iterate property="shifts" open="(" close=")" conjunction=",">#shifts[]#</iterate>
+			</isNotEmpty>
+			<isGreaterThan prepend="AND" property="customerId" compareValue="0"> c.customerid = #customerId# </isGreaterThan>
+			<isNotEmpty prepend="AND" property="partNo"> p.partno LIKE #partNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName"> p.partname LIKE #partName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateFr"> wk.reportdate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> wk.reportdate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+			<isGreaterThan prepend="AND" property="reportType" compareValue="0"> wk.reportType = #reportType# </isGreaterThan>
+  		</dynamic> 
+  		group by wk.reportdate,d.customerid, c.customercode,  wk.wip, d.partid, p.partno, p.partname, wk.shift,mc.machineno, mc.machinename
+  		order by wk.reportdate, c.customercode,  wk.wip, p.partno, p.partname,mc.machineno,wk.shift
+	</select>
+	
+	<select id="countDAL_R02" resultClass="Integer">
+		SELECT 
+			COUNT(*)
+		FROM
+			(
+				SELECT 
+					COUNT(*) AS rowData
+				FROM t_dailymcwk_detail d
+				INNER JOIN t_dailymcwk wk ON wk.dailymcwkid = d.dailymcwkid 		
+				INNER JOIN m_machine mc ON wk.machineid = mc.machineid 
+				GROUP BY wk.reportdate,d.customerid, wk.wip, d.partid, wk.shift,mc.machineno, mc.machinename
+			) c	
+	</select>
+	
+	<resultMap class="th.co.nttdata.tki.bean.TDailyMCWKNGReason" id="reason-map" groupBy="id" >
+		<result property="id" column="id" />
+		<result property="reasonId" column="reasonId" />
+		<result property="ng" column="sumng" />
+	</resultMap>
+	
+	<select id="queryReason" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK" resultMap="reason-map" >
+		SELECT 
+		ISNULL(CONVERT(varchar(100),wk.reportdate,11),0)
+		 +ISNULL(CONVERT(varchar(100),d.customerid),0)
+		 +ISNULL(CONVERT(varchar(100),wk.wip),0)
+		 +ISNULL(CONVERT(varchar(100),d.partid),0)
+		 +ISNULL(CONVERT(varchar(100),mc.machineno),0)    
+		 +CONVERT(varchar(100),ng.reasonid)  as id,
+		ng.reasonid as reasonId, ISNULL(SUM(ng.ng),0) as sumng 
+  		FROM t_dailymcwk_detail d 
+  		inner join t_dailymcwk wk on wk.dailymcwkid = d.dailymcwkid 
+  		inner join m_machine mc on wk.machineid = mc.machineid   
+  		inner join t_dailymcwk_ngreason ng on ng.dailymcwkdetailid =d.dailymcwkdetailid 
+      	and ng.dailymcwkid = wk.dailymcwkid 
+      	<dynamic prepend="Where" >
+			<isNotEmpty prepend="AND" property="wip"> wk.wip = #wip# </isNotEmpty>
+			<isGreaterThan prepend="AND" property="customerId" compareValue="0"> d.customerid = #customerId# </isGreaterThan>
+			<isNotEmpty prepend="AND" property="reportDateFr"> wk.reportdate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> wk.reportdate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+			<isGreaterThan prepend="AND" property="reportType" compareValue="0"> wk.reportType = #reportType# </isGreaterThan>
+  		</dynamic> 
+  		group by wk.reportdate, wk.wip, d.customerid, d.partid, ng.reasonid ,mc.machineno
+	</select>
+	
+	<sql id="queryProperties">
+		FROM t_dailymcwk m, t_dailymcwk_detail d, m_customer c, m_machine h, m_part p, m_wip w
+		WHERE
+			m.dailymcwkid = d.dailymcwkid AND d.customerid = c.customerid AND m.machineid = h.machineid AND m.wip = w.wip AND d.partid = p.partid
+			<isNotEmpty prepend="AND" property="dailyMCWKId"> m.dailymcwkid = #dailyMCWKId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDate"> m.reportdate = #reportDate# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateFr"> m.reportdate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> m.reportdate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerId"> c.customerid = #customerId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="machineId"> m.machineid = #machineId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="machineNo"> h.machineno LIKE #machineNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partId"> d.partid = #partId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName"> p.partname LIKE #partName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo"> p.partno LIKE #partNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip"> m.wip = #wip# </isNotEmpty>
+			<isGreaterThan prepend="AND" property="reportType" compareValue="0"> m.reportType = #reportType# </isGreaterThan>
+			<isNotEmpty prepend="AND" property="shifts">
+				m.shift IN <iterate property="shifts" open="(" close=")" conjunction=",">#shifts[]#</iterate>
+			</isNotEmpty>
+	</sql>
+
+	<sql id="queryTDailyMCWK" >
+		SELECT DISTINCT
+			 m.dailyMCWKId
+			,m.createDate
+			,m.lastUpdate
+			,m.reportDate
+			,m.machineId
+			,m.reportType
+			,m.createBy
+			,m.remark
+			,m.shift
+			,m.staff
+			,m.updateBy
+			,m.wip
+			,h.machineNo
+			,w.wipName
+			,CASE m.reporttype WHEN 1 THEN 'Usual' WHEN 2 THEN 'Trial Product' WHEN 3 THEN 'Replacement' WHEN 4 THEN 'Other' END AS reportName
+			,CASE m.shift WHEN 'D' THEN 'Day' WHEN 'N' THEN 'Night' ELSE '' END AS shiftName 
+	</sql>
+
+	<select id="query" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK" resultClass="th.co.nttdata.tki.bean.TDailyMCWK">
+		<include refid="queryTDailyMCWK"/>
+		<include refid="queryProperties"/>
+		ORDER BY lastUpdate DESC
+	</select>
+
+	<select id="count" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK" resultClass="int">
+		SELECT COUNT(dailyMCWKId) from (
+			<include refid="queryTDailyMCWK"/>
+			<include refid="queryProperties"/>
+		) tb
+	</select>
+	
+	<select id="queryWorkOrderNoList" resultClass="th.co.nttdata.tki.bean.MWorkOrder" parameterClass="th.co.nttdata.tki.bean.MWorkOrder">
+		SELECT TOP 50 
+		       wo.workorderno, v.partid, v.customerid,
+		       (wo.workorderqty - ISNULL(mcwk.ttl,0)) as workOrderQty
+		FROM v_cust_fg_part v
+		<isEqual property="reportType" compareValue="1"> 
+			INNER JOIN m_part_wip pw on v.partid = pw.partid		
+		</isEqual>
+		INNER JOIN m_workorder wo on v.partid = wo.partid
+		LEFT OUTER JOIN 
+			(select mcwkd.partid, mcwkd.workorderno, SUM(mcwkd.qty) as ttl
+			 from t_dailymcwk_detail mcwkd
+			 <dynamic prepend="WHERE">				 
+				<isNotEmpty prepend="AND" property="customerId"> mcwkd.customerid = #customerId# </isNotEmpty>
+				<isNotEmpty prepend="AND" property="partId"> mcwkd.partid = #partId# </isNotEmpty>
+				<isNotEmpty prepend="AND" property="workOrderNo"> mcwkd.workorderno like #workOrderNo# + '%' </isNotEmpty>
+			</dynamic>
+			 group by mcwkd.partid, mcwkd.workorderno) mcwk
+		on wo.partid = mcwk.partid and wo.workorderno = mcwk.workorderno
+		<dynamic prepend="WHERE">
+			<isEqual prepend="AND" property="reportType" compareValue="1">pw.wip = #wip#</isEqual> 
+			<isNotEmpty prepend="AND" property="customerId"> v.customerid = #customerId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partId"> v.partid = #partId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="workOrderNo"> wo.workorderno like #workOrderNo# + '%' </isNotEmpty>
+		</dynamic>				
+	</select>
+
+	<select id="queryDetail" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK" resultClass="th.co.nttdata.tki.bean.TDailyMCWKDetail">
+		SELECT
+			 d.dailyMCWKId
+			,d.customerId
+			,d.dailyMCWKDetailId
+			,d.partId
+			,d.ng
+			,d.ok
+			,d.pd
+			,d.qty
+			,d.manPower
+			,d.timeUsed
+			,d.reportTime
+			,d.lotNo
+			,d.workOrderNo
+			,ISNULL(w.workOrderQty,0) as workOrderQty
+		FROM t_dailymcwk_detail d
+			LEFT OUTER JOIN (SELECT workOrderNo, partId, SUM(workOrderQty) AS workOrderQty FROM m_workorder GROUP BY workOrderNo, partId) w ON w.partId = d.partId AND w.workOrderNo = d.workOrderNo
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="dailyMCWKId"> dailymcwkid = #dailyMCWKId# </isNotEmpty>
+		</dynamic>
+		ORDER BY dailyMCWKId, dailyMCWKDetailId
+	</select>
+
+	<select id="queryNGReason" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK" resultClass="th.co.nttdata.tki.bean.TDailyMCWKNGReason">
+		SELECT
+			 dailyMCWKId
+			,dailyMCWKDetailId
+			,ng
+			,tng.reasonid
+			,LEN(mr.reasonCode) as reasondigit 
+		FROM t_dailymcwk_ngreason tng, m_reason mr 
+		WHERE tng.reasonid = mr.reasonid 
+		<isNotEmpty prepend="AND" property="dailyMCWKId"> dailymcwkid = #dailyMCWKId# </isNotEmpty>
+		order by dailyMCWKDetailId,reasondigit,mr.reasoncode
+	</select>
+
+	<select id="queryStopMC" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK" resultClass="th.co.nttdata.tki.bean.TDailyMCWKStopMC">
+		SELECT
+			 dailyMCWKId
+			,reasonId
+			,reportTime
+			,stopMinute
+		FROM t_dailymcwk_stopmc
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="dailyMCWKId"> dailymcwkid = #dailyMCWKId# </isNotEmpty>
+		</dynamic>
+		ORDER BY reportTime, reasonId
+	</select>
+
+	<update id="update" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK">
+		UPDATE t_dailymcwk
+		SET
+			 lastupdate  = getDate()
+			,reportdate  = #reportDate#
+			,machineid   = #machineId#
+			,reporttype  = #reportType#
+			,remark      = #remark#
+			,staff       = #staff#
+			,updateby    = #updateBy#
+			,wip         = #wip#
+		WHERE
+			dailymcwkid = #dailyMCWKId#
+	</update>
+
+	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK">
+		INSERT INTO t_dailymcwk(reportdate,  machineid, reporttype, shift, createby, remark, staff, updateby, wip)
+		VALUES(#reportDate#,  #machineId#, #reportType#, #shift#, #createBy#, #remark#, #staff#, #updateBy#, #wip#);
+		<selectKey resultClass="int" > SELECT @@IDENTITY AS ID </selectKey>
+	</insert>
+
+	<insert id="insertDetail" parameterClass="th.co.nttdata.tki.bean.TDailyMCWKDetail">
+		INSERT INTO t_dailymcwk_detail(manpower, timeused, dailymcwkid, dailymcwkdetailid, ng, ok, partid, pd, qty, reporttime, customerid,lotno, workorderno) VALUES(#manPower#, #timeUsed#, #dailyMCWKId#, #dailyMCWKDetailId#, #ng#, #ok#, #partId#, #pd#, #qty#, #reportTime#, #customerId#, #lotNo#, #workOrderNo#);
+	</insert>
+
+	<insert id="insertNGReason" parameterClass="th.co.nttdata.tki.bean.TDailyMCWKNGReason">
+		INSERT INTO t_dailymcwk_ngreason(dailymcwkid, dailymcwkdetailid, ng, reasonid) VALUES(#dailyMCWKId#, #dailyMCWKDetailId#, #ng#, #reasonId#);
+	</insert>
+
+	<insert id="insertStopMC" parameterClass="th.co.nttdata.tki.bean.TDailyMCWKStopMC">
+		INSERT INTO t_dailymcwk_stopmc(dailymcwkid, reasonid, reporttime, stopminute) VALUES(#dailyMCWKId#, #reasonId#, #reportTime#, #stopMinute#);
+	</insert>
+
+	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK">
+		DELETE FROM t_dailymcwk          WHERE dailymcwkid = #dailyMCWKId#;
+	</delete>
+
+	<delete id="deleteDetail" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK">
+		DELETE FROM t_dailymcwk_detail   WHERE dailymcwkid = #dailyMCWKId#;
+	</delete>
+
+	<delete id="deleteNGReason" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK">
+		DELETE FROM t_dailymcwk_ngreason WHERE dailymcwkid = #dailyMCWKId#;
+	</delete>
+
+	<delete id="deleteStopMC" parameterClass="th.co.nttdata.tki.bean.TDailyMCWK">
+		DELETE FROM t_dailymcwk_stopmc   WHERE dailymcwkid = #dailyMCWKId#;
+	</delete>
+</sqlMap>

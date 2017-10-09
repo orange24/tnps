@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_pending">
+
+	<sql id="querySql"> 
+		FROM t_pending tp 
+		INNER JOIN m_part p ON tp.partid = p.partid	    
+        INNER JOIN m_wip wip ON tp.wip = wip.wip     
+	    INNER JOIN m_customer mc ON tp.customerid = mc.customerid 
+	    WHERE  tp.pd != ISNULL(tp.pdadjust,0) 
+	    	<isNotEmpty prepend="AND" property="wip"> wip.wip = #wip# </isNotEmpty>		
+	    	<isGreaterThan prepend="AND" property="customerId" compareValue="0"> tp.customerId = #customerId# </isGreaterThan>			
+			<isNotEmpty prepend="AND" property="partNo"> p.partNo like #partNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName"> p.partName like #partName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="workorderNo"> tp.workorderno like #workorderNo# + '%' </isNotEmpty>
+	</sql>
+	
+	<select id="query" parameterClass="th.co.nttdata.tki.bean.TPending" resultClass="th.co.nttdata.tki.bean.TPendingAdjust">
+		SELECT 
+			 tp.pdId
+			,mc.customerCode 
+			,p.partId 
+			,p.partNo 
+			,p.partName 
+			,tp.workorderNo
+			,tp.lotno
+			,tp.wip 
+			,wip.wipName  
+			,tp.pd - ISNULL(tp.pdadjust,0) as pdQty			         
+		<include refid="querySql"/>
+		ORDER BY p.partNo
+	</select>
+
+	<select id="count" parameterClass="th.co.nttdata.tki.bean.TPending" resultClass="int">
+		SELECT
+			count(*)
+		<include refid="querySql"/>
+	</select>
+
+	<select id="queryWip" parameterClass="th.co.nttdata.tki.bean.TPending" resultClass="th.co.nttdata.tki.bean.MWip">		
+  		SELECT w.wip, w.wipName
+		FROM m_wip w 
+		ORDER BY w.wip 	
+	</select>
+	
+	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TPendingAdjust">		
+		UPDATE t_pending SET pdAdjust = ISNULL(pdAdjust,0) + #pdAdjustQty# WHERE pdId = #pdId#;
+		
+		INSERT INTO t_pending_adjust(pdid, reportdate, ok, ng, createby, updateby) 
+		VALUES (#pdId#, CONVERT(DATE,GETDATE()), #ok#, #ng#, #createBy#, #createBy#);
+		<selectKey resultClass="int" >
+			SELECT @@IDENTITY AS pdAdjustId
+		</selectKey>
+	</insert>
+	
+	<insert id="insertRework" parameterClass="th.co.nttdata.tki.bean.TPendingAdjust">
+		<iterate property="reworkList">		
+			<isNotNull property="reworkList[].reworkQty">
+      		INSERT INTO t_pending_rework (pdadjustid, wip, reworkqty)
+			VALUES (#pdAdjustId#, #reworkList[].wip#, #reworkList[].reworkQty#);
+			</isNotNull>	
+		</iterate>
+	</insert>
+	
+	<!-- WIP_S04 -->
+	
+	<resultMap class="th.co.nttdata.tki.bean.TPendingAdjust" id="pending-map">
+		<result property="pdAdjustId"/>
+		<result property="pdId"/>
+		<result property="customerCode"/>
+		<result property="partId"/>
+		<result property="partNo"/>
+		<result property="partName"/>
+		<result property="workorderNo"/>
+		<result property="lotNo"/>
+		<result property="wip"/>
+		<result property="wipName"/>
+		<result property="pdQty"/>
+		<result property="ok"/>
+		<result property="ng"/>
+		<result property="createBy"/>
+		<result property="lastUpdate" column="reportDate"/>
+		<result property="reworkList" column="pdAdjustId" select="t_pending.queryPendingRework"/>
+	</resultMap>
+	
+	<select id="queryPendingRework" parameterClass="integer" resultClass="th.co.nttdata.tki.bean.TPendingRework">
+		SELECT 
+			 tpr.wip
+			,wip.wipName
+			,tpr.reworkQty	
+		 FROM t_pending_rework tpr INNER JOIN m_wip wip ON wip.wip = tpr.wip
+		WHERE tpr.pdAdjustId = #value#
+	</select>
+	
+	<sql id="queryHisSql">   
+		FROM t_pending tp 
+	   INNER JOIN m_part p ON tp.partid = p.partid
+	   INNER JOIN t_pending_adjust tpa ON tp.pdId = tpa.pdId	    
+       INNER JOIN m_wip wip ON tp.wip = wip.wip     
+	   INNER JOIN m_customer mc ON tp.customerid = mc.customerid 
+	    <dynamic prepend="WHERE">
+	    	<isNotEmpty prepend="AND" property="wip"> tp.wip = #wip# </isNotEmpty>
+			<isGreaterThan prepend="AND" property="customerId" compareValue="0"> tp.customerId = #customerId# </isGreaterThan>	
+	   		<isNotEmpty prepend="AND" property="partNo"> p.partNo like #partNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName"> p.partName like #partName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="workorderNo"> tp.workorderno like #workorderNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateFr"> tpa.reportDate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> tpa.reportDate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+	    </dynamic>  
+	</sql>
+	
+	<select id="queryHis" parameterClass="th.co.nttdata.tki.bean.TPending" resultMap="pending-map">
+		SELECT 
+			 tpa.pdAdjustId
+			,tpa.pdId
+			,mc.customerCode 
+			,p.partId 
+			,p.partNo 
+			,p.partName 
+			,tp.workorderNo
+			,tp.lotNo
+			,tp.wip 
+			,wip.wipName  
+			,tp.pd as pdQty	
+			,tpa.ok
+			,tpa.ng 
+			,tpa.createBy 
+			,tpa.reportDate
+		<include refid="queryHisSql"/>           
+		ORDER by reportDate DESC, tp.wip, p.partNo 
+	</select>
+	
+	<select id="countHis" parameterClass="th.co.nttdata.tki.bean.TPending" resultClass="int">
+		SELECT
+			count(*)
+		<include refid="queryHisSql"/>
+	</select>
+	
+	<select id="queryV_09_PendingList" parameterClass="th.co.nttdata.tki.bean.TPending" resultClass="th.co.nttdata.tki.bean.TPendingAdjust">
+		SELECT  TOP $maxRecord$
+				sPartNo AS partNo,
+				sPartName AS partName,
+				sWip AS wip,
+				sProcess AS wipName,
+				sCareerSheetNo AS workorderNo,
+				nPendingQty AS pdQty,
+				nOKQty AS ok,
+				nNGQty AS ng,
+				nDiffQty,
+				dOperationDate AS operationDate,
+				nPartId AS partId
+		FROM 	V_09_PendingList
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="reportDateFr"> dOperationDate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> dOperationDate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo"> sPartNo like '%'+#partNo#+'%'</isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName"> sPartName like '%'+#partName#+'%'</isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip"> sWip = #wip#</isNotEmpty>
+			<isNotEmpty prepend="AND" property="workorderNo"> sCareerSheetNo like '%'+#workorderNo#+'%'</isNotEmpty>
+		</dynamic>
+		ORDER BY dOperationDate, sPartNo, sWIP, sCareerSheetNo
+	</select>
+	
+	<select id="countMRDC_R08" resultClass="Integer">
+		SELECT 
+			COUNT(*)
+		FROM V_09_PendingList
+	</select>
+
+</sqlMap>

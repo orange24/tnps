@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_lot_sequence">
+	<select id="select_lotseq_existing" parameterClass="th.co.nttdata.tki.bean.TTagLabelDetail" resultClass="th.co.nttdata.tki.bean.TLotSequence">
+		SELECT  TAGID
+      		,SEQ
+      		,LOTSEQNO
+      		,LOTSEQQTY
+      		,FLAGPRINT AS printStatus
+      		,0 as FLAGPRINT
+      		,(Select Case when COUNT(*) >0 then 1 else 0 end from t_fg_detail where lotno=LEFT(ls.lotseqno,14) and lot_seqno = RIGHT(ls.lotseqno,3)) AS ISREADONLY
+  		FROM T_LOT_SEQUENCE ls
+  		<dynamic prepend="WHERE">
+				<isNotEmpty prepend="AND" property="tagId"> TAGID = #tagId# </isNotEmpty>
+		</dynamic>
+		ORDER BY SEQ
+	</select>
+	<insert id="insert_lot_sequence" parameterClass="th.co.nttdata.tki.bean.TLotSequence">
+		<iterate property="lotSequenceList">
+	           
+	           MERGE INTO T_LOT_SEQUENCE b
+			USING (SELECT #lotSequenceList[].lotSeqNo# as LOTSEQNO) t
+			ON (b.LOTSEQNO = t.LOTSEQNO)
+			WHEN NOT MATCHED THEN
+				INSERT (TAGID
+	           ,SEQ
+	           ,LOTSEQNO
+	           ,LOTSEQQTY
+	           ,FLAGPRINT)
+				VALUES(#lotSequenceList[].tagId#
+	           ,#lotSequenceList[].seq#
+	           ,#lotSequenceList[].lotSeqNo#
+	           ,#lotSequenceList[].lotSeqQty#
+	           ,#lotSequenceList[].printStatus#);
+				
+				
+				
+           </iterate>
+	</insert>
+	
+	<update id="edit_lot_sequence" parameterClass="th.co.nttdata.tki.bean.TLotSequence">
+		<iterate property="lotSequenceList">
+			UPDATE T_LOT_SEQUENCE
+	        SET
+	           LOTSEQQTY = #lotSequenceList[].lotSeqQty#
+	           ,FLAGPRINT = #lotSequenceList[].flagPrint#
+	    	WHERE TAGID = #lotSequenceList[].tagId#
+	           AND SEQ=#lotSequenceList[].seq#
+        </iterate>
+	</update>
+	
+	<delete id="delete_lot_sequence" parameterClass="th.co.nttdata.tki.bean.TLotSequence">
+		<iterate property="lotSequenceList">
+			DELETE FROM T_LOT_SEQUENCE
+     		WHERE TAGID = #lotSequenceList[].tagId#  AND SEQ=#lotSequenceList[].seq#
+     	</iterate>
+	</delete>
+	<delete id="delete_by_tag" parameterClass="Integer">
+		DELETE FROM t_lot_sequence
+      	WHERE tagid = #tagId#
+	</delete>
+	<select id="select_lotseq_autocom" parameterClass="String" resultClass="th.co.nttdata.tki.bean.TLotSequence">
+		SELECT distinct top(50) lotseqno
+		FROM t_lot_sequence lots
+		INNER JOIN t_taglabel tag on tag.tagid = lots.tagid
+		INNER JOIN t_lotno lot on lot.lotno = tag.lotno
+		WHERE lotseqno like #lotSeq#+'%'
+		ORDER BY lotseqno ASC;
+	</select>
+	<select id="select_lotseq" parameterClass="th.co.nttdata.tki.bean.MWorkOrder" resultClass="th.co.nttdata.tki.bean.MWorkOrder">
+		SELECT lotseqno
+		 	,cust.customercode
+		 	,cust.customerid
+		 	,fg.fgid
+		 	,fg.fgname
+		 	,fg.fgno
+		 	,tag.tagid
+		 	,lots.lotseqqty
+		FROM t_lot_sequence lots
+		INNER JOIN t_taglabel tag on tag.tagid = lots.tagid
+		INNER JOIN m_customer cust on cust.customerid = tag.customerid
+		INNER JOIN m_fg fg on fg.fgid = tag.fgid
+		where lotseqno = #lotSeqNo#
+	</select>
+	<update id="update_print_status" parameterClass="th.co.nttdata.tki.bean.TLotSequence">
+		update t_lot_sequence
+		set FLAGPRINT = 1
+		where LOTSEQNO = #lotSeqNo#
+	</update>
+</sqlMap>

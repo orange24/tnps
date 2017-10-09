@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_dcplan">
+
+	<sql id="querySelect">
+		SELECT 
+	      	dcPlanId 		AS dcPlanId,
+	      	dcPlanDate 		AS dcPlanDate,
+	      	wip 			AS wip,
+	      	machineId 		AS machineId,
+	      	seq 			AS seq,
+	      	shift 			AS shift,
+	      	customerId 		AS customerId,
+	      	qty 			AS quantity,
+	      	partId 			AS partId, 
+	      	(select snp_wip from m_part p where partid = T_DCPLAN.partid) 		AS snpWip, 
+	      	st 				AS st,
+	      	reasonId 		AS reasonId,
+	      	genStatus 		AS genStatus,
+	      	genDate 		AS genDate,
+	      	genBy 			AS genBy,
+	      	createDate 		AS createDate,
+	      	createBy 		AS createdBy,
+	      	updateDate 		AS lastUpdate,
+	      	updateBy 		AS updatedBy
+		FROM 
+			T_DCPLAN
+	</sql>
+	
+	<select id="select_search" resultClass="th.co.nttdata.tki.bean.TDCPlan" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
+		SELECT 
+	        DCP.DCPLANID 		AS dcPlanId, 
+	        DCP.DCPLANDATE 		AS dcPlanDate, 
+	        DCP.WIP 			AS wip, 
+	        WIP.WIPNAME			AS wipName,
+	        DCP.MACHINEID 		AS machineId, 
+	        MAC.MACHINENO 		AS machineNo, 
+	        DCP.SEQ 			AS seq, 
+	        DCP.SHIFT 			AS shift, 
+	        DCP.CUSTOMERID 		AS customerId, 
+	        CUST.CUSTOMERNAME 	AS customerName,
+	        CUST.CUSTOMERCODE 	AS customerCode,
+	        DCP.QTY 			AS quantity, 
+	        DCP.QTY 			AS qtyDefault, 
+	        DCP.PARTID 			AS partId, 
+	        PART.PARTNO + ' : ' + PART.PARTNAME	AS partName,
+	        PART.SNP_WIP 		AS snpWip, 
+	        DCP.ST 				AS st, 
+	        DCP.REASONID 		AS reasonId,
+	        REASON.reasonName   AS reasonName,
+	        DCP.GENSTATUS 		AS genStatus,
+	        DCP.GENSTATUS 		AS genStatusDefault,
+	        DCP.GENDATE 		AS genDate, 
+	        DCP.GENBY 			AS genBy, 
+	        DCP.CREATEDATE 		AS createDate,
+	        DCP.CREATEBY 		AS createdBy, 
+	        DCP.UPDATEDATE 		AS lastUpdate, 
+	        DCP.UPDATEBY 		AS updatedBy,
+	        DCP.MOLDID			AS moldId,
+	        DCP.MOLDNO			AS moldNo,
+	        M.MOLDNAME			AS moldName,
+	        MD.CAVNO			AS cavNo
+		FROM 
+			T_DCPLAN DCP
+		LEFT JOIN 
+			M_MACHINE MAC ON MAC.MACHINEID = DCP.MACHINEID
+		LEFT JOIN 
+			M_CUSTOMER CUST ON CUST.CUSTOMERID = DCP.CUSTOMERID
+		LEFT JOIN 
+			M_WIP WIP ON WIP.WIP = DCP.WIP
+		LEFT JOIN 
+			M_PART PART ON PART.PARTID = DCP.PARTID
+		LEFT JOIN 
+			M_REASON REASON ON REASON.REASONID = DCP.REASONID
+		LEFT JOIN
+			M_MOLD M ON M.MOLDID = DCP.MOLDID
+		LEFT JOIN
+			M_MOLD_DETAIL MD ON MD.MOLDID = DCP.MOLDID AND MD.MOLDNO = DCP.MOLDNO
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="dateString">
+			 	CONVERT(VARCHAR(20), DCP.DCPLANDATE, 103) LIKE '%' + #dateString# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip">
+				DCP.WIP = #wip#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="machineId">
+				DCP.MACHINEID = #machineId#
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY 
+			DCP.MACHINEID, 
+			DCP.SEQ
+	</select>
+	
+	<insert id="insert_dcplan" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
+		<iterate property="planList">	
+			INSERT INTO 
+				T_DCPLAN (DCPLANDATE ,WIP ,MACHINEID ,SEQ ,SHIFT,CUSTOMERID ,PARTID ,QTY ,
+				ST ,REASONID ,GENSTATUS,CREATEDATE ,CREATEBY ,UPDATEDATE ,UPDATEBY, MOLDID, MOLDNO)
+      		VALUES
+          	 	( convert(datetime, SUBSTRING(#planList[].dcPlanDate#, 7, 4) + SUBSTRING(#planList[].dcPlanDate#, 4, 2)
+          	 	  + SUBSTRING(#planList[].dcPlanDate#, 1, 2)),       	 	  
+          	 	  #planList[].wip#, #planList[].machineId# ,#planList[].seq# ,
+          	 	  #planList[].shift#, #planList[].customerId# ,#planList[].partId# , #planList[].quantity#, 
+          	 	  #planList[].st#, #planList[].reasonId#, 0, GETDATE(), #planList[].createBy#, 
+          	 	  GETDATE(), #planList[].updateBy#, #planList[].moldId#, #planList[].moldNo#)
+		</iterate>
+	</insert>
+	
+	<update id="update_dcplan" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
+		<iterate property="planList">	
+			<isNotNull  property="planList[].dcPlanId">	
+			UPDATE 
+				T_DCPLAN
+			SET 
+		        WIP 		= #planList[].wip#,
+		        MACHINEID 	= #planList[].machineId#,
+		        SEQ 		= #planList[].seq#,
+		        SHIFT 		= #planList[].shift#,
+		        CUSTOMERID 	= #planList[].customerId#,
+		        PARTID 		= #planList[].partId#,
+		        QTY 		= #planList[].quantity#,
+		        ST 			= #planList[].st#,
+		        REASONID 	= #planList[].reasonId#,
+		        GENSTATUS 	= #planList[].genStatus#,
+		        UPDATEDATE 	= GETDATE(),
+		        UPDATEBY 	= #updateBy#,
+		        MOLDID 		= #planList[].moldId#,
+		        MOLDNO 		= #planList[].moldNo#
+			WHERE 
+				DCPLANID = #planList[].dcPlanId#
+			</isNotNull>
+		</iterate>
+	</update>
+	
+	<delete id="delete_dcplan" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
+		<iterate property="planList">	
+			<isNotNull  property="planList[].dcPlanId">	
+				DELETE FROM T_DCPLAN WHERE DCPLANID = #planList[].dcPlanId#
+			</isNotNull>
+		</iterate>
+	</delete>
+	
+	<select id="prdS02_select_search" resultClass="th.co.nttdata.tki.bean.TDCPlan" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
+		SELECT 
+			dcPlanId,
+			CONVERT(VARCHAR(20), dcPlanDate,103) AS dcPlanDate,
+			wip,
+			machineId,
+			machineNo,
+			seq,
+			shift,
+			customerId,
+			customerCode,
+			reasonId,
+			reasonCode,
+			reasonName,
+			partId, 
+			partNo, 
+			partName,
+			materialId,
+			materialCode,
+			materialGroup,
+			st,
+			quantity,
+			snpWip,
+			workOrderNo, 
+			startLotNo,
+			endLotNo, 
+			genStatus,
+			genDate,
+			moldId,
+			moldName,
+			moldNo
+		From (
+		SELECT
+			DISTINCT DCP.dcPlanId AS dcPlanId,
+			DCP.dcPlanDate AS dcPlanDate,
+			DCP.wip 			AS wip,
+			MAC.machineId 		AS machineId,
+			MAC.machineNo 		AS machineNo,
+			DCP.seq 			AS seq,
+			DCP.shift 			AS shift,
+			CUST.customerId 	AS customerId,
+			CUST.customerCode 	AS customerCode,
+			REA.reasonId 		AS reasonId,
+			REA.reasonCode 		AS reasonCode,
+			REA.reasonName 		AS reasonName,
+			PT.partId 			AS partId, 
+			PT.partNo 			AS partNo, 
+			PT.partName 		AS partName,
+			MAT.nMaterialId     AS materialId,
+			MAT.sMaterialCode   AS materialCode,
+			MAT.materialGroup   AS materialGroup,
+			DCP.st 				AS st,
+			DCP.qty 			AS quantity,
+			(select snp_wip from m_part p where partid = DCP.partid) 		 		AS snpWip,
+			WKD.workOrderNo 	AS workOrderNo, 
+			WKD.startLot 		AS startLotNo,
+			WKD.endLot 			AS endLotNo, 
+			DCP.genStatus 		AS genStatus,
+			CONVERT(VARCHAR(20), DCP.genDate,103 ) + ' ' + 
+			CONVERT(VARCHAR(20), DCP.genDate, 108) AS genDate,
+			DCP.moldId			AS moldId,
+			M.moldName			AS moldName,
+			DCP.moldNo			AS moldNo,
+			MD.cavno			AS cavNo
+		FROM 
+			T_DCPLAN DCP 
+		LEFT JOIN 
+			M_PART PT ON PT.partId = DCP.partId
+		LEFT JOIN 
+			M_MACHINE MAC ON MAC.machineId = DCP.machineId
+		LEFT JOIN 
+			M_CUSTOMER CUST ON CUST.customerId = DCP.customerId
+		LEFT JOIN 
+			M_REASON REA ON REA.reasonId = DCP.reasonId
+		LEFT JOIN 
+			M_WORKORDER WKD ON WKD.dcPlanId = DCP.dcPlanId
+		LEFT JOIN 
+			T_LOTNO LOT ON LOT.dcPlanId = DCP.dcPlanId
+		LEFT JOIN
+			M_MATERIAL MAT ON MAT.nMaterialId = PT.materialId
+		LEFT JOIN
+			M_MOLD M ON M.moldId = DCP.moldId
+		LEFT JOIN
+			M_MOLD_DETAIL MD ON MD.moldId = DCP.moldId AND MD.moldno = DCP.moldno
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="dcPlanDateFrom" >
+			 	CONVERT(DATETIME,DCP.DCPLANDATE,103) <![CDATA[ >= ]]> CONVERT(DATETIME,#dcPlanDateFrom#,103)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="dcPlanDateTo">
+			 	CONVERT(DATETIME,DCP.DCPLANDATE,103) <![CDATA[ <= ]]> CONVERT(DATETIME,#dcPlanDateTo#,103)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip">
+			 	DCP.WIP = #wip#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="machineId">
+			 	DCP.machineId = #machineId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="shift">
+			 	DCP.SHIFT = #shift#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerId">
+			 	DCP.customerId = #customerId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="reasonId">
+			 	DCP.reasonId = #reasonId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo">
+			 	PT.partNo LIKE '%' + #partNo# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName">
+			 	PT.partName LIKE '%' + #partName# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="generateLot">
+			 	DCP.GENSTATUS = #generateLot#
+			</isNotEmpty>
+		</dynamic>
+		) as A
+		ORDER BY a.dcPlanDate,a.machineNo ASC
+	</select>
+	
+	<select id="count" parameterClass="th.co.nttdata.tki.bean.TDCPlan" resultClass="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT DCP.dcPlanId)
+		FROM 
+			T_DCPLAN DCP 
+		LEFT JOIN 
+			M_PART PT ON PT.partId = DCP.partId
+		LEFT JOIN 
+			M_MACHINE MAC ON MAC.machineId = DCP.machineId
+		LEFT JOIN 
+			M_CUSTOMER CUST ON CUST.customerId = DCP.customerId
+		LEFT JOIN 
+			M_REASON REA ON REA.reasonId = DCP.reasonId
+		LEFT JOIN 
+			M_WORKORDER WKD ON WKD.dcPlanId = DCP.dcPlanId
+		LEFT JOIN 
+			T_LOTNO LOT ON LOT.dcPlanId = DCP.dcPlanId
+		LEFT JOIN
+			M_MATERIAL MAT ON MAT.nMaterialId = PT.materialId
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="dcPlanDateFrom" >
+			 	CONVERT(DATETIME,DCP.DCPLANDATE,103) <![CDATA[ >= ]]> CONVERT(DATETIME,#dcPlanDateFrom#,103)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="dcPlanDateTo">
+			 	CONVERT(DATETIME,DCP.DCPLANDATE,103) <![CDATA[ <= ]]> CONVERT(DATETIME,#dcPlanDateTo#,103)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip">
+			 	DCP.WIP = #wip#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="machineId">
+			 	DCP.machineId = #machineId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="shift">
+			 	DCP.SHIFT = #shift#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerId">
+			 	DCP.customerId = #customerId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="reasonId">
+			 	DCP.reasonId = #reasonId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo">
+			 	PT.partNo LIKE '%' + #partNo# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName">
+			 	PT.partName LIKE '%' + #partName# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="generateLot">
+			 	DCP.GENSTATUS = #generateLot#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<update id="update_genstatus" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
+			<isNotNull  property="dcPlanId">
+				UPDATE 
+					T_DCPLAN 
+				SET 
+					GENSTATUS = 1, 
+					GENDATE   = GETDATE(), 
+					GENBY     = #createBy# 
+				WHERE 
+					DCPLANID = #dcPlanId#
+			</isNotNull>
+	</update>
+	
+	<select id="prdS03_select_search" parameterClass="th.co.nttdata.tki.bean.TDCPlan" resultClass="th.co.nttdata.tki.bean.TDCPlan">
+		SELECT 
+			DCP.WIP 		 AS wip,
+			MAC.MACHINENO 	 AS machineNo,
+			CONVERT(VARCHAR(20), DCP.DCPLANDATE, 103) AS dcPlanDate,
+			DCP.SHIFT 		 AS shift,
+			WO.WORKORDERNO 	 AS workOrderNo,
+			LOT.LOTNO 		 AS lotNo,
+			CUS.CUSTOMERCODE AS customerCode,
+			CUS.CUSTOMERNAME AS customerName,
+			PART.PARTNO 	 AS partNo,
+			PART.PARTNAME 	 AS partName,
+			PART.SNP_WIP	 AS snpWip,
+			LOT.LOTQTY 		 AS quantity,
+			LOT.PRINTSTATUS  AS printingStatus,
+			CONVERT(VARCHAR(20), LOT.PRINTDATE, 103) AS printDate,
+			rea.reasonName	AS reasonName,
+			m.moldId		AS moldId,
+			m.moldName		AS moldName,
+			md.moldNo		AS moldNo
+		FROM 
+			T_LOTNO LOT
+  		INNER JOIN 
+  			T_DCPLAN DCP ON DCP.DCPLANID = LOT.DCPLANID
+  		INNER JOIN 
+  			M_WORKORDER WO ON WO.DCPLANID = DCP.DCPLANID
+  		LEFT JOIN 
+  			M_CUSTOMER CUS ON CUS.CUSTOMERID = DCP.CUSTOMERID
+  		LEFT JOIN 
+  			M_MACHINE MAC ON MAC.MACHINEID = DCP.MACHINEID
+  		LEFT JOIN 
+  			M_PART PART ON PART.PARTID = DCP.PARTID
+  		LEFT JOIN 
+  			m_reason rea ON rea.reasonid = DCP.reasonid
+  		LEFT JOIN
+  			m_mold m ON m.moldId = DCP.moldId
+  		LEFT JOIN
+  			m_mold_detail md ON md.moldId = DCP.moldId
+  		<dynamic prepend="WHERE">
+  			<isNotEmpty prepend="AND" property="wip">
+			 	DCP.wip = #wip#
+			</isNotEmpty>
+			<isNotEmpty property="startLotNo">
+				<isNotEmpty prepend="AND" property="endLotNo">
+			 		LOT.lotNo BETWEEN #startLotNo# AND #endLotNo#
+			 	</isNotEmpty>
+			</isNotEmpty>
+			<isNotEmpty property="machineFrom">
+				<isNotEmpty prepend="AND" property="machineTo">
+					MAC.machineNo BETWEEN #machineFrom# AND  #machineTo#
+				</isNotEmpty>
+			</isNotEmpty>
+			<isNotEmpty property="dcPlanDateFrom">
+				<isNotEmpty prepend="AND" property="dcPlanDateTo">
+			 		DCP.dcPlanDate 
+				 		BETWEEN 
+				 			CONVERT(DATETIME, SUBSTRING(#dcPlanDateFrom#, 7, 4) + SUBSTRING(#dcPlanDateFrom#, 4, 2)  + SUBSTRING(#dcPlanDateFrom#, 1, 2))
+				 		AND 
+			 				CONVERT(DATETIME, SUBSTRING(#dcPlanDateTo#, 7, 4) + SUBSTRING(#dcPlanDateTo#, 4, 2)  + SUBSTRING(#dcPlanDateTo#, 1, 2)) 
+			 	</isNotEmpty>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="shift">
+			 	DCP.shift = #shift#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerId">
+			 	CUS.customerId = #customerId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo">
+			 	PART.partNo LIKE #partNo# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName">
+			 	PART.partName LIKE #partName# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="printStatus">
+			 	LOT.printStatus = #printStatus#
+			</isNotEmpty>
+  		</dynamic>
+  		ORDER BY 
+  			DCP.dcPlanDate
+	</select>
+	<select id="work_order_exiting" resultClass="java.lang.Integer" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
+		Select COUNT(*) from
+		(
+		select workorderno as workorderno
+		from t_dailymcwk_detail
+		union
+		
+		select lotno as workorderno
+		from t_dailymc_lot
+		union
+		
+		select workorderno as workorderno
+		from t_dailywk_detail
+		) a
+		inner join m_workorder b on b.workorderno = a.workorderno
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="dcPlanId" > 
+				b.dcplanid = #dcPlanId#
+			</isNotEmpty> 
+		</dynamic>
+	</select>
+</sqlMap>

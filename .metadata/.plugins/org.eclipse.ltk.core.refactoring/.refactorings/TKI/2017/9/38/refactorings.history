@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Encapsulate field &apos;th.co.nttdata.tki.bean.TFGStock.moldNo&apos; in &apos;th.co.nttdata.tki.bean.TFGStock&apos;&#x0A;- Original project: &apos;TKI&apos;&#x0A;- Original element: &apos;th.co.nttdata.tki.bean.TFGStock.moldNo&apos;&#x0A;- Getter method name: &apos;getMoldNo&apos;&#x0A;- Setter method name: &apos;setMoldNo&apos;&#x0A;- Field visibility: &apos;public&apos;&#x0A;- Use getter and setter methods in declaring type" comments="false" declaring="true" description="Encapsulate field &apos;moldNo&apos;" flags="589830" getter="getMoldNo" id="org.eclipse.jdt.ui.self.encapsulate" input="/business&lt;th.co.nttdata.tki.bean{TFGStock.java[TFGStock^moldNo" insertion="101" setter="setMoldNo" stamp="1506101419063" version="1.0" visibility="1"/>
+</session>

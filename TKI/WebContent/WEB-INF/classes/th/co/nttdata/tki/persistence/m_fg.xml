@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_fg">
+ <select id="select_search" parameterClass="th.co.nttdata.tki.bean.MFgPart" resultClass="th.co.nttdata.tki.bean.MFgPart">
+       SELECT 
+            CUS.CUSTOMERID
+           ,CUS.CUSTOMERCODE
+           ,CUS.CUSTOMERNAME
+           ,FG.FGID
+           ,FG.FGNO+' : '+FG.FGNAME AS FG
+           ,PART.PARTID
+           ,PART.PARTNO
+           ,PART.PARTNAME
+      FROM  M_FG_CUSTOMER FGC 
+      INNER JOIN M_FG FG ON FG.FGID = FGC.FGID
+      INNER JOIN M_CUSTOMER CUS ON CUS.CUSTOMERID = FGC.CUSTOMERID
+      LEFT  JOIN M_FG_PART FGP ON FGC.FGID = FGP.FGID
+      LEFT  JOIN M_PART PART ON PART.PARTID = FGP.PARTID
+      WHERE 
+             FGC.CUSTOMERID = #customerId#
+     <isNotEmpty prepend="AND" property="fgNo">  FG.FGNO like  '%'+ #fgNo# + '%'</isNotEmpty>
+     <isNotEmpty prepend="AND" property="fgName">  FG.FGNAME like  '%'+ #fgName# + '%'</isNotEmpty>
+     ORDER BY FG.FGNO
+   </select>
+   <select id="select_fg_by_cust"  parameterClass="th.co.nttdata.tki.bean.MFgPart" resultClass="th.co.nttdata.tki.bean.MFgPart">
+           SELECT 
+                    FG.FGID
+                   ,FG.FGNO
+                   ,FG.FGNO+' : '+FG.FGNAME AS FG
+                   ,FG.FGNAME
+           FROM    M_FG  FG
+           INNER JOIN        M_FG_CUSTOMER FGC ON FGC.FGID = FG.FGID
+          <dynamic prepend="WHERE">
+          	 <isNotEmpty prepend="AND" property="customerId"> FGC.CUSTOMERID  = #customerId# </isNotEmpty>
+           </dynamic>
+   </select>
+   <select id="select_part" parameterClass="th.co.nttdata.tki.bean.MFgPart" resultClass="th.co.nttdata.tki.bean.MFgPart">
+         
+          SELECT      
+                  PART.PARTID
+                  ,PART.PARTNO
+                  ,PART.PARTNAME
+                  ,PART.MATERIALID
+                  ,MAT.SMATERIALNAME
+          FROM M_PART PART
+               INNER JOIN M_MATERIAL MAT 
+               ON  MAT.NMATERIALID = PART.MATERIALID
+          WHERE 
+<!--           PART.PARTID  -->
+          NOT EXISTS 
+                (SELECT 1 FROM M_FG_PART FGP WHERE FGP.FGID =#fgId# AND PART.PARTID = FGP.PARTID)
+          ORDER BY PARTNO
+   
+   </select>
+	<select id="queryFG" parameterClass="th.co.nttdata.tki.bean.MPart" resultClass="th.co.nttdata.tki.bean.MPart">
+		SELECT
+			 f.fgId as partId
+			,f.fgName as partName
+			,f.fgNo as partNo
+			,fc.customerId
+		FROM m_fg f inner join m_fg_customer fc on f.fgId = fc.fgId
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="partId"> f.fgId = #partId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerId"> fc.customerId = #customerId# </isNotEmpty>
+		</dynamic>
+		Order by f.fgName,f.fgNo
+	</select>
+	
+	<select id="queryPartSync" parameterClass="th.co.nttdata.tki.bean.MPart" resultClass="hashMap">
+		SELECT
+			 partNo
+		FROM m_part
+		<isNotEmpty property="partList">
+			<iterate property="partList" prepend="WHERE partNo in (" close=")" conjunction=",">
+				#partList[].partNo#
+			</iterate>
+		</isNotEmpty>
+	</select>
+	
+	<statement id="merge" parameterClass="th.co.nttdata.tki.bean.MPart" resultClass="integer">	
+		<isNotEmpty property="partNo">
+			MERGE INTO m_fg f
+			USING (SELECT MAX(a.fgId) as fgId from (SELECT fgId FROM m_fg WHERE fgNo = #fgNo# UNION ALL SELECT -1) a) op
+			ON (f.fgId = op.fgId)
+			WHEN MATCHED THEN 
+				UPDATE SET f.fgNo = #fgNo#, f.fgName = #fgName#
+			WHEN NOT MATCHED THEN
+				INSERT(fgNo,fgName,createBy,updateBy)
+				VALUES(#fgNo#,#fgName#,#createBy#,#updateBy#)
+			OUTPUT INSERTED.fgId;
+		</isNotEmpty>
+	</statement>
+	
+	<statement id="mergePart" parameterClass="th.co.nttdata.tki.bean.MPart">
+		<isNotEmpty property="partId">
+			MERGE INTO m_fg_part f
+			USING (SELECT MAX(a.fgId) as fgId,MAX(a.partId) as partId  from 
+					(SELECT fgId, partId FROM m_fg_part 
+					 WHERE fgId = #fgId# and partId = #partId# UNION ALL SELECT -1,-1) a) op
+			ON (f.fgId = op.fgId and f.partId = op.partId)
+			WHEN NOT MATCHED THEN
+				INSERT(fgId,partId,isActive)
+				VALUES(#fgId#,#partId#,1);
+		</isNotEmpty>
+	</statement>
+	<insert id="insert_fg_part_mapping" parameterClass="th.co.nttdata.tki.bean.MFgPart" >
+			<isNotEmpty property="partId">
+	        INSERT INTO   M_FG_PART
+                       (FGID, PARTID,ISACTIVE)
+            VALUES
+           (#fgId# ,#partId#,1)
+           </isNotEmpty>
+	</insert>
+	<update id="update_fg_part_mapping"  parameterClass="th.co.nttdata.tki.bean.MFgPart">
+		<isNotEmpty property="customerId">
+	             MERGE M_FG_PART AS FGP
+                    USING (
+                             SELECT 
+                                 CUS.CUSTOMERID
+                                 ,FG.FGID
+                                 ,PART.PARTID
+                                 FROM M_FG_PART FGP
+                             INNER JOIN M_PART PART ON PART.PARTID = FGP.PARTID
+                             INNER JOIN M_FG FG ON FG.FGID = FGP.FGID
+                             INNER JOIN M_FG_CUSTOMER FGC ON FGC.FGID = FGP.FGID
+                             INNER JOIN M_CUSTOMER CUS ON CUS.CUSTOMERID = FGC.CUSTOMERID
+                  WHERE 
+                          FGC.CUSTOMERID = #customerId#
+                          <isNotEmpty prepend="AND" property="fgNo">  FG.FGNO  like   '%' + #fgNo# + '%'</isNotEmpty>
+                          <isNotEmpty prepend="AND" property="fgName">  FG.FGNAME  like  '%' + #fgName# + '%'</isNotEmpty>
+                 ) QUE
+                 ON (QUE.FGID = FGP.FGID AND QUE.PARTID = FGP.PARTID)
+                 WHEN MATCHED THEN DELETE;
+        </isNotEmpty>
+	</update>
+	
+	<statement id="mergeCustomer" parameterClass="th.co.nttdata.tki.bean.MPart">
+		<isNotEmpty property="partId">
+			MERGE INTO m_fg_customer f
+			USING (SELECT MAX(a.fgId) as fgId,MAX(a.customerId) as customerId  from 
+					(SELECT fgId, customerId FROM m_fg_customer 
+					 WHERE fgId = #fgId# and customerId = #customerId# UNION ALL SELECT -1,-1) a) op
+			ON (f.fgId = op.fgId and f.customerId = op.customerId)
+			WHEN NOT MATCHED THEN
+				INSERT(fgId,customerId)
+				VALUES(#fgId#,#customerId#);
+		</isNotEmpty>
+	</statement>
+	
+	
+	<delete id="deletePart" parameterClass="th.co.nttdata.tki.bean.MPart">
+		<iterate property="partList">
+			<isNotEmpty property="partList[].fgId">
+				<isNotEmpty property="partList[].partId">				
+					DELETE FROM m_fg_part WHERE partid = #partList[].partId# AND fgid = #partList[].fgId#
+				</isNotEmpty>
+			</isNotEmpty>
+		</iterate>
+	</delete>
+	
+	<delete id="deleteCustomer" parameterClass="th.co.nttdata.tki.bean.MPart">
+		<iterate property="partList">
+			<isNotEmpty property="partList[].fgId">
+				DELETE FROM m_fg_customer WHERE fgid = #partList[].fgId# AND customerid = #partList[].customerId#
+			</isNotEmpty>
+		</iterate>
+	</delete>
+	
+	<delete id="deleteFg" parameterClass="th.co.nttdata.tki.bean.MPart">
+		<iterate property="partList">
+			<isNotEmpty property="partList[].fgId">
+				DELETE FROM m_fg WHERE fgid = #partList[].fgId#
+			</isNotEmpty>
+		</iterate>
+	</delete>
+	
+</sqlMap>

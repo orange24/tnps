@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_dailywk">
+
+	<sql id="queryProperties">
+		FROM t_dailywk m, t_dailywk_detail d, m_part p, m_wip w
+		WHERE
+			m.dailywkid = d.dailywkid AND d.partid = p.partid AND m.wip = w.wip
+			<isNotEmpty prepend="AND" property="dailyWKId"> m.dailywkid = #dailyWKId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateFr"> m.reportdate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> m.reportdate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName"> p.partname LIKE #partName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo"> p.partno LIKE #partNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip"> m.wip = #wip# </isNotEmpty>
+			<isGreaterThan prepend="AND" property="reportType" compareValue="0"> m.reportType = #reportType# </isGreaterThan>
+			<isNotEmpty prepend="AND" property="shifts">
+				m.shift IN <iterate property="shifts" open="(" close=")" conjunction=",">#shifts[]#</iterate>
+			</isNotEmpty>
+	</sql>
+
+	<select id="query" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWK">
+		SELECT DISTINCT
+			 m.dailyWKId
+			,m.shift
+			,m.createDate
+			,m.lastUpdate
+			,m.reportDate
+			,m.reportType
+			,m.createBy
+			,m.updateBy
+			,m.wip
+			,w.wipName
+			,CASE m.reporttype WHEN 1 THEN 'Usual' WHEN 2 THEN 'Trial Product' WHEN 3 THEN 'Replacement' WHEN 4 THEN 'Other' END AS reportName
+			,CASE m.shift WHEN 'D' THEN 'Day' WHEN 'N' THEN 'Night' ELSE ' ' END AS shiftName
+		<include refid="queryProperties"/>
+		ORDER BY lastUpdate DESC
+	</select>
+
+	<select id="count" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="int">
+		SELECT
+			count(DISTINCT m.dailyWKId)
+		<include refid="queryProperties"/>
+	</select>
+	
+	<select id="queryWorkOrderNoList" resultClass="th.co.nttdata.tki.bean.MWorkOrder" parameterClass="th.co.nttdata.tki.bean.MWorkOrder">
+		SELECT TOP 50 
+		       wo.workorderno, v.partid, v.customerid,
+		       (wo.workorderqty - ISNULL(wk.ttl,0)) as workOrderQty
+		FROM v_cust_fg_part v
+		<isEqual property="reportType" compareValue="1"> 
+			INNER JOIN m_part_wip pw on v.partid = pw.partid		
+		</isEqual>
+		INNER JOIN m_workorder wo on v.partid = wo.partid
+		LEFT OUTER JOIN 
+			(select wkd.partid, wkd.workorderno, SUM(wkd.qty) as ttl
+			 from t_dailywk_detail wkd
+			 <dynamic prepend="WHERE">				 
+				<isNotEmpty prepend="AND" property="customerId"> wkd.customerid = #customerId# </isNotEmpty>
+				<isNotEmpty prepend="AND" property="partId"> wkd.partid = #partId# </isNotEmpty>
+				<isNotEmpty prepend="AND" property="workOrderNo"> wkd.workorderno like #workOrderNo# + '%' </isNotEmpty>
+			</dynamic>
+			 group by wkd.partid, wkd.workorderno) wk
+		on wo.partid = wk.partid and wo.workorderno = wk.workorderno
+		<dynamic prepend="WHERE">
+			<isEqual prepend="AND" property="reportType" compareValue="1">pw.wip = #wip#</isEqual> 
+			<isNotEmpty prepend="AND" property="customerId"> v.customerid = #customerId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partId"> v.partid = #partId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="workOrderNo"> wo.workorderno like #workOrderNo# + '%' </isNotEmpty>
+		</dynamic>		
+	</select>
+
+	<update id="update" parameterClass="th.co.nttdata.tki.bean.TDailyWK">
+		UPDATE t_dailywk
+		SET
+			 shift      = #shift#
+			,lastupdate = getDate()
+			,reportdate = #reportDate#
+			,reporttype = #reportType#
+			,updateby   = #updateBy#
+			,wip        = #wip#
+		WHERE
+			dailywkid = #dailyWKId#
+	</update>
+
+	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TDailyWK">
+		INSERT INTO t_dailywk(shift, reportdate, reporttype, createby, updateby, wip)
+		VALUES(#shift#, #reportDate#, #reportType#, #createBy#, #updateBy#, #wip#);
+		<selectKey resultClass="int" > SELECT @@IDENTITY AS ID </selectKey>
+	</insert>
+
+	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.TDailyWK">
+		DELETE FROM t_dailywk WHERE dailywkid = #dailyWKId#
+	</delete>
+	
+	<select id="selectDAL_R03" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKDetail">
+		SELECT TOP $maxRecord$ 
+			 CONVERT(VARCHAR(10),wk.reportDate,103) + ':' + wk.wip + ':' + CAST(d.customerId AS VARCHAR) + ':' + CAST(d.partId AS VARCHAR) as datailRef
+			,wk.reportDate
+			,d.customerId
+			,c.customerCode
+			,wk.wip
+			,d.partId
+			,p.partNo
+			,p.partName
+			,wk.shift
+			,ISNULL(SUM(d.ok),0) as ok
+			,ISNULL(SUM(d.ng),0) as ng
+			,ISNULL(SUM(d.pd),0) as pd
+			,ISNULL(SUM(d.qty),0) as qty
+			,ISNULL(SUM(d.timeused),0) as timeUsed
+			,ISNULL(SUM(d.manpower),0) as manPower
+			,CASE wk.shift WHEN 'D' THEN 'Day' WHEN 'N' THEN 'Night' ELSE '' END AS shiftName
+		FROM t_dailywk_detail d
+		INNER JOIN t_dailywk wk ON wk.dailywkid = d.dailywkid
+		INNER JOIN m_customer c ON d.customerid = c.customerid
+		INNER JOIN m_part p ON d.partid = p.partid
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="reportDateFr"> wk.reportdate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> wk.reportdate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName"> p.partname LIKE #partName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo"> p.partno LIKE #partNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip"> wk.wip = #wip# </isNotEmpty>
+			<isGreaterThan prepend="AND" property="reportType" compareValue="0"> wk.reportType = #reportType# </isGreaterThan>
+			<isNotEmpty prepend="AND" property="shifts">
+				wk.shift IN <iterate property="shifts" open="(" close=")" conjunction=",">#shifts[]#</iterate>
+			</isNotEmpty>
+		</dynamic>
+		GROUP BY wk.reportdate, d.customerid, c.customercode, wk.wip, d.partid, p.partno, p.partname, wk.shift
+		ORDER BY wk.reportdate, c.customercode, wk.wip, p.partno, p.partname, wk.shift
+	</select>
+	
+	<select id="countDAL_R03" resultClass="Integer">
+		SELECT 
+			COUNT(*) 
+		FROM 
+		(
+			SELECT 
+				COUNT(*) AS rowData
+			FROM t_dailywk_detail d
+			INNER JOIN t_dailywk wk ON wk.dailywkid = d.dailywkid
+			GROUP BY wk.reportdate, d.customerid, wk.wip, d.partid, wk.shift
+		) c
+	</select>
+	
+	<select id="selectDAL_R03NGReason" resultClass="th.co.nttdata.tki.bean.TDailyWKNGReason">
+		SELECT
+			 CONVERT(VARCHAR(10),wk.reportDate,103) + ':' + wk.wip + ':' + CAST(d.customerId AS VARCHAR) + ':' + CAST(d.partId AS VARCHAR) + ':' + CAST(ng.reasonId AS VARCHAR) as idRef
+			,ISNULL(SUM(ng.ng),0) as ng
+		FROM t_dailywk_detail d
+		INNER JOIN t_dailywk wk ON wk.dailywkid = d.dailywkid
+		INNER JOIN m_part p ON d.partid = p.partid
+		INNER JOIN t_dailywk_ngreason ng ON ng.dailywkdetailid = d.dailywkdetailid AND ng.dailywkid = wk.dailywkid
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="reportDateFr"> wk.reportdate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> wk.reportdate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName"> p.partname LIKE #partName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo"> p.partno LIKE #partNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip"> wk.wip = #wip# </isNotEmpty>
+			<isGreaterThan prepend="AND" property="reportType" compareValue="0"> wk.reportType = #reportType# </isGreaterThan>
+			<isNotEmpty prepend="AND" property="shifts">
+				wk.shift IN <iterate property="shifts" open="(" close=")" conjunction=",">#shifts[]#</iterate>
+			</isNotEmpty>
+		</dynamic>
+		GROUP BY wk.reportdate, wk.wip, d.customerid, d.partid, ng.reasonid
+	</select>
+	
+	<select id="selectMRDC_R10" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKDetail">
+		SELECT 	TOP $maxRecord$ 
+				CAST(nId AS VARCHAR) AS datailRef
+				,nPartId AS partId
+				,sPartNo AS partNo
+				,sPartName AS partName
+				,sCareerSheetNo AS workOrderNo
+				,dOperationDate AS reportDate
+				,sWip AS wip
+				,sProcess AS wipName
+				,sWorker AS staff
+				,nSortingQty AS qty
+				,nOKQty AS ok
+				,nNGQty AS ng
+				,nSortingTime_Min AS sortingTimeMin
+				,nSortingTime AS sortingTime
+				,nMachineId AS machineId
+				,sMachine AS machineNamey
+  		FROM 	V_11_DailyDeliveryInspection
+  		<dynamic prepend="WHERE">
+  			<isNotEmpty prepend="AND" property="workOrderNo"> sCareerSheetNo LIKE '%'+ #workOrderNo# +'%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="machineId"> nMachineId = #machineId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateFr"> dOperationDate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> dOperationDate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip"> sWip = #wip# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo"> sPartNo LIKE #partNo# +'%' </isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="partName"> sPartName LIKE #partName# +'%' </isNotEmpty>
+  		</dynamic>
+  		ORDER BY dOperationDate, sPartNo, sCareerSheetNo 
+	</select>
+	
+	<select id="countMRDC_R10" resultClass="Integer">
+		SELECT 
+			COUNT(*) 
+		FROM V_11_DailyDeliveryInspection
+	</select>
+	
+	<select id="selectMRDC_R10NGReason" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKNGReason">
+		SELECT 	CAST(ng.nId AS VARCHAR)+':'+ CAST(ng.nReasonid AS VARCHAR)+':'+ng.workorderno  AS idRef,
+				ISNULL(ng.nNGQtyperReason,0) AS ng 
+		FROM 	V_11_DailyDeliveryInspection_NG ng 
+		LEFT JOIN V_11_DailyDeliveryInspection v ON v.nId = ng.nId  and v.sCareerSheetNo = ng.workorderno
+		<!-- WHERE 	ng.reasontype = 1 -->
+		<dynamic prepend="WHERE">
+	  		<isNotEmpty prepend="AND" property="workOrderNo"> v.sCareerSheetNo LIKE '%'+ #workOrderNo# +'%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="machineId"> v.nMachineId = #machineId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateFr"> v.dOperationDate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> v.dOperationDate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip"> v.sWip = #wip# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo"> sPartNo LIKE #partNo# +'%' </isNotEmpty>
+		  	<isNotEmpty prepend="AND" property="partName"> sPartName LIKE #partName# +'%' </isNotEmpty>
+	  	</dynamic>
+	</select>
+	
+	<select id="selectMRDC_R12" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKDetail">
+			SELECT TOP $maxRecord$ 
+				 partid AS partId
+				,sPartNo AS partNo
+				,sPartName AS partName
+				,wip AS wip
+				,sProcess AS wipName 
+				,dOperationdate AS reportDate
+				,machineid AS machineId
+				,sMachineName AS machineName
+				,sWorker AS staff
+				,nOKQty AS ok
+				,nNGQty AS ng
+				,nNGRatio AS ngRatio
+				,nOperationTime
+				,nSecondQty AS secondQty
+				,nShotQty AS shotQty
+				,sCareerSheetNo AS workOrderNo
+				,customerid AS customerId
+				,sCustomer AS customerName
+				,sReportType AS typeName
+				,nId AS id
+				,nStandardProductivity AS standardProductivity
+				,nStandardProductionPrice AS standardProductionPrice
+				,nActualOperatingProductivity AS actualOperatingProductivity
+				,nActualProductionPrice AS actualProductionPrice
+				,nDiff AS diff
+				,nPercentage AS percentage
+			FROM V_13_ActualResultListPerProduct
+	  		<dynamic prepend="WHERE">
+	  			<isNotEmpty prepend="AND" property="wip"> wip = #wip# </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="customerId"> customerid = #customerId# </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="machineId"> machineid = #machineId# </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="reportDateFr"> dOperationdate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+				<isNotEmpty prepend="AND" property="reportDateTo"> dOperationdate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="workOrderNo"> sCareerSheetNo LIKE #workOrderNo# +'%' </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="partNo"> sPartNo LIKE #partNo# +'%' </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="partName"> sPartName LIKE #partName# +'%' </isNotEmpty>
+	  		</dynamic>
+	  		ORDER BY sPartNo, sPartName, wip, dOperationdate
+	</select>
+	
+	<select id="countMRDC_R12" resultClass="Integer">
+		SELECT 
+			COUNT(*) 
+		FROM V_13_ActualResultListPerProduct
+	</select>
+	
+	<select id="selectMRDC_R13" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKDetail">
+		SELECT TOP $maxRecord$ 
+			 sPartNo AS partNo
+			,sPartName AS partName
+			,nTotalQty AS qty
+			,nNGQty AS ng
+			,nOKQty AS ok
+			,nOperationTime
+			,nActualOperatingProductivity AS actualProductivity
+			,nStandardProductivity AS standardProductivity
+			,nStandardProductionPrice AS standardProduction
+			,nActualProductionPrice AS actualProduction
+			,nDiff AS diff
+			,nPercentage AS percentage
+			,sProcess AS wipName
+			,dReportDate AS reportDate
+		FROM V_14_WorkerProductivityCheckList
+  		<dynamic prepend="WHERE">
+  			<isNotEmpty prepend="AND" property="wip"> sWip = #wip# </isNotEmpty>
+  			<isNotEmpty prepend="AND" property="reportDateFr"> [dReportDate] <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> [dReportDate] <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+  			<isNotEmpty prepend="AND" property="partNo"> sPartNo LIKE #partNo# +'%' </isNotEmpty>
+  			<isNotEmpty prepend="AND" property="partName"> sPartName LIKE #partName# +'%' </isNotEmpty>
+  		</dynamic>
+  		ORDER BY dReportDate, sPartNo
+	</select>
+	
+	<select id="countMRDC_R13" resultClass="Integer">
+		SELECT 
+			COUNT(*) 
+		FROM V_14_WorkerProductivityCheckList
+	</select>
+	
+	<select id="selectMRDC_R22" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKDetail">
+			SELECT TOP $maxRecord$ 
+				 sPartNo AS partNo
+				,sPartName AS partName
+				,sProcess AS wipName 
+				,dReportDate AS reportDate
+				,sMachineName AS machineName
+				,sWorker AS staff
+				,nOKQty AS ok
+				,nNGQty AS ng
+				,nOperationTime
+				,sMaterial AS materialType
+				,nTotalQty AS totalQty
+				,nActualOperatingProductivity AS actualProductivity
+				,nStandardProductivity AS standardProductivity
+				,nStandardProductionPrice AS standardProduction
+				,nActualProductionPrice AS actualProduction
+				,nDiff AS diff
+				,nPercentage AS percentage
+			FROM V_32_MachineProductivityCheckList
+	  		<dynamic prepend="WHERE">
+	  			<isNotEmpty prepend="AND" property="wip"> sWip = #wip# </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="machineId"> nMachineID = #machineId# </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="materialId"> nMaterialId = #materialId# </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="reportDateFr"> dReportDate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+				<isNotEmpty prepend="AND" property="reportDateTo"> dReportDate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="partNo"> sPartNo LIKE #partNo# +'%' </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="partName"> sPartName LIKE #partName# +'%' </isNotEmpty>
+	  		</dynamic>
+	  		ORDER BY dReportDate, sPartNo
+	</select>
+	
+	<select id="countMRDC_R22" resultClass="Integer">
+		SELECT 
+			COUNT(*) 
+		FROM V_32_MachineProductivityCheckList
+	</select>
+	
+	<select id="selectCategory" resultClass="java.lang.String">
+		SELECT classifybiz AS category
+  		FROM m_classify_business
+  		ORDER BY classifybiz
+	</select>
+	
+	<select id="selectMRDC_R02" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKDetail">
+			SELECT TOP $maxRecord$ 
+				 sCustomerId AS customerId
+				,sCustomer AS customerCode
+				,sPartId AS partId
+				,sCustomerDeptCode AS partNo
+				,sPartName AS partName
+				,sCategory AS category
+				,nUnitWeight AS unitWeight
+				,nSaleUnitPrice AS saleUnitPrice
+				,nCurrency AS currency
+				,sMaterialName AS materialName
+			FROM V_02_SalesUnitPriceList
+	  		<dynamic prepend="WHERE">
+	  			<isNotEmpty prepend="AND" property="customerId"> sCustomerId = #customerId# </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="partNo"> sPartNo LIKE #partNo# +'%' </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="partName"> sPartName LIKE #partName# +'%' </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="category"> sCategory = #category# </isNotEmpty>
+	  			<isNotEmpty prepend="AND" property="materialId"> nMaterialId = #materialId# </isNotEmpty>
+	  		</dynamic>
+	  		ORDER BY sCustomerDeptCode, sPartName
+	</select>
+	
+	<select id="countMRDC_R02" resultClass="Integer">
+		SELECT 
+			COUNT(*) 
+		FROM V_02_SalesUnitPriceList
+	</select>
+</sqlMap>

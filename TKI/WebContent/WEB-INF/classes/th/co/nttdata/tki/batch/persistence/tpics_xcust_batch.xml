@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="tpics_xcust_batch">
+	<delete id="delete" >
+		delete from tpics_xcust
+	</delete>
+	
+	<insert id="insert" parameterClass="th.co.nttdata.tki.batch.bean.TpicsXCust" >
+		INSERT tpics_xcust (cust,name) 
+		VALUES (#cust#,#name#);
+	</insert>
+</sqlMap>

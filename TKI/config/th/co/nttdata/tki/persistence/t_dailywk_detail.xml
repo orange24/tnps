@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_dailywk_detail">
+
+	<select id="query" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKDetail">
+		SELECT
+			 d.manPower
+			,d.timeUsed
+			,d.customerId
+			,d.dailyWKId
+			,d.ng
+			,d.ok
+			,d.pd
+			,d.partId
+			,d.qty
+			,d.dailyWKDetailId
+			,d.lotNo
+			,d.staff
+			,d.workOrderNo
+			,ISNULL(w.workOrderQty,0) as workOrderQty
+		FROM t_dailywk_detail d
+			LEFT OUTER JOIN (SELECT workOrderNo, partId, SUM(workOrderQty) AS workOrderQty FROM m_workorder GROUP BY workOrderNo, partId) w ON w.partId = d.partId AND w.workOrderNo = d.workOrderNo
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="dailyWKId"> dailywkid = #dailyWKId# </isNotEmpty>
+		</dynamic>
+		ORDER BY dailyWKId, dailyWKDetailId
+	</select>
+
+	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TDailyWKDetail">
+		INSERT INTO t_dailywk_detail(manpower, timeused, customerid, dailywkid, dailywkdetailid, ng, ok, partid, pd, qty, lotno, staff, workorderno) VALUES(#manPower#, #timeUsed#, #customerId#, #dailyWKId#, #dailyWKDetailId#, #ng#, #ok#, #partId#, #pd#, #qty#, #lotNo#, #staff#, #workOrderNo#);
+	</insert>
+
+	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.TDailyWK">
+		DELETE FROM t_dailywk_ngreason WHERE dailywkid = #dailyWKId# AND dailywkdetailid IN ( SELECT dailywkdetailid FROM t_dailywk_detail WHERE dailywkid = #dailyWKId# );
+		DELETE FROM t_dailywk_detail WHERE dailywkid = #dailyWKId#;
+	</delete>
+	
+	<!-- For PRD S02, check daily actual to generate work order and lot no -->
+	<select id="select_daily_actual" parameterClass="th.co.nttdata.tki.bean.TDCPlan" resultClass="java.lang.Integer">
+		SELECT 
+			COUNT(*) 
+  		FROM 
+  			T_DAILYWK_DETAIL DL
+		INNER JOIN 
+			M_WORKORDER WO ON WO.WORKORDERNO = DL.WORKORDERNO
+		INNER JOIN 
+			T_DCPLAN DCP ON DCP.DCPLANID = WO.DCPLANID
+		WHERE 
+			DCP.DCPLANID = #dcPlanId# 
+	</select>
+	
+</sqlMap>

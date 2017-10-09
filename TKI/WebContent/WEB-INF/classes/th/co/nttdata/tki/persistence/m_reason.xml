@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_reason">
+
+	<select id="queryReason" parameterClass="th.co.nttdata.tki.bean.MReason" resultClass="th.co.nttdata.tki.bean.MReason">
+		SELECT
+			 createDate
+			,lastUpdate
+			,parentReasonId
+			,reasonId
+			,reasonType
+			,createBy
+			,description
+			,reasonCode
+			,reasonName
+			,updateBy
+			,LEN(reasonCode) as reasondigit
+		FROM m_reason
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="reasonId"> reasonid = #reasonId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reasonType"> reasontype = #reasonType# </isNotEmpty>
+		</dynamic>
+		ORDER BY reasondigit,reasonCode
+	</select>
+	
+	<sql id="queryProperties">
+		FROM m_reason r
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="reasonTypeCode"> r.reasonType IN 
+				<iterate property="reasonTypeCode" open="(" close=")" conjunction=",">					
+					#reasonTypeCode[]#
+				</iterate>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="reasonCode"> r.reasonCode like '%'+#reasonCode#+'%'</isNotEmpty>
+			<isNotEmpty prepend="AND" property="reasonName"> r.reasonName like '%'+#reasonName#+'%'</isNotEmpty>			
+		</dynamic>
+	</sql>
+	
+	<select id="queryReasonList" parameterClass="th.co.nttdata.tki.bean.MReason" resultClass="th.co.nttdata.tki.bean.MReason">
+		SELECT
+			 r.createDate
+			,r.lastUpdate
+			,r.parentReasonId
+			,r.reasonId
+			,r.reasonType
+			,CASE r.reasonType WHEN 1 THEN 'NG Reason' WHEN 2 THEN 'Machine Stop' WHEN 3 THEN 'Discast' ELSE '' END AS reasonTypeName
+			,r.createBy
+			,r.description
+			,r.reasonCode
+			,r.reasonName
+			,r.updateBy
+		<include refid="queryProperties"/>	
+		ORDER BY r.reasoncode
+	</select>
+	
+	<select id="count" parameterClass="th.co.nttdata.tki.bean.MReason" resultClass="int">
+		SELECT
+			count(*) 
+		<include refid="queryProperties"/>		
+	</select>
+	
+	<select id="queryParentReason" resultClass="th.co.nttdata.tki.bean.MReason">
+		SELECT 	r.reasonId ,r.reasonCode ,r.reasonName , LEN(r.reasoncode) as reasondigit 
+		FROM 	m_reason r
+		where 	r.reasonType = 2 and r.parentReasonId is null
+		ORDER BY reasondigit ,r.reasonCode
+	</select>
+	
+	<insert id="insertReason" parameterClass="th.co.nttdata.tki.bean.MReason">
+		INSERT INTO m_reason (reasoncode ,reasonname ,reasontype ,description ,parentreasonid ,createdate ,createby ,lastupdate ,updateby)
+		VALUES (#reasonCode#,#reasonName#,#reasonType#,#description#,#parentReasonId#,GETDATE(),#createBy#,GETDATE(),#updateBy#)
+	</insert>
+	
+	<update id="updateReason" parameterClass="th.co.nttdata.tki.bean.MReason">
+		UPDATE m_reason 
+		SET reasoncode = #reasonCode#
+		  ,reasonname = #reasonName#
+		  ,reasontype = #reasonType#
+		  ,description = #description#
+		  ,parentreasonid = #parentReasonId# 
+		  ,lastupdate = GETDATE()
+		  ,updateby = #updateBy#
+		WHERE reasonid = #reasonId# 
+	</update>
+	
+	<delete id="deleteReason" parameterClass="th.co.nttdata.tki.bean.MReason">
+		DELETE FROM m_reason WHERE reasonId = #reasonId#
+	</delete>
+	
+	<select id="queryCheckDupCode" parameterClass="th.co.nttdata.tki.bean.MReason" resultClass="th.co.nttdata.tki.bean.MReason">
+		SELECT *
+		FROM m_reason
+		WHERE reasontype = #reasonType# AND reasoncode = #reasonCode#
+		<isNotEmpty prepend="AND" property="createDate"> reasonid != #reasonId#  </isNotEmpty>		
+	</select>
+	
+	<select id="queryReasonInWipType" parameterClass="th.co.nttdata.tki.bean.MReason" resultClass="th.co.nttdata.tki.bean.MReason">
+		SELECT reasonId, reasonCode, LEN(reasonCode) as reasondigit
+		FROM (	SELECT mrw.reasonid, mr.reasoncode
+				FROM m_reason AS mr 
+				INNER JOIN m_reason_wip AS mrw ON mr.reasonid = mrw.reasonid 
+				INNER JOIN m_wip AS mw ON mrw.wip = mw.wip
+				WHERE (mr.reasontype = #reasonType#) AND (mw.wiptype = #wipType#)
+			 ) AS m_reason
+		GROUP BY reasonId, reasonCode 
+		ORDER BY reasondigit,reasonCode
+	</select>
+	
+	<select id="select_reason_type3" resultClass="th.co.nttdata.tki.bean.MReason">
+		SELECT 
+			reasonId 	AS reasonId,
+			reasonCode 	AS reasonCode,
+			reasonName 	AS reasonName,
+			reasonType 	AS reasonType
+  		FROM 
+  			M_REASON
+  		WHERE 
+  			REASONTYPE = 3
+		ORDER BY 
+			reasonName
+	</select>
+	
+	
+</sqlMap>

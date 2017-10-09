@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_wip_stock">
+
+	<select id="query" parameterClass="th.co.nttdata.tki.bean.TWip" resultClass="th.co.nttdata.tki.bean.TWipStock">
+		SELECT DISTINCT m.*,
+		                DAY(m.reportdate)                                                                     AS reportDay,
+		                ISNULL(ws.ok,0)                                                                       AS ok,
+		                ISNULL(ws.ng,0)                                                                       AS ng,
+		                ISNULL(ws.pd,0)                                                                       AS pd,
+		                ISNULL(ws.qty,0)                                                                      AS qty,
+		                ws.adjuststock                                                                        AS adjuststock,
+		                ISNULL(ws.currentstock,0)                                                                currentstock,
+		                ISNULL(ws.nextwipqty, dbo.GetNextWIPQty(m.customerid, m.partid, m.wip, m.reportDate)) AS nextwipqty,
+		                CASE
+		                                WHEN DAY(m.reportdate) = 1 THEN dbo.GetWIPPrevQty(m.partid, m.wip, m.reportDate)
+		                                ELSE ws.prevstock
+		                END AS prevstock
+		FROM            (
+		                           SELECT     c.calendardate AS reportDate,
+		                                      customerid,
+		                                      customercode AS customer,
+		                                      v.partid,
+		                                      v.partno,
+		                                      v.partname,
+		                                      wp.wip,
+		                                      w.wipname,
+		                                      wp.wiporder
+		                           FROM       (
+		                                             SELECT calendardate
+		                                             FROM   m_calendar
+		                                             WHERE  calendardate BETWEEN #reportDateFr# AND #reportDateTo#) c
+		                           CROSS JOIN
+		                                      (
+		                                                 SELECT     partid,
+		                                                            wip,
+		                                                            wiporder
+		                                                 FROM       m_part_wip
+		                                                            <dynamic prepend="WHERE">
+		                                                            	<isGreaterThan prepend="AND" property="partId" compareValue="0"> partid = #partId# </isGreaterThan>
+		                                                            	<isNotEmpty prepend="AND" property="wip"> wip = #wip# </isNotEmpty>
+		                                                            </dynamic> ) wp
+		                                                 INNER JOIN v_cust_fg_part v
+		                                                 ON         v.partid = wp.partid
+		                                                 INNER JOIN m_wip w
+		                                                 ON         wp.wip = w.wip
+		                                                 WHERE      v.part_isenable = 1
+		                                                            <isGreaterThan prepend="AND" property="customerId" compareValue="0"> v.customerid = #customerId# </isGreaterThan>
+		                                                            <isGreaterThan prepend="AND" property="partId" compareValue="0"> v.partid = #partId# </isGreaterThan> ) m
+		                                                 LEFT JOIN  t_wip_stock ws
+		                                                 ON         m.reportDate = ws.reportdate
+		                                                 AND        m.partid = ws.partid
+		                                                 AND        m.wip = ws.wip
+		                                                 ORDER BY   m.customer,
+		                                                            m.partNo,
+		                                                            m.wipOrder,
+		                                                            m.reportDate
+	</select>
+
+	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.TWip">
+		DELETE FROM t_wip_stock WHERE partid = #partId# AND wip = #wip#
+		<isNotEmpty prepend="AND" property="reportDate"> reportdate = #reportDate# </isNotEmpty>
+		<isNotEmpty prepend="AND" property="reportDateFr"> reportdate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+		<isNotEmpty prepend="AND" property="reportDateTo"> reportdate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+	</delete>
+
+	<select id="queryMRDC_S19" parameterClass="th.co.nttdata.tki.bean.TWip" resultClass="th.co.nttdata.tki.bean.TWipStock">
+		SELECT
+			 sCustomerCode AS customer
+			,sPartNo AS partNo
+			,sPartName AS partName
+			,sCategory AS category
+			,sProcess AS wipName
+			,nPrevStockQty AS carriedBalance
+			,nInQty AS inQty
+			,nOutQty AS outQty
+			,nBalanceStockQty AS stockBalance
+			,nInventoryUnitPrice AS inventoryUnitPrice
+			,nStockValue AS stockValue
+		FROM V_29_WIPStockInquiry
+	  	<dynamic prepend="WHERE">
+	  		<isNotEmpty prepend="AND" property="year"> nYearMonth <![CDATA[ >= ]]> CAST(#year# AS VARCHAR(4)) + RIGHT('0'+ CAST(#month#+1 AS VARCHAR), 2) </isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="wip"> sWIP = #wip# </isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="partNo"> sPartNo LIKE #partNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName"> sPartName LIKE #partName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="category"> sCategory = #category# </isNotEmpty>
+	  	</dynamic>
+	  	<isEqual property="sorting" compareValue="1">
+			ORDER BY sPartNo, nWIPSeq
+		</isEqual>
+		<isEqual property="sorting" compareValue="2">
+			ORDER BY nWIPSeq, sPartNo
+		</isEqual>
+	</select>
+
+	<select id="countMRDC_S19" parameterClass="th.co.nttdata.tki.bean.TWip" resultClass="int">
+		SELECT COUNT(*)
+		FROM V_29_WIPStockInquiry
+		<dynamic prepend="WHERE">
+	  		<isNotEmpty prepend="AND" property="year"> nYearMonth <![CDATA[ >= ]]> CAST(#year# AS VARCHAR(4)) + RIGHT('0'+ CAST(#month#+1 AS VARCHAR), 2) </isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="wip"> sWIP = #wip# </isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="partNo"> sPartNo LIKE #partNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName"> sPartName LIKE #partName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="category"> sCategory = #category# </isNotEmpty>
+	  	</dynamic>
+	</select>
+
+	<resultMap class="th.co.nttdata.tki.bean.VProductProcesMaster" id="vProduct" groupBy="keyPart">
+		<result property="keyPart" column="keyPart"/>
+		<result property="dUpdatedDate" column="dUpdatedDate"/>
+		<result property="dUpdatedTime" column="dUpdatedTime"/>
+		<result property="nPartId" column="nPartId"/>
+		<result property="sPartNo" column="sPartNo"/>
+		<result property="sPartName" column="sPartName"/>
+		<result property="sMaterial" column="sMaterial"/>
+		<result property="nMaterialCost" column="nMaterialCost"/>
+		<result property="snp" column="snp"/>
+		<result property="vList" resultMap="t_wip_stock.vProcess"/>
+	</resultMap>
+	<resultMap class="th.co.nttdata.tki.bean.VProductProcesMaster" id="vProcess">
+		<result property="keyWip" column="keyWip"/>
+		<result property="nWIPSeq" column="nWIPSeq"/>
+		<result property="sWIP" column="sWIP"/>
+		<result property="sProcessName" column="sProcess"/>
+		<result property="nMachineId" column="nMachineId"/>
+		<result property="sLineMachineCD" column="sLineMachineCD"/>
+		<result property="sMachine" column="sMachine"/>
+	</resultMap>
+
+	<select id="queryMRDC_S05" parameterClass="th.co.nttdata.tki.bean.VProductProcesMaster" resultMap="vProduct">
+		SELECT TOP $maxRecord$
+		  dUpdatedDate + ':' + dUpdatedTime + ':' + CAST(nPartId AS VARCHAR) as keyPart,
+		  dUpdatedDate
+	      ,dUpdatedTime
+	      ,nPartId
+	      ,sPartNo
+	      ,sPartName
+	      ,sMaterial
+	      ,nMaterialCost
+	      ,snp
+	      ,CAST(nWIPSeq AS VARCHAR)+ ':' + sWIP as keyWip
+	      ,nWIPSeq
+	      ,sWIP
+	      ,sProcess
+	      ,nMachineId
+	      ,sLineMachineCD
+	      ,sMachine
+	  	FROM V_05_ProductProcessMaster
+  		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="reportDateFr"> CONVERT(DATETIME,dUpdatedDate,103) <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> CONVERT(DATETIME,dUpdatedDate,103) <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip"> sWIP = #wip# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="nMachineId"> nMachineId = #nMachineId# </isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="sPartNo"> sPartNo LIKE #sPartNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="sPartName"> sPartName LIKE #sPartName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="sCategory"> sCategory = #sCategory# </isNotEmpty>
+	  	</dynamic>
+	  	ORDER BY dUpdatedDate, dUpdatedTime, sPartNo, nWIPSeq ,sLineMachineCD
+	</select>
+
+	<select id="countMRDC_R05" resultClass="Integer">
+		SELECT
+			COUNT(*)
+		FROM V_05_ProductProcessMaster
+	</select>
+</sqlMap>

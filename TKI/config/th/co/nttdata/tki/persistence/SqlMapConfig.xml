@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMapConfig
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+
+	<settings cacheModelsEnabled="false" enhancementEnabled="true" useStatementNamespaces="true" />
+
+	<sqlMap resource="th/co/nttdata/tki/persistence/batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/master.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_action.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_calendar.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_customer.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_fg.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_leadtime.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_machine.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_menu.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_mold.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_mold_detail.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_mold_part.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_part.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_part_wip.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_reason.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_reason_wip.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_role.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_role_action.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_role_menu.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_user.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_user_access_wip.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_user_customer.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_wip.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_mfgMaster.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_nirvana_sync_master.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_partRoutingMaster.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_workorder.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_printer.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_dailymc.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_dailymc_detail.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_dailymc_ngreason.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_dailymc_stopmc.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_dailymcwk.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_dailywk.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_dailywk_detail.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_dailywk_ngreason.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_fg_detail.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_fg_stock.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_fg_stock_adjust.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_fg_junk.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_mold_history.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_nir_export_total.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_pending.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_rework_adjust.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_wip_deadline.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_wip_stock.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_wip_stockadjust.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_wip_junk.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_deliveryplan.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/v_daily_monthlysales.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_material.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_worker.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_dcplan.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_lotno.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_lotno_gentmp.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_taglabel.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_lot_sequence.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_taglabel_history.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_doccontrol.xml" />
+
+	<!-- batch process -->
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/cfg_interface_mapping_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/cfg_system_config.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/m_mold_shot_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/t_fg_stock_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/t_daily_summary_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/t_pending_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/t_wip_stock_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/m_workorder_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/m_leadtime_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/m_batch_control.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/m_nirvana_sync_master_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/t_deadline_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/tpics_cbom_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/tpics_cust_fg_part_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/tpics_workorder_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/tpics_xcust_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/tpics_xsect_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/tpics_XBAIK_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/tpics_XITEM_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/tpics_clotseqno_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/t_stock_export_history_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/m_currency_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/m_fg_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/m_uom_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/Ss_dataexch3_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/t_fg_detail_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/t_nir_export_total_batch.xml" />
+
+</sqlMapConfig>

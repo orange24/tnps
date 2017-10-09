@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_wip_junk">
+
+	<sql id="queryCondition">
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="customerId">
+				customerid = #customerId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip">
+				wip = #wip#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo">
+				partno LIKE #partNo# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName">
+				partname LIKE #partName# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="workOrderNo">
+				workorderno LIKE #workOrderNo# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="lotNo">
+				lotno LIKE #lotNo# + '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="junkQtyMin">
+				junkqty <![CDATA[ >= ]]> #junkQtyMin#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="junkQtyMax">
+				junkqty <![CDATA[ <= ]]> #junkQtyMax#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="amountFr">
+				junkamount <![CDATA[ >= ]]> #amountFr#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="amountTo">
+				junkamount <![CDATA[ <= ]]> #amountTo#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<sql id="queryProperties">
+		FROM
+			(
+	  			SELECT *
+	  			FROM V_T_Junk_DC
+	  			<include refid="queryCondition"/> 
+  				UNION ALL
+  				SELECT *
+  				FROM V_T_Junk_WIP
+  				<include refid="queryCondition"/>
+			) wip   
+  		LEFT JOIN t_wip_stock ws on wip.partid = ws.partid 
+        	and wip.wip = ws.wip
+        	and ws.reportdate = CONVERT(DATETIME,DATEADD(hh,-24,#monthYear#))
+   		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="stockQtyMin">
+				ISNULL(ws.adjuststock, ISNULL(ws.currentstock,0)) <![CDATA[ >= ]]> #stockQtyMin#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="stockQtyMax">
+				ISNULL(ws.adjuststock, ISNULL(ws.currentstock,0)) <![CDATA[ <= ]]> #stockQtyMax#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+
+	<select id="queryWipJunk" parameterClass="th.co.nttdata.tki.bean.TWipJunk" resultClass="th.co.nttdata.tki.bean.TWipJunk">
+		SELECT 
+			wip.customerId
+      		,wip.customerCode
+      		,wip.customerName
+      		,wip.partId
+			,wip.partNo
+			,wip.partName
+			,wip.wip
+			,wip.workOrderNo
+			,wip.lotNo
+			,wip.lastReportDate
+			,wip.junkQty
+			,wip.junkamount AS amount
+			,ISNULL(ws.adjuststock, ISNULL(ws.currentstock,0)) AS stockQty
+			,CASE
+				WHEN DATEDIFF(DAY,CONVERT(DATE,wip.lastReportDate),CONVERT(DATE,GETDATE())) <![CDATA[ > ]]> 40
+				OR (CONVERT(DATE,wip.lastReportDate) IS NULL) 
+				THEN 1
+				ELSE 0 
+			END AS isEnable
+		<include refid="queryProperties"/>
+	</select>
+	
+	<select id="count" parameterClass="th.co.nttdata.tki.bean.TWipJunk" resultClass="integer">
+		SELECT
+			count(*)
+		<include refid="queryProperties"/>
+	</select>
+
+	<insert id="insertWipJunk" parameterClass="th.co.nttdata.tki.bean.TWipJunk">
+		INSERT INTO t_wip_junk
+           (
+				customerid
+				,partid
+				,wip
+				,workorderno
+				,lotno
+				,junkqty
+				,junkamount
+				,createby
+				,updatedate
+				,updateby
+			)
+		VALUES
+           (
+           		#customerId#
+           		,#partId#
+				,#wip#
+				,#workOrderNo#
+				,#lotNo#
+				,#junkQty#
+				,#amount#
+				,#createBy#
+				,GETDATE()
+				,#updateBy#
+			)
+	</insert>
+
+	<select id="getCurrentStock" parameterClass="th.co.nttdata.tki.bean.TWipJunk" resultClass="integer">
+		SELECT  ISNULL(MIN(ISNULL(ws1.adjuststock,ws1.currentstock)),0) as stock
+  		FROM 	t_wip_stock ws1
+  		WHERE 	partid = #partId# 
+  		AND 	wip = #wip#
+  		AND 	reportdate = (
+  								SELECT 	MAX(ws2.reportdate) 
+  								FROM 	t_wip_stock ws2 
+  								WHERE 	ws1.wip = ws2.wip 
+  								AND 	ws1.partid = ws2.partid
+  							  )
+	</select>
+</sqlMap>
