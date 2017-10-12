@@ -65,11 +65,11 @@
 			,SUM(tb.totalfgsold) AS totalfgsold 
 		FROM 
 			(
-				SELECT v.customercode, m.moldname, v.partname, v.partno, h.reportdate, h.moldid, h.moldno,h.totaldcshot, 0 AS totalfgsold 
+				SELECT distinct v.customercode, m.moldname, v.partname, v.partno, h.reportdate, h.moldid, h.moldno,h.totaldcshot, 0 AS totalfgsold 
 				FROM t_mold_dc_history h 
 				<include refid="queryProperties2"/>
 				UNION ALL
-				SELECT v.customercode, m.moldname, v.partname, v.partno, h.reportdate, h.moldid, h.moldno, 0 AS totaldcshot, case when h.totalfgsold > 0 then h.totalfgsold / d.qtyshot else h.totalfgsold end  totalfgsold 
+				SELECT distinct v.customercode, m.moldname, v.partname, v.partno, h.reportdate, h.moldid, h.moldno, 0 AS totaldcshot, case when h.totalfgsold > 0 then h.totalfgsold / d.qtyshot else h.totalfgsold end  totalfgsold 
 				FROM t_mold_fg_history h 
 				<include refid="queryProperties2"/>
 			) tb

@@ -34,18 +34,18 @@
 		                       md.alertshot                                      AS alertShot,
 		                       md.guaranteeshot                                  AS guaranteeShot,
 		                       md.initialshot                                    AS initialShot,
-		                       md.initialshot + ISNULL((
+		                       ISNULL(md.initialshot,0) + ISNULL((
 		                       		SELECT SUM(totaldcshot) 
 		                       		FROM t_mold_dc_history 
 		                       		WHERE moldid = md.moldid AND moldno = md.moldno
 		                       			AND reportdate <![CDATA[ >= ]]> md.startdate 
-		                       			AND reportdate <![CDATA[ <= ]]> md.enddate), 0) AS totalDCShot,
-		                       md.initialshot + ISNULL((
+		                       			AND reportdate <![CDATA[ <= ]]> isnull(md.enddate,'3000-01-01')), 0) AS totalDCShot,
+		                       ISNULL(md.initialshot,0) + ISNULL((
 		                       		SELECT SUM(totalfgsold) 
 		                       		FROM t_mold_fg_history 
 		                       		WHERE moldid = md.moldid AND moldno = md.moldno
 		                       			AND reportdate <![CDATA[ >= ]]> md.startdate 
-		                       			AND reportdate <![CDATA[ <= ]]> md.enddate), 0) AS totalFGSold,
+		                       			AND reportdate <![CDATA[ <= ]]> isnull(md.enddate,'3000-01-01')), 0) AS totalFGSold,
 		                       md.startdate,
 		                       md.enddate,
 		                       CASE

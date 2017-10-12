@@ -20,7 +20,7 @@
 	</select>
 	<insert id="insert_lot_sequence" parameterClass="th.co.nttdata.tki.bean.TLotSequence">
 		<iterate property="lotSequenceList">
-			INSERT INTO T_LOT_SEQUENCE
+			<!-- INSERT INTO T_LOT_SEQUENCE
 	           (TAGID
 	           ,SEQ
 	           ,LOTSEQNO
@@ -31,7 +31,22 @@
 	           ,#lotSequenceList[].seq#
 	           ,#lotSequenceList[].lotSeqNo#
 	           ,#lotSequenceList[].lotSeqQty#
-	           ,#lotSequenceList[].printStatus#)
+	           ,#lotSequenceList[].printStatus#) -->
+	           
+	        MERGE INTO T_LOT_SEQUENCE b
+			USING (SELECT #lotSequenceList[].lotSeqNo# as LOTSEQNO) t
+			ON (b.LOTSEQNO = t.LOTSEQNO)
+			WHEN NOT MATCHED THEN
+				INSERT (TAGID
+	           ,SEQ
+	           ,LOTSEQNO
+	           ,LOTSEQQTY
+	           ,FLAGPRINT)
+				VALUES(#lotSequenceList[].tagId#
+	           ,#lotSequenceList[].seq#
+	           ,#lotSequenceList[].lotSeqNo#
+	           ,#lotSequenceList[].lotSeqQty#
+	           ,#lotSequenceList[].printStatus#);
            </iterate>
 	</insert>
 	

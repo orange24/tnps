@@ -151,6 +151,7 @@ public class DAL_S02Controller extends AbstractBaseController {
 	
 	@RequestMapping(value="/DAL_S02_lotno", method=RequestMethod.POST)
 	public @ResponseBody MWorkOrder DisplayCPByLotno( String lotNo, String wip,Integer reportType  ) {
+		System.out.println("lotno = "+lotNo+", wip="+wip+" , reportType="+reportType);
 		return dalS02Logic.searchLotno(lotNo,wip,reportType);
 	}
 	

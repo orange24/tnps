@@ -384,6 +384,7 @@
 				if( partId ) {
 					boxPartNo.val(partId).change();
 				}
+				
 
 				// <!-- Sort Data list -->
 // 				var selectList = boxPartNo.find('option');
@@ -417,6 +418,10 @@
 					boxPartNo.data("partId", "");
 				}
 				
+				var moldNo = boxMoldNo.data("moldNo");
+				if( moldNo ) {
+					boxMoldNo.val(moldNo).change();
+				}
 				// <!-- Sort Data list -->
 // 				var selectList = boxMoldNo.find('option');
 // 				selectList.sort(function(a,b){
@@ -470,6 +475,11 @@
 					boxMoldName.find("option:eq(1)").attr("selected", true).end().change();
 				}
 
+				var moldId = boxMoldName.data("moldId");
+				if( moldId ) {
+					boxMoldName.val(moldId).change();
+				}
+				
 				// <!-- Sort Data list -->
 // 				var selectList = boxMoldName.find('option');
 // 				selectList.sort(function(a,b){
