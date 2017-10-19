@@ -150,7 +150,7 @@ public class PRD_S03LogicImpl implements PRD_S03Logic {
 		for (int i = 0; i < param.size(); i++) {
 			object = new TDCPlan();
 			BeanUtils.populate(object, param.get(i));
-			System.out.println(i+".) "+param.get(i));
+//			System.out.println(i+".) "+param.get(i));
 			list.add(object);
 		}
 		return list;

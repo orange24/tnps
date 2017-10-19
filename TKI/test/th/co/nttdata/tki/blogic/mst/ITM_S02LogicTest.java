@@ -29,7 +29,6 @@ public class ITM_S02LogicTest extends DaoSpringTest {
 		
 		try {
 			partTPics = itm_S02Logic.query(part);
-			System.out.println(partTPics);
 			Assert.assertNotNull(partTPics.getPartList());
 //			Assert.assertEquals(7, tfg.getDetails().size());
 		} catch (Exception e) {
@@ -73,7 +72,6 @@ public class ITM_S02LogicTest extends DaoSpringTest {
 		
 		try {
 			itm_S02Logic.save(part);
-			System.out.println(part);
 //			Assert.assertNotNull(result.get);
 //			Assert.assertEquals(7, tfg.getDetails().size());
 		} catch (Exception e) {

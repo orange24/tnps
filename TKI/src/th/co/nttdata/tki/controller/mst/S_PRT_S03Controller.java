@@ -67,8 +67,6 @@ public class S_PRT_S03Controller extends AbstractBaseController {
 	List<PartRoutingMaster> getProcessList(PartRoutingMaster prMaster) {
 		PartRoutingMaster partRoutingMaster = new PartRoutingMaster();
 		partRoutingMaster = s_prt_S03Logic.selectProcess();
-		System.out.println(partRoutingMaster.getPartRoutinglist().get(1)
-				.getProcess());
 		return partRoutingMaster.getPartRoutinglist();
 	}
 

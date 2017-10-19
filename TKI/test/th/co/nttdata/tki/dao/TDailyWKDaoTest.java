@@ -20,7 +20,6 @@ public class TDailyWKDaoTest extends AbstractTransactionalJUnit4SpringContextTes
 	public void query_WipDC() {
 		try {
 			TDailyWK dailyWK = dailyWKDao.selectDAL_R03(new TDailyWK());
-			System.out.println(mapper.writeValueAsString(dailyWK));
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.assertTrue(false);

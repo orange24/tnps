@@ -109,7 +109,6 @@ public class TPendingDaoTest extends AbstractTransactionalJUnit4SpringContextTes
 			Assert.assertEquals(new Integer(1), pending.getPageTotal());
 			Assert.assertEquals(1, pending.getAdjustList().size());
 			Assert.assertEquals(1, pending.getAdjustList().get(0).getReworkList().size());
-			System.out.println(pending.getAdjustList().get(0).getWip());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.assertTrue(false);

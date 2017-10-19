@@ -88,7 +88,6 @@ public class MUserDaoTest extends AbstractTransactionalJUnit4SpringContextTests 
 		userDao.queryList(user);
 		Assert.assertNotNull(user);
 		Assert.assertTrue(user.getUserList().size()>0);
-		System.out.println(user.getUserList().size());
 	}
 	
 }

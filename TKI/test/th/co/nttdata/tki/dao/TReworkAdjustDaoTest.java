@@ -121,7 +121,6 @@ public class TReworkAdjustDaoTest extends AbstractTransactionalJUnit4SpringConte
 		try {
 			pending = pendingDao.query(pending);
 			Assert.assertNotNull(pending.getWipList());
-			System.out.println(pending.getWipList());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.assertTrue(false);
@@ -143,7 +142,6 @@ public class TReworkAdjustDaoTest extends AbstractTransactionalJUnit4SpringConte
 //			Assert.assertEquals(new Integer(3), pending.getPageTotal());			
 			Assert.assertEquals(1, pending.getAdjustList().size());
 			Assert.assertTrue(pending.getAdjustList().get(0).getReworkList().size() > 0);
-			System.out.println(pending.getAdjustList().get(0).getReworkList());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.assertTrue(false);

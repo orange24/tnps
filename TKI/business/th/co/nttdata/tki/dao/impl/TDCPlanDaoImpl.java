@@ -19,7 +19,7 @@ public class TDCPlanDaoImpl extends AbstractBaseDao implements TDCPlanDao {
 
 	@Override
 	public void insertDCPlan(TDCPlan object) {
-		System.out.println(object.toString());
+//		System.out.println(object.toString());
 		insert("t_dcplan.insert_dcplan", object);
 	}
 

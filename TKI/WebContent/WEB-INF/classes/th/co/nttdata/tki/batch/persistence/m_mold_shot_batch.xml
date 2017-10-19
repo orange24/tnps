@@ -107,7 +107,7 @@
 	</update>
 	
 		
-	<insert id="insertMoldFGHistory" parameterClass="java.util.Date" >
+	<insert id="insertMoldFGHistory_bkk" parameterClass="java.util.Date" >
 		
 	INSERT INTO t_mold_fg_history (reportdate, moldid, moldno, totalfgsold) 
 		SELECT 
@@ -134,7 +134,7 @@
 		GROUP BY fgout.reportdate, dcp.moldid, dcp.moldno
 	</insert>
 	
-	<insert id="insertMoldFGHistory_old" parameterClass="java.util.Date" >
+	<insert id="insertMoldFGHistory" parameterClass="java.util.Date" >
 		INSERT INTO t_mold_fg_history (reportdate, moldid, moldno, totalfgsold) 
 		SELECT 
        		fgout.reportdate AS reportDate,

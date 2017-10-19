@@ -32,7 +32,6 @@ public class WIPDeadline extends AbstractTransactionalJUnit4SpringContextTests {
 	public void batch() {
 		Date startDate = new Date();
 		startDate = DateUtils.round(startDate, Calendar.DATE);
-		System.out.println(startDate);
 		BigDecimal shiftHour = new BigDecimal(settings.getProperty("CMM.shiftHour", "12"));
 		int shiftPerDay = 24/shiftHour.intValue();
 		List<Map<String, Object>> productionPlan = new ArrayList<Map<String,Object>>();
@@ -93,6 +92,5 @@ public class WIPDeadline extends AbstractTransactionalJUnit4SpringContextTests {
 				}
 			}
 		}
-		System.out.println(productionPlan);
 	}
 }

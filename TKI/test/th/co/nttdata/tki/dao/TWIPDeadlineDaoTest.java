@@ -21,7 +21,6 @@ public class TWIPDeadlineDaoTest extends AbstractTransactionalJUnit4SpringContex
 	public void getDeadlineList() {
 		try {
 			TWIPDeadline TWipDeadline = (TWIPDeadline)tWIPdeadlineDao.getDeadlineList(new TWIPDeadline());
-			System.out.println(mapper.writeValueAsString(TWipDeadline));
 			Assert.assertEquals(1, TWipDeadline.getDeadlinePartList().size());
 			/*Assert.assertEquals(5, TWipDeadline.get(0).getDeadlineList().size());
 			Assert.assertEquals(2, TWipDeadline.get(0).getDeadlineList().get(0).getDeadlineDateList().size());

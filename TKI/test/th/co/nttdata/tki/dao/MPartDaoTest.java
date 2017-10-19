@@ -24,8 +24,6 @@ public class MPartDaoTest extends AbstractTransactionalJUnit4SpringContextTests 
 		
 		try {
 			MPart actual = mPartDao.getPartNotSync(part);
-			System.out.println(actual.getPartList());
-			System.out.println(actual.getPageTotal());
 			Assert.assertNotNull(actual.getPartList());			
 			Assert.assertEquals(5, actual.getPartList().size());
 		} catch (Exception e) {
@@ -37,14 +35,12 @@ public class MPartDaoTest extends AbstractTransactionalJUnit4SpringContextTests 
 	@Test
 	public void query_Cust_AAP() {
 		List<MPart> result = mPartDao.getPartList();
-		System.out.println(result);
 		Assert.assertNotNull(result);
 	}
 	
 	@Test
 	public void query_Master_Cust_AAP() {
 		MPart result = mPartDao.getPartMasterList(new MPart());
-		System.out.println(result);
 		Assert.assertNotNull(result);
 	}
 	
@@ -134,7 +130,6 @@ public class MPartDaoTest extends AbstractTransactionalJUnit4SpringContextTests 
 		try {
 			pending = pendingDao.query(pending);
 			Assert.assertNotNull(pending.getWipMap());
-			System.out.println(pending.getWipMap().get(1).getWipList());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.assertTrue(false);
@@ -156,7 +151,6 @@ public class MPartDaoTest extends AbstractTransactionalJUnit4SpringContextTests 
 //			Assert.assertEquals(new Integer(3), pending.getPageTotal());			
 			Assert.assertEquals(1, pending.getAdjustList().size());
 			Assert.assertTrue(pending.getAdjustList().get(0).getReworkList().size() > 0);
-			System.out.println(pending.getAdjustList().get(0).getReworkList());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.assertTrue(false);

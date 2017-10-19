@@ -29,7 +29,7 @@ public class MWorkOrderDaoImpl extends AbstractBaseDao implements MWorkOrderDao 
 				map.put("lotQtyIn", endLotQty - fgIn);
 				map.put("lotQtyOut", endLotQty - fgOut);
 			} else {
-				System.out.println(map);
+//				System.out.println(map);
 				Integer lotQty = (Integer) map.get("lotQty");
 				map.put("lotQtyIn", lotQty - fgIn);
 				map.put("lotQtyOut", lotQty - fgOut);
