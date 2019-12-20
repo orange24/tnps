@@ -75,7 +75,7 @@ function fnDelete( row ) {
 		<div id="navcontainer">
 			<ul id="navlist">
 				<li><a href="MLD_S01.html" id="current">Mold Search/List</a></li>
-				<li><a href="MLD_S02.html" >Mold Add/Edit</a></li>
+				<security:authorize ifAnyGranted="MLD_S02_ADD_EDIT"><li><a href="MLD_S02.html" >Mold Add/Edit</a></li></security:authorize> 
 				<li><a href="MLD_S03.html" >Mold History Search/List</a></li>
 			</ul>
 		</div>
@@ -188,8 +188,10 @@ function fnDelete( row ) {
 										<c:if test="${moldDetail.fgStatus==3}"><font class="textred">Over Guarantee.</font></c:if>&nbsp;
 									</td>
 									<td align="center"  >
-										<a href="MLD_S02_edit_page.html?action=editAction&moldId=${moldDetail.moldId}&moldNo=${moldDetail.moldNo}"><img src="image/icon/update.gif" width="16" height="16" /></a>
-										<a href="javascript:void(0);" onclick="fnDelete( $(this).closest('tr') );" ><img src="image/icon/delete.gif" width="16" height="16" /></a>
+										<security:authorize ifAnyGranted="MLD_S02_ADD_EDIT">
+											<a href="MLD_S02_edit_page.html?action=editAction&moldId=${moldDetail.moldId}&moldNo=${moldDetail.moldNo}"><img src="image/icon/update.gif" width="16" height="16" /></a>
+											<a href="javascript:void(0);" onclick="fnDelete( $(this).closest('tr') );" ><img src="image/icon/delete.gif" width="16" height="16" /></a>
+										</security:authorize>
 										<a href="MLD_S03_search.html?page=viewHist&customerId=${moldDetail.customerId}&partId=${moldDetail.partId}&moldId=${moldDetail.moldId}&moldNo=${moldDetail.moldNo}"><img src="image/icon/page_find.gif" width="16" height="16" /></a>
 									</td>
 			        			</tr>

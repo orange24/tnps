@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="m_customer_line">
+    
+    <select id="select_search" resultClass="th.co.nttdata.tki.bean.CustomerLine">
+		     SELECT 
+                   LI.*
+           FROM   M_CUSTOMER_LINE     LI
+           WHERE 
+                    LI.CUSTOMERID = #customerId# 
+           ORDER BY LI.CUSTOMERLINEID
+    </select>
+    
+	<delete id="delete_cust_line" parameterClass="th.co.nttdata.tki.bean.CustomerLine">
+		<iterate property="customerLineList">
+			<isNotEmpty property="customerLineList[].customerLineId">
+				DELETE FROM m_customer_line WHERE customerLineId = #customerLineList[].customerLineId#;
+			</isNotEmpty>
+		</iterate>
+	</delete>
+	
+	<insert id="insert_cust_line" parameterClass="th.co.nttdata.tki.bean.CustomerLine">
+		<iterate property="customerLineList">	
+		<isNotNull  property="customerLineList[].customerLineName">		
+			INSERT INTO  m_customer_line 
+				(customerLineName, customerId, 
+				createDate,createBy,lastUpdate,updateBy) 
+			VALUES 
+				(#customerLineList[].customerLineName#, #customerLineList[].customerId#,
+				GETDATE(),#createBy#,GETDATE(),#updateBy#);
+		</isNotNull>
+		</iterate>
+	</insert>
+	
+</sqlMap>

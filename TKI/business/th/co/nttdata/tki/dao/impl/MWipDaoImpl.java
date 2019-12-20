@@ -72,7 +72,7 @@ public class MWipDaoImpl extends AbstractBaseDao implements MWipDao {
 
 	@Override
 	public void save(MWip mWip) {
-		update("m_wip.update", mWip);
+		update("m_wip.updateMwip", mWip);
 		update("m_wip.updateMPartWip", mWip);
 	}
 

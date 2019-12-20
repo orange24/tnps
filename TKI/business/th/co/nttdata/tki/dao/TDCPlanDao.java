@@ -26,4 +26,5 @@ public interface TDCPlanDao {
 
 	Integer workOrderExiting(TDCPlan tdcPlan);
 
+	List<TDCPlan> prdS03GetWip(TDCPlan param);
 }

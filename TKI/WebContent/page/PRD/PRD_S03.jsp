@@ -123,6 +123,7 @@
 			</tr>
 		</table>
 		<input id="btnSave"  type="button" name="btnSave"  class="submit_button" value="Save" />
+		<input id="btnPrintPDF" type="button" name="btnPrintPDF" class="submit_button" value="PDF"  />
 		<input id="btnPrint" type="button" name="btnPrint" class="submit_button" value="Print"  />
 		<input id="btnSelectAndPrint" type="button" name="btnSelectAndPrint" class="submit_button" value="Select and Print"  />
 	</div>
@@ -143,7 +144,37 @@
 			</table>
 			<br/>
 		</div>
+		
+		<div class="grid-header">
+			<label>Print Option</label>
+		</div>
+		<div class="grid-detail">
+		<br/>
+			<table width="100%">
+				<tr>
+					<td align="left">
+						<label>Date</label>  <input id="optionPrintDate" name="optionPrintDate"  class="date" size="15" />
+						<label>Worker</label> <input id="optionPrintWorker" name="optionPrintWorker"/>
+						<label>Qty</label>
+						<label>OK</label> : <input id="optionPrintQtyOK" name="optionPrintQtyOK" size="5"/>
+						<label>NG</label> : <input id="optionPrintQtyNG" name="optionPrintQtyNG" size="5"/>
+					</td>
+				</tr>
+				<tr>
+					<td align="left">
+					<hr/>
+					<div>Process List</div>
+					<div id="processList">
+						
+					</div>
+					</td>
+				</tr>
+			</table>
+			<br/>
+		</div>
+		
 	</div>
 </form:form>
+<iframe id="pdfFrame" name="pdfFrame" style="display:none;"></iframe>
 </body>
 </html>

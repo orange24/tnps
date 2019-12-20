@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import sun.util.logging.resources.logging;
 import th.co.nttdata.tki.bean.MReportType;
 import th.co.nttdata.tki.bean.MWorkOrder;
 import th.co.nttdata.tki.bean.Message;
@@ -41,7 +40,14 @@ public class FNG_S01Controller extends AbstractBaseController {
 	
 	@RequestMapping("/FNG_S01")
 	public ModelAndView init() {
+		TFG TFG = new TFG();
+		TFG.setFgStockType("fgin");
+		
 		return new ModelAndView(PATH_URI).addObject("tfg", new TFG())
+				.addObject(
+						"reportTypeList",
+						masterDao.selectReportTypeList(new MReportType()
+								.setReportCategory(new String[] { TFG.getFgStockType() })))
 				.addObject("minReportDate",
 						settings.getProperty("DAL.reportDate.minDate", "-40d"));
 	}
@@ -53,8 +59,8 @@ public class FNG_S01Controller extends AbstractBaseController {
 				.addObject(
 						"reportTypeList",
 						masterDao.selectReportTypeList(new MReportType()
-								.setReportCategory(new String[] { TFG
-										.getFgStockType() })))
+								.setReportCategory(new String[] { TFG.getFgStockType() })))
+				
 				.addObject("customerMap", commonController.getCustomerSel());
 	}
 

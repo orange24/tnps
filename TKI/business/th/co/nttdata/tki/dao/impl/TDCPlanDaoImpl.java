@@ -68,6 +68,12 @@ public class TDCPlanDaoImpl extends AbstractBaseDao implements TDCPlanDao {
 		return queryForList("t_dcplan.prdS03_select_search", param);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<TDCPlan> prdS03GetWip(TDCPlan param) {
+		return queryForList("t_dcplan.prdS03_select_get_wip", param);
+	}
+	
 	@Override
 	public Integer workOrderExiting(TDCPlan tdcPlan) {
 		return (Integer) queryForObject("t_dcplan.work_order_exiting", tdcPlan);

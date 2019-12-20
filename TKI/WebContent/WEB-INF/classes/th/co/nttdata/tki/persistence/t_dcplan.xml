@@ -410,6 +410,83 @@
   		ORDER BY 
   			DCP.dcPlanDate
 	</select>
+	
+	
+	<select id="prdS03_select_get_wip" parameterClass="th.co.nttdata.tki.bean.TDCPlan" resultClass="th.co.nttdata.tki.bean.TDCPlan">
+		
+		SELECT wip, wipname
+		FROM(
+		SELECT 
+				WIP.WIP as wip,
+				CASE WHEN PW.remark IS NULL OR RTRIM(LTRIM(PW.remark)) = '' then WIP.WIP +' : '+WIP.WIPNAME ELSE PW.remark END AS wipname
+				
+		  		FROM 
+		  			T_LOTNO LOT
+		  		INNER JOIN 
+		  			T_DCPLAN DCP ON DCP.DCPLANID = LOT.DCPLANID
+		  		INNER JOIN 
+		  			M_WORKORDER WO ON WO.DCPLANID = DCP.DCPLANID
+		  		LEFT JOIN 
+		  			M_CUSTOMER CUS ON CUS.CUSTOMERID = DCP.CUSTOMERID
+		  		LEFT JOIN 
+		  			M_PART PART ON PART.PARTID = DCP.PARTID
+		  		LEFT JOIN 
+		  			M_PART_WIP PW ON PW.PARTID = DCP.PARTID
+		  		LEFT JOIN 
+		  			M_WIP WIP ON WIP.WIP = PW.WIP
+		  		LEFT JOIN 
+		  			M_REASON REA ON REA.REASONID = DCP.REASONID
+		  		LEFT JOIN
+		  			M_MOLD_DETAIL MD ON DCP.MOLDID = MD.MOLDID
+		  		LEFT JOIN 
+		  			M_MACHINE MAC ON MAC.MACHINEID = DCP.MACHINEID
+		  			
+		  		<dynamic prepend="WHERE">
+		  			<isNotEmpty prepend="AND" property="wip">
+					 	DCP.wip = #wip#
+					</isNotEmpty>
+					<isNotEmpty property="startLotNo">
+						<isNotEmpty prepend="AND" property="endLotNo">
+					 		LOT.lotNo BETWEEN #startLotNo# AND #endLotNo#
+					 	</isNotEmpty>
+					</isNotEmpty>
+					<isNotEmpty property="machineFrom">
+						<isNotEmpty prepend="AND" property="machineTo">
+							MAC.machineNo BETWEEN #machineFrom# AND  #machineTo#
+						</isNotEmpty>
+					</isNotEmpty>
+					<isNotEmpty property="dcPlanDateFrom">
+						<isNotEmpty prepend="AND" property="dcPlanDateTo">
+					 		DCP.dcPlanDate 
+						 		BETWEEN 
+						 			CONVERT(DATETIME, SUBSTRING(#dcPlanDateFrom#, 7, 4) + SUBSTRING(#dcPlanDateFrom#, 4, 2)  + SUBSTRING(#dcPlanDateFrom#, 1, 2))
+						 		AND 
+					 				CONVERT(DATETIME, SUBSTRING(#dcPlanDateTo#, 7, 4) + SUBSTRING(#dcPlanDateTo#, 4, 2)  + SUBSTRING(#dcPlanDateTo#, 1, 2)) 
+					 	</isNotEmpty>
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="shift">
+					 	DCP.shift = #shift#
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="customerId">
+					 	CUS.customerId = #customerId#
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="partNo">
+					 	PART.partNo LIKE #partNo# + '%'
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="partName">
+					 	PART.partName LIKE #partName# + '%'
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="printStatus">
+					 	LOT.printStatus = #printStatus#
+					</isNotEmpty>
+		  		</dynamic>
+			
+		)a
+		GROUP BY wip, wipname
+  		
+	</select>
+	
+	
 	<select id="work_order_exiting" resultClass="java.lang.Integer" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
 		Select COUNT(*) from
 		(

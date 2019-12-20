@@ -16,6 +16,16 @@
 	<form:form id="cus_s01Form" commandName="mCustomer"
 		action="CUS_S01_search.html" method="POST">
 		
+		<table cellpadding="3" cellspacing="1" border="0" width="100%">
+			<tr>
+				<td><div id="navcontainer">
+						<ul id="navlist">
+							<li><a href="CUS_S01.html" id="current">CUstomer Master</a></li>
+							<li><a href="CUS_S03.html">Customer Line</a></li>
+						</ul>
+					</div></td>
+			</tr>
+		</table>
 		
 		<page:message item="${mCustomer}" /> 
 		<br />

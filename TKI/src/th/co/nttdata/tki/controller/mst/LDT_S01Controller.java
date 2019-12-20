@@ -71,4 +71,15 @@ public class LDT_S01Controller extends AbstractBaseController {
 		.addObject("wipMap",commonControl.getWIPSel())
 		.addObject("customerMap",getCustomerAll());
 	}
+	
+
+	@RequestMapping(value = "/LDT_S01_export", method = RequestMethod.POST)
+	public ModelAndView export(MLeadtime mLeadtime) {
+		mLeadtime = ldtS01Logic.getLeadtimeExportList(mLeadtime);
+		return new ModelAndView("LDT_R01ExcelView")
+				.addObject("mLeadtime",mLeadtime)
+				.addObject("wipMap",commonControl.getWIPAll())
+				.addObject("customerMap",getCustomerAll());
+	}
+	
 }

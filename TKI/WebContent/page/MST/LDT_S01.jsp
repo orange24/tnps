@@ -40,9 +40,14 @@
 		ldts01Form		= $("#ldts01Form"); 
 		btnSearch		= $("#btnSearch");
 		btnSave			= $("#btnSave");
+		btnExport		= $("#btnExport");
 				
 		btnSearch.click(function(){
 			ldts01Form.attr("action","LDT_S01_search.html");
+			ldts01Form.submit();		
+		});	
+		btnExport.click(function(){
+			ldts01Form.attr("action","LDT_S01_export.html");
 			ldts01Form.submit();		
 		});	
 		btnSave.click(function(){			
@@ -192,6 +197,7 @@
 			</tr>
 			<tr>
 				<td align="right">
+					<input name="btnExport" type="button" id="btnExport" value="Export Excel File"/>
 					<input name="btnSearch" type="submit" id="btnSearch" value="Search" />
 				</td>
 			</tr>

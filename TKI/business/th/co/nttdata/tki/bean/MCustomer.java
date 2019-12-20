@@ -88,4 +88,5 @@ public class MCustomer extends AbstractBaseBean {
 	public void setIsBarcodeQty(Boolean isBarcodeQty) {
 		this.isBarcodeQty = isBarcodeQty;
 	}
+
 }

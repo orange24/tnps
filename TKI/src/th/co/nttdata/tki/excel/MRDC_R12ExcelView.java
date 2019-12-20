@@ -299,7 +299,11 @@ public class MRDC_R12ExcelView extends AbstractExcelView{
 				} else {
 					if(currRow.getCell(10).getStringCellValue() != ""){
 						hour += Integer.parseInt(currRow.getCell(10).getStringCellValue().substring(0,2));
-						min += Integer.parseInt(currRow.getCell(10).getStringCellValue().substring(3,5));
+						try{
+							min += Integer.parseInt(currRow.getCell(10).getStringCellValue().substring(3,5));
+						}catch(Exception e){
+							min += 0;
+						}
 						sec += Integer.parseInt(currRow.getCell(10).getStringCellValue().substring(6));
 					}
 				}

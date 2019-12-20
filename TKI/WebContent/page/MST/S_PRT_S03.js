@@ -382,20 +382,21 @@ function copyFormatter(row, cell, value, columnDef, dataContext) {
 function searchPartRouting() {
 	$("[id=btnSearch]").click(function() {
 		clearMessage();
-		customerNameSel = $("#customerNameSel");
-		if (customerNameSel.val() == -2147483648) {
-			errors.push({
-				"code" : "err.cmm.001",
-				"arguments" : [ "Customer" ]
-			});
-			message.setErrors(errors);
-			return;
-		} else {
+		
+//		customerNameSel = $("#customerNameSel");
+//		if (customerNameSel.val() == -2147483648) {
+//			errors.push({
+//				"code" : "err.cmm.001",
+//				"arguments" : [ "Customer" ]
+//			});
+//			message.setErrors(errors);
+//			return;
+//		} else {
 			gridheader.show();
 			fgPartRoutingGrid.show();
 			getpartRoutingGridData();
 			createpartRoutingGrid();
-		}
+//		}
 	});
 }
 
@@ -420,15 +421,15 @@ function getpartRoutingGridData() {
 function exportPartRouting() {
 	$("[id=btnExport]").click(function() {
 		clearMessage();
-		customerNameSel = $("#customerNameSel");
-		if (customerNameSel.val() == -2147483648) {
-			errors.push({
-				"code" : "err.cmm.001",
-				"arguments" : [ "Customer" ]
-			});
-			message.setErrors(errors);
-			return;
-		} else {
+//		customerNameSel = $("#customerNameSel");
+//		if (customerNameSel.val() == -2147483648) {
+//			errors.push({
+//				"code" : "err.cmm.001",
+//				"arguments" : [ "Customer" ]
+//			});
+//			message.setErrors(errors);
+//			return;
+//		} else {
 			exportForm.empty();
 			var hd = $(fgPartGrid.getGrid().getHeaderRow());
 			hd.find(".slick-headerrow-column").each(
@@ -447,7 +448,7 @@ function exportPartRouting() {
 			downloadNotify($("<div title='" + message.getMessage("downloadAlertContent") + "'/>'>"
 					+ message.getMessage("downloadAlertContent") + "</div>"));
 			exportForm.submit();
-		}
+//		}
 	});
 }
 

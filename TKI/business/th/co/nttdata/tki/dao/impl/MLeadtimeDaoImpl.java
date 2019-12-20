@@ -22,6 +22,12 @@ public class MLeadtimeDaoImpl extends AbstractBaseDao implements MLeadtimeDao{
 	}
 
 	@Override
+	public MLeadtime queryLeadtimeExportList(MLeadtime mLeadtime) {
+		mLeadtime.setLeadTimeList((List<MLeadtime>)queryForList("m_leadtime.queryLeadtime",mLeadtime));
+		return mLeadtime;
+	}
+
+	@Override
 	public void insertLeadtime(MLeadtime mLeadtime) {
 		try {
 			getSqlMapClient().startBatch();

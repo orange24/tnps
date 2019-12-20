@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="prd_s03" language="groovy" pageWidth="420" pageHeight="595" columnWidth="380" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isFloatColumnFooter="true" uuid="bb408676-5638-4cf1-b348-595f8e6c9aaf">
 	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="181"/>
+	<property name="ireport.y" value="161"/>
 	<parameter name="logo" class="java.lang.String"/>
 	<parameter name="dateParam" class="java.lang.String"/>
 	<queryString>
@@ -21,6 +21,10 @@
 	<field name="moldNo" class="java.lang.String"/>
 	<field name="cavNo" class="java.lang.String"/>
 	<field name="dcPlanDate" class="java.lang.String"/>
+	<field name="optionPrintDate" class="java.lang.String"/>
+	<field name="optionPrintWorker" class="java.lang.String"/>
+	<field name="optionPrintQtyOK" class="java.lang.String"/>
+	<field name="optionPrintQtyNG" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -412,6 +416,34 @@
 					<font size="7"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{wip}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="169" y="0" width="38" height="16" uuid="c4ad76f5-0dca-44c1-b8b8-47abdeb9d969"/>
+				<textElement textAlignment="Center">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{optionPrintDate}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="208" y="0" width="41" height="16" uuid="4f6c3626-7e9c-4914-8fb0-18a1a7cfab6a"/>
+				<textElement textAlignment="Center">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{optionPrintWorker}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="251" y="0" width="28" height="16" uuid="3a93318a-dd4d-4b54-b5ae-b2c0bdd537ea"/>
+				<textElement textAlignment="Center">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{optionPrintQtyOK}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="280" y="0" width="32" height="16" uuid="3ebe6144-fd07-4236-84f4-997d73ed99d2"/>
+				<textElement textAlignment="Center">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{optionPrintQtyNG}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

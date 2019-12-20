@@ -31,6 +31,7 @@ public class TDeliveryPlan extends AbstractBaseBean {
 	private Integer deliveryQty;
 	private Integer timeHr;
 	private Integer timeMin;
+	private String customerLine;
 	
 	// MRDC_S14
 	private Double  saleUnitPrice;
@@ -560,5 +561,11 @@ public class TDeliveryPlan extends AbstractBaseBean {
 	}
 	public void setCurrency(String currency) {
 		this.currency = currency;
+	}
+	public String getCustomerLine() {
+		return customerLine;
+	}
+	public void setCustomerLine(String customerLine) {
+		this.customerLine = customerLine;
 	}
 }

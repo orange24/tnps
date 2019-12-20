@@ -64,6 +64,7 @@
 			LOT.LOTQTY       AS quantity,
 			PW.WIPORDER      AS wipOrder,
 			CASE WHEN PW.remark IS NULL OR RTRIM(LTRIM(PW.remark)) = '' then WIP.WIP +' : '+WIP.WIPNAME ELSE PW.remark END AS wip,
+			WIP.WIP AS wipName,
 			REA.REASONNAME   AS reasonName,
 			MD.MOLDNO		 AS moldNo,
 			MD.CAVNO		 AS cavNo

@@ -96,7 +96,7 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 		HSSFRow row4 = sheet.getRow(4);
 		String lastUpdate = "";
 		String updateBy = "";
-		int minColumn = (d + 4) - 6// 4 = column text
+		int minColumn = (d + 4) - 6+1// 4 = column text
 		, maxColumn = d + 4;
 		// row1 and row2
 		for (int h = minColumn; h < maxColumn; h = h + 3) {
@@ -128,7 +128,7 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 		}
 		// row3 and row4
 		minColumn = (d + 4) - 12;
-		for (int h = minColumn; h < maxColumn; h = h + 3) {
+		for (int h = minColumn+1; h < maxColumn; h = h + 3) {
 			createCell(workbook, row3, h, leftStyle);
 			createCell(workbook, row3, h + 1, leftStyle);
 			createCell(workbook, row3, h + 2, leftStyle);
@@ -140,13 +140,13 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 			createMergedRegion(sheet, row4.getRowNum(), row4.getRowNum(), h,
 					(h + 2));
 
-			if (h == minColumn) {
+			if (h == minColumn+1) {
 				row3.getCell(h).setCellValue("ACKNOWLEDGE SIGN");
-			} else if (h == minColumn + 3) {
+			} else if (h == minColumn + 3+1) {
 				row3.getCell(h).setCellValue("APPROVED BY");
-			} else if (h == minColumn + 6) {
+			} else if (h == minColumn + 6+1) {
 				row3.getCell(h).setCellValue("CHECKED BY");
-			} else if (h == minColumn + 9) {
+			} else if (h == minColumn + 9+1) {
 				row3.getCell(h).setCellValue("PLANING BY");
 				Calendar now = new GregorianCalendar(Locale.US);
 				lastUpdate = dFormat.format(now.getTime());
@@ -160,7 +160,7 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 				"Customer : " + deliveryPlan.getCustomerName());
 		// <!-- set style header day -->
 		if (d < 31) {
-			for (int i = 34; i > d + 3; i--) {
+			for (int i = 35; i > d + 4; i--) {
 				titleHeader.getCell(i).setCellValue("");
 				titleHeader.getCell(i).setCellStyle(workbook.createCellStyle());
 				fstHeader.getCell(i).setCellValue("");
@@ -168,19 +168,19 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 				sndHeader.getCell(i).setCellValue("");
 				sndHeader.getCell(i).setCellStyle(workbook.createCellStyle());
 			}
-			createCell(workbook, fstHeader, d + 3, fstHDRStyle);
+			createCell(workbook, fstHeader, d + 4, fstHDRStyle);
 		}
 
 		// <!-- Generate: Merge Cells -->
-		createMergedRegion(sheet, 0, 0, 0, d + 3);
-		createMergedRegion(sheet, 5, 5, 2, d + 3);
-		fstHeader.getCell(1).setCellValue(
-				"Revise " + deliveryPlan.getRevision());
+		createMergedRegion(sheet, 0, 0, 0, d + 4);
+		createMergedRegion(sheet, 5, 5, 3, d + 4);
 		fstHeader.getCell(2).setCellValue(
+				"Revise " + deliveryPlan.getRevision());
+		fstHeader.getCell(3).setCellValue(
 				deliveryPlan.getMonthName() + " " + deliveryPlan.getYear());
 
 		// <!-- Create Rows. -->
-		int dayNumber = 4;
+		int dayNumber = 5;
 		int oldFgId = 0;
 		int rowNumber = 7;
 		int prevBdeli = 0;
@@ -244,9 +244,25 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 				// <!-- Generate: Merge Cells -->
 				createMergedRegion(sheet, fstRow1.getRowNum(),
 						fstRow11.getRowNum(), 0, 0);
-				firstCell.setValue(detail.getFgName() + " : "
-						+ detail.getFgNo());
+				firstCell.setValue(detail.getFgName());
 
+				Cell stCell = createCell(workbook, fstRow1, 1, r01c00Style);
+				createCell(workbook, fstRow2, 1, r01c00Style);
+				createCell(workbook, fstRow3, 1, r01c00Style);
+				createCell(workbook, fstRow4, 1, r01c00Style);
+				createCell(workbook, fstRow5, 1, r01c00Style);
+				createCell(workbook, fstRow6, 1, r01c00Style);
+				createCell(workbook, fstRow7, 1, r01c00Style);
+				createCell(workbook, fstRow8, 1, r01c00Style);
+				createCell(workbook, fstRow9, 1, r01c00Style);
+				createCell(workbook, fstRow10, 1, r01c00Style);
+				createCell(workbook, fstRow11, 1, r00c11Style);
+
+				// <!-- Generate: Merge Cells -->
+				createMergedRegion(sheet, fstRow1.getRowNum(),
+						fstRow11.getRowNum(), 1, 1);
+				stCell.setValue(detail.getFgNo());
+				
 				
 				// <!-- check BalanceOrder(n-1)-->
 				bFlag = true;
@@ -274,7 +290,7 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 			}
 			if (oldFgId != detail.getFgId()) {
 				oldFgId = detail.getFgId();
-				dayNumber = 3;
+				dayNumber = 4;
 				rowNum = rowNum + 11;
 				cntFG++;
 				prevBdeli = 0;
@@ -306,8 +322,23 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 				// <!-- Generate: Merge Cells -->
 				createMergedRegion(sheet, fstRow1.getRowNum(),
 						fstRow11.getRowNum(), 0, 0);
-				firstCell.setValue(detail.getFgName() + " : "
-						+ detail.getFgNo());
+				firstCell.setValue(detail.getFgName() );
+				
+				Cell stCell = createCell(workbook, fstRow1, 1, r01c00Style);
+				createCell(workbook, fstRow2, 1, r01c00Style);
+				createCell(workbook, fstRow3, 1, r01c00Style);
+				createCell(workbook, fstRow4, 1, r01c00Style);
+				createCell(workbook, fstRow5, 1, r01c00Style);
+				createCell(workbook, fstRow6, 1, r01c00Style);
+				createCell(workbook, fstRow7, 1, r01c00Style);
+				createCell(workbook, fstRow8, 1, r01c00Style);
+				createCell(workbook, fstRow9, 1, r01c00Style);
+				createCell(workbook, fstRow10, 1, r01c00Style);
+				createCell(workbook, fstRow11, 1, r00c11Style);
+				createMergedRegion(sheet, fstRow1.getRowNum(),
+						fstRow11.getRowNum(), 1, 1);
+				stCell.setValue(detail.getFgNo());
+				
 				firstRowOfEachFg = true;
 
 				// <!-- check BalanceOrder(n-1)-->
@@ -334,121 +365,121 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 				}
 			}
 
-			createCell(workbook, fstRow1, 1, r01c01Style).setValue("Forecast");
-			createCell(workbook, fstRow1, 2, rFMc02Style);
-			fstRow1.getCell(2).setCellFormula(
-					"IF(SUM(E" + (E + 0 + rowNum) + ":AI" + (AI + 0 + rowNum)
-							+ ")=0,0,SUM(E" + (E + 0 + rowNum) + ":AI"
+			createCell(workbook, fstRow1, 1+1, r01c01Style).setValue("Forecast");
+			createCell(workbook, fstRow1, 2+1, rFMc02Style);
+			fstRow1.getCell(2+1).setCellFormula(
+					"IF(SUM(F" + (E + 0 + rowNum) + ":AJ" + (AI + 0 + rowNum)
+							+ ")=0,0,SUM(F" + (E + 0 + rowNum) + ":AJ"
 							+ (AI + 0 + rowNum) + "))");
-			createCell(workbook, fstRow1, 3, rFMc02Style).setValue("");
+			createCell(workbook, fstRow1, 3+1, rFMc02Style).setValue("");
 			createCell(workbook, fstRow1, dayNumber, rFMc02Style).setValue(
 					detail.getForCastQty(), true);
 
-			createCell(workbook, fstRow2, 1, r01c01Style)
+			createCell(workbook, fstRow2, 1+1, r01c01Style)
 					.setValue("Cust. Req.");
-			createCell(workbook, fstRow2, 2, rFMc02Style);
-			fstRow2.getCell(2).setCellFormula(
-					"IF(SUM(E" + (E + 1 + rowNum) + ":AI" + (AI + 1 + rowNum)
-							+ ")=0,0,SUM(E" + (E + 1 + rowNum) + ":AI"
+			createCell(workbook, fstRow2, 2+1, rFMc02Style);
+			fstRow2.getCell(2+1).setCellFormula(
+					"IF(SUM(F" + (E + 1 + rowNum) + ":AJ" + (AI + 1 + rowNum)
+							+ ")=0,0,SUM(F" + (E + 1 + rowNum) + ":AJ"
 							+ (AI + 1 + rowNum) + "))");
-			createCell(workbook, fstRow2, 3, rFMc02Style).setValue("");
+			createCell(workbook, fstRow2, 3+1, rFMc02Style).setValue("");
 			createCell(workbook, fstRow2, dayNumber, rFMc02Style).setValue(
 					detail.getCustReqQty(), true);
 
-			createCell(workbook, fstRow3, 1, r01c01Style).setValue("Commit");
-			createCell(workbook, fstRow3, 2, rFMc02Style);
-			fstRow3.getCell(2).setCellFormula(
-					"IF(SUM(E" + (E + 2 + rowNum) + ":AI" + (AI + 2 + rowNum)
-							+ ")=0,0,SUM(E" + (E + 2 + rowNum) + ":AI"
+			createCell(workbook, fstRow3, 1+1, r01c01Style).setValue("Commit");
+			createCell(workbook, fstRow3, 2+1, rFMc02Style);
+			fstRow3.getCell(2+1).setCellFormula(
+					"IF(SUM(F" + (E + 2 + rowNum) + ":AJ" + (AI + 2 + rowNum)
+							+ ")=0,0,SUM(F" + (E + 2 + rowNum) + ":AJ"
 							+ (AI + 2 + rowNum) + "))");
-			createCell(workbook, fstRow3, 3, rFMc02Style).setValue("");
+			createCell(workbook, fstRow3, 3+1, rFMc02Style).setValue("");
 			createCell(workbook, fstRow3, dayNumber, rFMc02Style).setValue(
 					detail.getTkiCommitQty(), true);
 
-			createCell(workbook, fstRow4, 1, r01c01Style).setValue(
+			createCell(workbook, fstRow4, 1+1, r01c01Style).setValue(
 					"Production Plan");
-			createCell(workbook, fstRow4, 2, rFMc02Style);
-			fstRow4.getCell(2).setCellFormula(
-					"IF(SUM(E" + (E + 3 + rowNum) + ":AI" + (AI + 3 + rowNum)
-							+ ")=0,0,SUM(E" + (E + 3 + rowNum) + ":AI"
+			createCell(workbook, fstRow4, 2+1, rFMc02Style);
+			fstRow4.getCell(2+1).setCellFormula(
+					"IF(SUM(F" + (E + 3 + rowNum) + ":AJ" + (AI + 3 + rowNum)
+							+ ")=0,0,SUM(F" + (E + 3 + rowNum) + ":AJ"
 							+ (AI + 3 + rowNum) + "))");
-			createCell(workbook, fstRow4, 3, rFMc02Style).setValue("");
+			createCell(workbook, fstRow4, 3+1, rFMc02Style).setValue("");
 			createCell(workbook, fstRow4, dayNumber, rFMc02Style).setValue(
 					detail.getProductionQty(), true);
 
-			createCell(workbook, fstRow5, 1, r01c01Style).setValue(
+			createCell(workbook, fstRow5, 1+1, r01c01Style).setValue(
 					"Delivery Plan (Normal)");
-			createCell(workbook, fstRow5, 2, rFMc02Style);
-			fstRow5.getCell(2).setCellFormula(
-					"IF(SUM(E" + (E + 4 + rowNum) + ":AI" + (AI + 4 + rowNum)
-							+ ")=0,0,SUM(E" + (E + 4 + rowNum) + ":AI"
+			createCell(workbook, fstRow5, 2+1, rFMc02Style);
+			fstRow5.getCell(2+1).setCellFormula(
+					"IF(SUM(F" + (E + 4 + rowNum) + ":AJ" + (AI + 4 + rowNum)
+							+ ")=0,0,SUM(F" + (E + 4 + rowNum) + ":AJ"
 							+ (AI + 4 + rowNum) + "))");
-			createCell(workbook, fstRow5, 3, rFMc02Style).setValue("");
+			createCell(workbook, fstRow5, 3+1, rFMc02Style).setValue("");
 			createCell(workbook, fstRow5, dayNumber, rFMc02Style).setValue(
 					detail.getDeliveryQtyNormal(), true);
 
-			createCell(workbook, fstRow6, 1, r01c01Style).setValue(
+			createCell(workbook, fstRow6, 1+1, r01c01Style).setValue(
 					"Delivery Plan (Back)");
-			createCell(workbook, fstRow6, 2, rFMc02Style);
-			fstRow6.getCell(2).setCellFormula(
-					"IF(" + "SUM(" + backOrder0 + ",E" + (E + 5 + rowNum)
-							+ ":AI" + (AI + 5 + rowNum) + ")<=0,"
-							+ " TEXT(ABS(SUM(" + backOrder0 + ",E"
-							+ (E + 5 + rowNum) + ":AI" + (AI + 5 + rowNum)
+			createCell(workbook, fstRow6, 2+1, rFMc02Style);
+			fstRow6.getCell(2+1).setCellFormula(
+					"IF(" + "SUM(" + backOrder0 + ",F" + (E + 5 + rowNum)
+							+ ":AJ" + (AI + 5 + rowNum) + ")<=0,"
+							+ " TEXT(ABS(SUM(" + backOrder0 + ",F"
+							+ (E + 5 + rowNum) + ":AJ" + (AI + 5 + rowNum)
 							+ ")),\"#,##0\")," + " \"(\" & TEXT(SUM("
-							+ backOrder0 + ",E" + (E + 5 + rowNum) + ":AI"
+							+ backOrder0 + ",F" + (E + 5 + rowNum) + ":AJ"
 							+ (AI + 5 + rowNum) + "),\"#,##0\") & \")\")");
 
 			// fstRow6.getCell(2).setCellFormula("IF(SUM(E"+(E+5+rowNum)+":AI"+(AI+5+rowNum)+")=0,0,SUM(E"+(E+5+rowNum)+":AI"+(AI+5+rowNum)+"))");
 			if (backOrder0 <= 0) {
 				String backOrder0Str = balanceOrder0.replace("(", "");
 				backOrder0Str = backOrder0Str.replace(")", "");
-				createCell(workbook, fstRow6, 3, nFMc02Style).setValue(
+				createCell(workbook, fstRow6, 3+1, nFMc02Style).setValue(
 						backOrder0Str);
 			} else {
-				createCell(workbook, fstRow6, 3, rFMc02Style).setValue(
+				createCell(workbook, fstRow6, 3+1, rFMc02Style).setValue(
 						"(" + backOrder0 + ")");
 			}
 
 			createCell(workbook, fstRow6, dayNumber, rFMc02Style).setValue(
 					detail.getDeliveryQtyBack(), true);
 
-			createCell(workbook, fstRow7, 1, r01c01Style).setValue(
+			createCell(workbook, fstRow7, 1+1, r01c01Style).setValue(
 					"Delivery Plan (Total)");
-			createCell(workbook, fstRow7, 2, rFMc02Style);
-			fstRow7.getCell(2).setCellFormula(
-					"IF(SUM(E" + (E + 6 + rowNum) + ":AI" + (AI + 6 + rowNum)
-							+ ")=0,0,SUM(E" + (E + 6 + rowNum) + ":AI"
+			createCell(workbook, fstRow7, 2+1, rFMc02Style);
+			fstRow7.getCell(2+1).setCellFormula(
+					"IF(SUM(F" + (E + 6 + rowNum) + ":AJ" + (AI + 6 + rowNum)
+							+ ")=0,0,SUM(F" + (E + 6 + rowNum) + ":AJ"
 							+ (AI + 6 + rowNum) + "))");
-			createCell(workbook, fstRow7, 3, rFMc02Style).setValue("");
+			createCell(workbook, fstRow7, 3+1, rFMc02Style).setValue("");
 			createCell(workbook, fstRow7, dayNumber, rFMc02Style).setValue(
 					detail.getDeliveryQtyTotal(), true);
 
-			createCell(workbook, fstRow8, 1, r01c01Style).setValue(
+			createCell(workbook, fstRow8, 1+1, r01c01Style).setValue(
 					"Actual Delivery");
-			createCell(workbook, fstRow8, 2, rFMc02Style);
-			fstRow8.getCell(2).setCellFormula(
-					"IF(SUM(E" + (E + 7 + rowNum) + ":AI" + (AI + 7 + rowNum)
-							+ ")=0,0,SUM(E" + (E + 7 + rowNum) + ":AI"
+			createCell(workbook, fstRow8, 2+1, rFMc02Style);
+			fstRow8.getCell(2+1).setCellFormula(
+					"IF(SUM(F" + (E + 7 + rowNum) + ":AJ" + (AI + 7 + rowNum)
+							+ ")=0,0,SUM(F" + (E + 7 + rowNum) + ":AJ"
 							+ (AI + 7 + rowNum) + "))");
-			createCell(workbook, fstRow8, 3, rFMc02Style).setValue("");
+			createCell(workbook, fstRow8, 3+1, rFMc02Style).setValue("");
 			createCell(workbook, fstRow8, dayNumber, rFMc02Style).setValue(
 					nullToZero(detail.getFgOut()), true);
 
-			createCell(workbook, fstRow9, 1, r01c01Style).setValue(
+			createCell(workbook, fstRow9, 1+1, r01c01Style).setValue(
 					"Balance Delivery");
-			createCell(workbook, fstRow9, 2, nFMc02Style);
-			fstRow9.getCell(2).setCellFormula(
-					"IF(" + "SUM(D" + (E + 8 + rowNum) + ",0-C"
+			createCell(workbook, fstRow9, 2+1, nFMc02Style);
+			fstRow9.getCell(2+1).setCellFormula(
+					"IF(" + "SUM(E" + (E + 8 + rowNum) + ",0-D"
 							+ (E + 1 + rowNum) + ",C" + (E + 7 + rowNum)
-							+ ")<0," + " \"(\"  & TEXT(ABS(SUM(D"
-							+ (E + 6 + rowNum) + ",0-C" + (E + 1 + rowNum)
-							+ ",C" + (E + 7 + rowNum)
-							+ ")),\"#,##0\") & \")\"," + "TEXT(SUM(D"
-							+ (E + 6 + rowNum) + ",0-C" + (E + 1 + rowNum)
+							+ ")<0," + " \"(\"  & TEXT(ABS(SUM(E"
+							+ (E + 6 + rowNum) + ",0-D" + (E + 1 + rowNum)
+							+ ",D" + (E + 7 + rowNum)
+							+ ")),\"#,##0\") & \")\"," + "TEXT(SUM(E"
+							+ (E + 6 + rowNum) + ",0-D" + (E + 1 + rowNum)
 							+ ",C" + (E + 7 + rowNum) + "),\"#,##0\"))");
 
-			createCell(workbook, fstRow9, 3, nFMc02Style).setValue("");
+			createCell(workbook, fstRow9, 3+1, nFMc02Style).setValue("");
 
 			// < !-- BalanceDelivery -->
 			if(firstRowOfEachFg){
@@ -456,7 +487,7 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 				prevBdeli = 0;
 //				detail.setFgOut(0);
 			}
-			if(dayNumber == 3){
+			if(dayNumber == 4){
 				detail.setCustReqQty(0);
 			}
 			prevBdeli = nullToZero(prevBdeli) - nullToZero(detail.getCustReqQty()) + nullToZero(detail.getFgOut());
@@ -471,19 +502,19 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 			createCell(workbook, fstRow9, dayNumber, nFMc02Style).setValue(
 					balanceDeliveryQty);
 
-			createCell(workbook, fstRow10, 1, r01c01Style).setValue(
+			createCell(workbook, fstRow10, 1+1, r01c01Style).setValue(
 					"Balance Order");
-			createCell(workbook, fstRow10, 2, nFMc02Style);
-			fstRow10.getCell(2).setCellFormula(
-					"IF(" + "SUM(" + backOrder0 + ",0-C" + (E + 6 + rowNum)
+			createCell(workbook, fstRow10, 2+1, nFMc02Style);
+			fstRow10.getCell(2+1).setCellFormula(
+					"IF(" + "SUM(" + backOrder0 + ",0-D" + (E + 6 + rowNum)
 							+ ",C" + (E + 7 + rowNum) + ")<0,"
-							+ " \"(\"  & TEXT(ABS(SUM(" + backOrder0 + ",0-C"
-							+ (E + 6 + rowNum) + ",C" + (E + 7 + rowNum)
+							+ " \"(\"  & TEXT(ABS(SUM(" + backOrder0 + ",0-D"
+							+ (E + 6 + rowNum) + ",D" + (E + 7 + rowNum)
 							+ ")),\"#,##0\") & \")\"," + "TEXT(SUM("
-							+ backOrder0 + ",0-C" + (E + 6 + rowNum) + ",C"
+							+ backOrder0 + ",0-D" + (E + 6 + rowNum) + ",D"
 							+ (E + 7 + rowNum) + "),\"#,##0\"))");
 
-			createCell(workbook, fstRow10, 3, nFMc02Style).setValue(
+			createCell(workbook, fstRow10, 3+1, nFMc02Style).setValue(
 					balanceOrder0);
 
 			// < !-- BalanceOrder -->
@@ -491,7 +522,7 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 				prevBOrder = nullToZero(backOrder0);
 				firstRowOfEachFg = false;
 			}
-			if(dayNumber == 3){
+			if(dayNumber == 4){
 				detail.setDeliveryQtyTotal(0);
 			}
 			prevBOrder = nullToZero(prevBOrder) - nullToZero(detail.getDeliveryQtyTotal()) + nullToZero(detail.getFgOut());
@@ -506,9 +537,9 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 			createCell(workbook, fstRow10, dayNumber, nFMc02Style).setValue(
 					balanceOrderQty);
 
-			createCell(workbook, fstRow11, 1, rHDc11Style).setValue("Reason");
-			createCell(workbook, fstRow11, 2, rHDc11Style).setValue("");
-			createCell(workbook, fstRow11, 3, rHDc11Style).setValue("");
+			createCell(workbook, fstRow11, 1+1, rHDc11Style).setValue("Reason");
+			createCell(workbook, fstRow11, 2+1, rHDc11Style).setValue("");
+			createCell(workbook, fstRow11, 3+1, rHDc11Style).setValue("");
 			createCell(workbook, fstRow11, dayNumber, r01c11Style).setValue(
 					detail.getReason());
 
@@ -520,7 +551,7 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 			}
 		}
 		// <!-- Setup 'Print Area'. -->
-		workbook.setPrintArea(0, 0, 34, 0, rowNumber);
+		workbook.setPrintArea(0, 0, 34+1, 0, rowNumber);
 		sheet.getFooter()
 				.setCenter(
 						"* ถ้าได้รับเอกสารแล้วภายใน 2 วัน กรณีไม่ได้รับการติดต่อจากท่านจะถือว่าเอกสาร DELIVERY SCHEDULE ฉบับนี้ได้รับการตอบรับโดยอัตโนมัติค่ะ *\n"

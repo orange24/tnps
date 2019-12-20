@@ -22,6 +22,11 @@ public class LDT_S01LogicImpl implements LDT_S01Logic{
 	}
 
 	@Override
+	public MLeadtime getLeadtimeExportList(MLeadtime mLeadtime) {
+		return mLeadtimeDao.queryLeadtimeExportList(mLeadtime);
+	}
+
+	@Override
 	public void saveLeadtime(MLeadtime mLeadtime) {
 		int listSize = mLeadtime.getLeadTimeList().size();
 		if(listSize != 0){

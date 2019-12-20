@@ -197,13 +197,30 @@ public class MRDC_R20ExcelView extends AbstractExcelView{
 				isMerged = false;
 				
 				// sum time
-				hour += (detailList.getStTimeNoYield() != null?Integer.parseInt(detailList.getStTimeNoYield().substring(0,2)):0);
-				min  += (detailList.getStTimeNoYield() != null?Integer.parseInt(detailList.getStTimeNoYield().substring(3,5)):0);
-				sec  += (detailList.getStTimeNoYield() != null?Integer.parseInt(detailList.getStTimeNoYield().substring(6)):0);
+				
+				if(detailList.getStTimeNoYield() != null){
+					String[] h1Tmp = detailList.getStTimeNoYield().split(":");
+					hour += Integer.parseInt(h1Tmp[0]);
+					min += Integer.parseInt(h1Tmp[1]);
+					sec += Integer.parseInt(h1Tmp[2]);
+				}
+				
+//				hour += (detailList.getStTimeNoYield() != null?Integer.parseInt(detailList.getStTimeNoYield().substring(0,2)):0);
+//				min  += (detailList.getStTimeNoYield() != null?Integer.parseInt(detailList.getStTimeNoYield().substring(3,5)):0);
+//				sec  += (detailList.getStTimeNoYield() != null?Integer.parseInt(detailList.getStTimeNoYield().substring(6)):0);
+
 				// sum time2
-				hour2 += (detailList.getStTimeYield() != null?Integer.parseInt(detailList.getStTimeYield().substring(0,2)):0);
-				min2  += (detailList.getStTimeYield() != null?Integer.parseInt(detailList.getStTimeYield().substring(3,5)):0);
-				sec2  += (detailList.getStTimeYield() != null?Integer.parseInt(detailList.getStTimeYield().substring(6)):0);
+
+				if(detailList.getStTimeYield() != null){
+					String[] h1Tmp = detailList.getStTimeYield().split(":");
+					hour2 += Integer.parseInt(h1Tmp[0]);
+					min2 += Integer.parseInt(h1Tmp[1]);
+					sec2 += Integer.parseInt(h1Tmp[2]);
+				}
+				
+//				hour2 += (detailList.getStTimeYield() != null?Integer.parseInt(detailList.getStTimeYield().substring(0,2)):0);
+//				min2  += (detailList.getStTimeYield() != null?Integer.parseInt(detailList.getStTimeYield().substring(3,5)):0);
+//				sec2  += (detailList.getStTimeYield() != null?Integer.parseInt(detailList.getStTimeYield().substring(6)):0);
 				
 			}
 			if(!isMerged){

@@ -133,7 +133,7 @@ $(document).ready(function() {
 		  	<ul id="navlist">
 			    <!-- CSS Tabs -->
 			    <li><a href="MLD_S01.html" >Mold Search/List</a></li>
-			    <li><a href="MLD_S02.html" >Mold Add/Edit</a></li>
+			    <security:authorize ifAnyGranted="MLD_S02_ADD_EDIT"><li><a href="MLD_S02.html" >Mold Add/Edit</a></li></security:authorize>
 			    <li><a href="MLD_S03.html" id="current">Mold History Search/List</a></li>
 		  	</ul>
 		</div>

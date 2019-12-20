@@ -28,7 +28,7 @@
   <tr>
     <td colspan="2"><table cellpadding="3" cellspacing="1" width="100%" border="0" class="ui-widget ui-widget-content">
       <tr>
-        <th width="12%" class="label">Customer&nbsp;<span class="textred">*</span></th><td>
+        <th width="12%" class="label">Customer&nbsp;</th><td>
         <form:select tabindex="1" path="customerId" items="${custMap}" id="customerNameSel" ></form:select></td>
         <td width="15%" class="label">&nbsp;</td>
         <td width="33%" >&nbsp;</td>

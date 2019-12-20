@@ -17,7 +17,11 @@ public class PartRoutingMasterDaoImpl extends AbstractBaseDao implements
 	@Override
 	public List<PartRoutingMaster> searchFgPartWipList(
 			PartRoutingMaster prMaster) {
-		return queryForList("m_partRoutingMaster.select_fg_part_wip", prMaster);
+		if(prMaster.getCustomerId() == Integer.MIN_VALUE){
+			return queryForList("m_partRoutingMaster.select_fg_part_wip_allcus", prMaster);			
+		}else{
+			return queryForList("m_partRoutingMaster.select_fg_part_wip", prMaster);	
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -54,8 +58,13 @@ public class PartRoutingMasterDaoImpl extends AbstractBaseDao implements
 	@Override
 	public List<PartRoutingMasterFilter> selectExportList(
 			PartRoutingMasterFilter partRoutingMasterFilter) {
-		return queryForList("m_partRoutingMaster.select_export",
-				partRoutingMasterFilter);
+		if(Integer.parseInt(partRoutingMasterFilter.getCustomerId()) == Integer.MIN_VALUE){
+			return queryForList("m_partRoutingMaster.select_export_allcus",
+					partRoutingMasterFilter);
+		}else{
+			return queryForList("m_partRoutingMaster.select_export",
+					partRoutingMasterFilter);	
+		}
 	}
 
 	@Override

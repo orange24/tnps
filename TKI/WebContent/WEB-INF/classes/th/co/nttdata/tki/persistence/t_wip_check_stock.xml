@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_wip_check_stock">
+        
+<select id="query" parameterClass="th.co.nttdata.tki.bean.TWipCheckStock" resultClass="th.co.nttdata.tki.bean.TWipFgMaping">
+SELECT DISTINCT  m.reportDate, m.customerid, m.customer, m.partid, m.partno, m.partname, m.wip, m.wipname, m.wiporder, DAY(m.reportDate) AS reportDay, 
+      ISNULL(ws.prevstock, 0) AS stockAfterQty, dbo.GetWIPPrevPdQty(m.partid, m.wip, m.reportDate) AS preWipPdQty,
+      ISNULL(ws.prevstock, 0) + dbo.GetWIPPrevPdQty(m.partid, m.wip, m.reportDate) AS totals,
+      (SELECT COUNT(wiporder) AS tt FROM m_part_wip WHERE (partid = m.partid)) AS countProcess, 
+	ISNULL(CASE WHEN
+          (SELECT SUM(a.fgadjust_qty) AS adj FROM t_fg_stock_adjust AS a INNER JOIN v_cust_fg_part AS v ON a.fgid = v.fgid
+           WHERE (v.partid = m.partid) AND (a.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, CONVERT(DATETIME, m.reportDate, 102)), 102))) 
+           IS NOT NULL 
+      THEN
+          (SELECT SUM(a.fgadjust_qty) AS adj FROM t_fg_stock_adjust AS a INNER JOIN v_cust_fg_part AS v ON a.fgid = v.fgid
+           WHERE (v.partid = m.partid) AND (a.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, CONVERT(DATETIME, m.reportDate, 102)), 102)))
+      ELSE
+          (SELECT top 1 ISNULL(t_fg_stock.fgbalance, 0) 
+           FROM t_fg_stock INNER JOIN v_cust_fg_part ON t_fg_stock.customerid = v_cust_fg_part.customerid AND t_fg_stock.fgid = v_cust_fg_part.fgid
+           WHERE (t_fg_stock.customerid = m.customerid) AND (v_cust_fg_part.partid = m.partid) AND (t_fg_stock.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, m.reportDate), 102))) 
+      END ,0)
+      AS fgBl,
+      ISNULL((SELECT SUM(twip.prevstock) AS sWip FROM t_wip_stock AS twip INNER JOIN m_part_wip AS mwip ON twip.partid = mwip.partid AND twip.wip = mwip.wip
+              WHERE (twip.reportdate = CONVERT(DATETIME, m.reportDate, 102)) AND (twip.partid = m.partid)), 0) AS sumWip, 
+      ISNULL((SELECT SUM(twip.pd) AS sp FROM t_wip_stock AS twip INNER JOIN m_part_wip AS pwip ON twip.partid = pwip.partid AND twip.wip = pwip.wip
+              WHERE (twip.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, CONVERT(DATETIME, m.reportDate, 102)), 102)) AND (twip.partid = m.partid)), 0) AS sumPending, 
+      ISNULL((SELECT SUM(ISNULL(twip.prevstock, 0)) AS st FROM t_wip_stock AS twip INNER JOIN m_part_wip AS pwip ON twip.partid = pwip.partid AND twip.wip = pwip.wip 
+            WHERE (twip.reportdate = CONVERT(DATETIME, m.reportDate, 102)) AND (twip.partid = m.partid)) + 
+            (SELECT SUM(twip.pd) AS sp FROM t_wip_stock AS twip INNER JOIN m_part_wip AS pwip ON twip.partid = pwip.partid AND twip.wip = pwip.wip 
+            WHERE (twip.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, CONVERT(DATETIME, m.reportDate, 102)), 102)) AND (twip.partid = m.partid)), 0) 
+      AS sumTotal, 
+	ISNULL((CASE WHEN
+          (SELECT SUM(a.fgadjust_qty) AS adj FROM t_fg_stock_adjust AS a INNER JOIN v_cust_fg_part AS v ON a.fgid = v.fgid
+            WHERE (v.partid = m.partid) AND (a.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, CONVERT(DATETIME, m.reportDate, 102)), 102))) 
+            IS NOT NULL 
+      THEN
+          (SELECT SUM(a.fgadjust_qty) AS adj
+            FROM t_fg_stock_adjust AS a INNER JOIN v_cust_fg_part AS v ON a.fgid = v.fgid
+            WHERE (v.partid = m.partid) AND (a.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, CONVERT(DATETIME, m.reportDate, 102)), 102))) 
+      ELSE
+          (SELECT top 1 ISNULL(t_fg_stock.fgbalance, 0) FROM t_fg_stock INNER JOIN v_cust_fg_part ON t_fg_stock.customerid = v_cust_fg_part.customerid AND t_fg_stock.fgid = v_cust_fg_part.fgid
+            WHERE (t_fg_stock.customerid = m.customerid) AND (v_cust_fg_part.partid = m.partid) AND (t_fg_stock.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, m.reportDate), 102))) 
+      END) 
+      + ISNULL((SELECT SUM(ISNULL(twip.prevstock, 0)) AS st FROM t_wip_stock AS twip INNER JOIN m_part_wip AS pwip ON twip.partid = pwip.partid AND twip.wip = pwip.wip
+              WHERE (twip.reportdate = CONVERT(DATETIME, m.reportDate, 102)) AND (twip.partid = m.partid)) 
+      + (SELECT SUM(twip.pd) AS sp FROM t_wip_stock AS twip INNER JOIN m_part_wip AS pwip ON twip.partid = pwip.partid AND twip.wip = pwip.wip
+         WHERE (twip.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, CONVERT(DATETIME, m.reportDate, 102)), 102)) AND (twip.partid = m.partid)), 0) ,0)
+      AS grandTotal
+    FROM
+        (SELECT c.calendardate AS reportDate, customerid, customercode AS customer, v.partid, v.partno, v.partname, wp.wip, w.wipname, wp.wiporder
+         FROM
+                (SELECT calendardate FROM m_calendar WHERE calendardate between #reportDateFr# AND #reportDateTo#) c
+                 CROSS JOIN 
+                (SELECT partid, wip, wiporder FROM m_part_wip 
+                <dynamic prepend="WHERE">
+                        <isGreaterThan prepend="AND" property="partId" compareValue="0"> partid = #partId# </isGreaterThan>
+                        <isNotEmpty prepend="AND" property="wip"> wip = #wip# </isNotEmpty>
+                </dynamic>
+        ) wp
+        INNER JOIN v_cust_fg_part v ON v.partid = wp.partid   
+        INNER JOIN m_wip w ON wp.wip = w.wip
+        <dynamic prepend="WHERE">
+                <isGreaterThan prepend="AND" property="customerId" compareValue="0"> v.customerid = #customerId# </isGreaterThan>
+                <isGreaterThan prepend="AND" property="partId" compareValue="0"> v.partid = #partId# </isGreaterThan>
+        </dynamic>
+        ) m
+        LEFT JOIN t_wip_stock ws ON m.reportDate = ws.reportdate AND m.partid = ws.partid AND m.wip = ws.wip
+        ORDER BY m.customer, m.partNo, m.wipOrder, m.reportDate	
+</select>
+        
+</sqlMap>

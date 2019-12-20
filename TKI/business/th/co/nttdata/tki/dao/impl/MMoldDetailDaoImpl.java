@@ -17,7 +17,7 @@ public class MMoldDetailDaoImpl extends AbstractBaseDao implements MMoldDetailDa
 
 	@Override
 	public MMoldDetail search(MMoldDetail mDetail) {
-		mDetail.setmDetailList( (List<MMoldDetail>) queryForList("m_mold_detail.querySearch",mDetail, getSkipResult(mDetail), mDetail.getPageCount()) );
+		mDetail.setmDetailList( (List<MMoldDetail>) queryForList("m_mold_detail.selectMLD_R01",mDetail, getSkipResult(mDetail), mDetail.getPageCount()) );
 		calPageTotal("m_mold_detail.count", mDetail);
 		return mDetail;
 	}

@@ -31,15 +31,25 @@ String contextPath = request.getContextPath();
       <td>
         <table class="ui-widget ui-widget-content " cellpadding="3" cellspacing="1" width="100%" border="0">
           <tr>
-         	<th width="13%">Report Date&nbsp;<span class="textred">*</span></th>
-            <td width="29%">
+         	<th>Report Date&nbsp;<span class="textred">*</span></th>
+            <td>
             	<form:input path="tfg.reportDate" id="reportDate" tabindex="2" size="10" cssClass="date"  />
             </td> 
-            <th width="13%">FG Stock Type&nbsp;<span class="textred">*</span></th>
-            <td width="32%">
+            <th>FG Stock Type&nbsp;<span class="textred">*</span></th>
+            <td>
             	<form:radiobutton path="tfg.fgStockType" disabled="${tfg.fgStockType != null}" id="rdiIn" value="fgin" tabindex="1"  checked="checked"/> IN
             	<form:radiobutton path="tfg.fgStockType" disabled="${tfg.fgStockType != null}" id="rdiIn" value="fgout" /> OUT
             </td>
+            
+            <th>Type&nbsp;<span class="textred">*</span></th>
+            <td>
+             	<select name="reportType" id="reportType" title="Type">
+	                <c:forEach items="${reportTypeList}" var="item">
+	                  	<option value="${item.typeCode}" class="${item.report}" "${item.typeCode == tfg.reportType?' selected=select':null} >${item.typeName}</option>
+	                </c:forEach>
+           	   	</select>  
+           	</td>
+           	   	
             <td align="right">
               <input type="submit" value="OK" id="btnOk" class="submit_button" tabindex="4"
               	<c:if test="${not empty tfg.fgStockType}">
@@ -69,9 +79,6 @@ String contextPath = request.getContextPath();
     	    </th>
     	    <th rowspan="2" width="30%">
     	      FG No : FG Name <span class="textred">*</span>
-    	    </th>
-    	    <th rowspan="2" width="10%">
-    	      Type <span class="textred">*</span>
     	    </th>
     	    <th colspan="2" width="16%">
     	      Stock FG <span class="textred">*</span>
@@ -103,13 +110,6 @@ String contextPath = request.getContextPath();
              	<div align="left" id="fgId">&nbsp;</div>
              	<input type="hidden" id="hideFgId" name="hideFgId"/>
              	<input type="hidden" id="hideFgNo" name="hideFgNo"/>
-            </td>
-            <td>
-             	<select name="reportType" id="reportType" title="Type">
-	                <c:forEach items="${reportTypeList}" var="item">
-	                  	<option value="${item.typeCode}" class="${item.report}">${item.typeName}</option>
-	                </c:forEach>
-           	   	</select>  
             </td>
             <td align="center">
               <input name="fgIn" type="text" id="fgIn" tabindex="17" maxlength="10" size="5" title="FG In/Out" onkeypress="return fngIntegerFilter(event)" onchange="getTotalFgIn()" />

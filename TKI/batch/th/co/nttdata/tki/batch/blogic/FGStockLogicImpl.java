@@ -29,11 +29,8 @@ public class FGStockLogicImpl extends BatchLogicImpl {
 
 		log.info("t_fg_stock_batch.mindate is running.");
 		Map<String, Object> p = new HashMap<String, Object>();
-		p.put("executeDate",
-				this.getExecuteDate() != null ? this.getExecuteDate()
-						: new Date());
-		Date minDate = (Date) sqlMap.queryForObject("t_fg_stock_batch.mindate",
-				p);
+		p.put("executeDate", this.getExecuteDate() != null ? this.getExecuteDate() : new Date());
+		Date minDate = (Date) sqlMap.queryForObject("t_fg_stock_batch.mindate",p);
 
 		log.info("t_fg_stock_batch.maxDate is running.");
 		Date maxDate = (Date) sqlMap.queryForObject("t_fg_stock_batch.maxDate");

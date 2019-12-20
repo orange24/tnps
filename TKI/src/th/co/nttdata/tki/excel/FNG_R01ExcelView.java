@@ -109,7 +109,12 @@ public class FNG_R01ExcelView extends AbstractExcelView {
 			String keyMap = "";
 			for(TFGDetail reportType : reportTypeList){
 				int fgOutStock = 0;
-				keyMap = dateFormat(detail.getReportDate())+":"+detail.getFgId()+":"+detail.getCustomerId()+":"+reportType.getReportType();
+				String moldNo = "";
+				if(detail.getMoldNo() != null){
+					moldNo = detail.getMoldNo();
+				}
+				
+				keyMap = dateFormat(detail.getReportDate())+":"+detail.getFgId()+":"+detail.getCustomerId()+":"+reportType.getReportType()+":"+moldNo;
 				if(tfg.getDetailMap().get(keyMap)!= null){
 					fgOutStock = tfg.getDetailMap().get(keyMap).getFgOut();
 				}

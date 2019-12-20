@@ -50,9 +50,9 @@
 		boxUserName.focus();
 
 		btnSearch.click(function() {
-			usrS01Form.find("select[id=pageNumber]").attr("disabled", true);
-			usrS01Form.attr("action", "USR_S01_search.html");
-			usrS01Form.submit();
+			$("#usrS01Form").find("select[id=pageNumber]").attr("disabled", true);
+			$("#usrS01Form").attr("action", "USR_S01_search.html");
+			document.getElementById("usrS01Form").submit();
 		});
 
 	});
@@ -138,14 +138,17 @@
 						<td align="left">${user.roleName}&nbsp;</td>
 						<td align="center">
 							<security:authorize ifAnyGranted="USR_S01_EDIT">
+								<a href="USR_S02_copy.html?userName=${user.userName}">
+									<img src="image/icon/copy.png" border="0" title="Copy" />
+								</a>
 								<a href="USR_S02_edit.html?userName=${user.userName}">
-									<img src="image/icon/update.gif" border="0" />
+									<img src="image/icon/update.gif" border="0" title="Edit"/>
 								</a>
 							</security:authorize>
 							<security:authorize ifAnyGranted="USR_S01_DELETE">
 								<c:if test="${!user.isLocked}">
 									<a href="javascript:void(0);" onclick="fnDelete( $(this).closest('tr') );">
-										<img src="image/icon/delete.gif" border="0" />
+										<img src="image/icon/delete.gif" border="0" title="Delete"/>
 									</a>
 								</c:if>
 							</security:authorize> &nbsp;

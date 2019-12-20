@@ -63,6 +63,17 @@
 				<th width="12%" class="label">Rev Doc No.</th>
 		        <td width="35%"><form:input title="Rev Doc No." path="revDocNoR2" id="revDocNoR2" tabindex="4"  /></td>
 			</tr>
+			<tr>		      	
+				<th width="100%" class="label" colspan="2"><spring:message code='menu.DocNo.report3'/></th>
+			</tr>
+			<tr>		      	
+				<th width="12%" class="label">Doc No.</th>
+		        <td width="35%"><form:input title="Doc No." path="docNoR3" id="docNoR3" tabindex="5"  /></td>
+			</tr>
+			<tr>		      	
+				<th width="12%" class="label">Rev Doc No.</th>
+		        <td width="35%"><form:input title="Rev Doc No." path="revDocNoR3" id="revDocNoR3" tabindex="6"  /></td>
+			</tr>
 		</table>
 		<table width="100%">
 			<tr>

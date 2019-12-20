@@ -19,7 +19,7 @@ public class DLV_S02LogicImpl extends AbstractBaseLogic implements DLV_S02Logic 
 
 	@Autowired
 	private TDeliveryPlanDao tDeliveryPlanDao;
-
+	
 	@Override
 	public TDeliveryPlan search(TDeliveryPlan TDeliveryPlan) {
 		TDeliveryPlan = tDeliveryPlanDao.getDateList(TDeliveryPlan);
@@ -134,5 +134,4 @@ public class DLV_S02LogicImpl extends AbstractBaseLogic implements DLV_S02Logic 
 		tDeliveryPlan.setDateList(dateList);
 		return tDeliveryPlan;
 	}
-
 }

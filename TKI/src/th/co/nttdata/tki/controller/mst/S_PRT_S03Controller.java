@@ -37,7 +37,7 @@ public class S_PRT_S03Controller extends AbstractBaseController {
 		List<MCustomer> custList = s_prt_S03Logic.getAllCustomer()
 				.getCustomerList();
 		Map<Integer, String> map = new LinkedHashMap<Integer, String>();
-		map.put(Integer.MIN_VALUE, "-- Select Customer --");
+		map.put(Integer.MIN_VALUE, "-- All Customer --");
 		for (MCustomer cust : custList) {
 			map.put(cust.getCustomerId(), cust.getCustomerCode());
 		}

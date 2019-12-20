@@ -93,6 +93,18 @@ public class USR_S02Controller extends AbstractBaseController {
         .addObject("currentUser", currentUser);
 	}
 	
+	@RequestMapping("/USR_S02_copy")
+	public ModelAndView copy(MUser MUser) {
+		currentUser = usr_S02Logic.getCurrentUser();
+		return new ModelAndView(PATH_URI)
+		.addObject("mUser", new MUser())
+        .addObject("wipMap", commonController.getWIPSel())
+        .addObject("roleMap", getRole())
+        .addObject("acessWip", usr_S02Logic.getAcessWip(MUser) )
+        .addObject("customerMap", usr_S02Logic.getCustomer(MUser))
+        .addObject("currentUser", currentUser);
+	}
+	
 	@RequestMapping("USR_S02_delete")
 	public ModelAndView delete(MUser MUser, HttpSession session){
 		

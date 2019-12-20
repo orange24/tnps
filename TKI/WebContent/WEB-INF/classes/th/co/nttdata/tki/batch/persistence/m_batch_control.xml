@@ -22,4 +22,79 @@
 		SET batchstatus = #batchstatus#, finishdate = GETDATE(),runby = #runby#
 		WHERE batchcode = #batchcode#;
 	</update>
+	
+	
+	<statement id="resetZeroFG" parameterClass="java.util.Map">
+		INSERT INTO t_fg_stock_adjust
+           (reportdate
+           ,customerid
+           ,fgid
+           ,fgcurrent_qty
+           ,fgadjust_qty
+           ,fgadjust_reason
+           ,createdate
+           ,createby
+           ,lastupdate
+           ,updateby)
+		select 
+			#resetdate#
+			,fc.customerid
+			,fc.fgid
+			,0
+			,0
+			,'Reset FG stock'
+			,GETDATE()
+			,'admin'
+			,GETDATE()
+			,'admin'
+		from m_fg_customer fc
+	</statement>
+	
+	<statement id="resetZeroWip" parameterClass="java.util.Map">
+		INSERT INTO t_wip_stockadjust(reportdate, wip, partid, currentstock, 
+				adjuststock, adjustreason, createby, updateby) 
+		SELECT distinct
+			ISNULL(w.reportdate, #resetdate#) as reportdate
+			,pw.wip
+			,p.partId
+			,ISNULL(w.adjuststock, ISNULL(w.currentstock,0)) as currentStock
+			,0
+			,'Reset WIP stock'
+			,'admin'
+			,'admin'
+		FROM m_part p 
+		INNER JOIN m_part_wip pw ON p.partid = pw.partid			 
+		INNER JOIN m_wip wip ON pw.wip = wip.wip
+		INNER JOIN m_fg_part fgp ON fgp.partid = p.partid
+		INNER JOIN m_fg fg ON fgp.fgid = fg.fgid
+		INNER JOIN m_fg_customer fgc ON fgc.fgid = fg.fgid 
+		INNER JOIN m_customer mc ON fgc.customerid = mc.customerid
+		LEFT JOIN t_wip_stock w ON pw.partid = w.partid AND pw.wip = w.wip  
+			AND (w.reportdate = #resetdate# OR w.reportdate IS NULL);
+		
+		
+		MERGE INTO t_wip_stock ws 
+					USING (SELECT distinct
+							ISNULL(w.reportdate, #resetdate#) as reportdate
+							,pw.wip
+							,p.partId
+							,0 as adjustqty
+						FROM m_part p 
+						INNER JOIN m_part_wip pw ON p.partid = pw.partid			 
+						INNER JOIN m_wip wip ON pw.wip = wip.wip
+						INNER JOIN m_fg_part fgp ON fgp.partid = p.partid
+						INNER JOIN m_fg fg ON fgp.fgid = fg.fgid
+						INNER JOIN m_fg_customer fgc ON fgc.fgid = fg.fgid 
+						INNER JOIN m_customer mc ON fgc.customerid = mc.customerid
+						LEFT JOIN t_wip_stock w ON pw.partid = w.partid AND pw.wip = w.wip  
+							AND (w.reportdate = #resetdate# OR w.reportdate IS NULL)
+						) as st(reportdate, wip, partid, adjustqty)
+					ON (ws.reportdate = st.reportdate and ws.wip = st.wip and ws.partid = st.partid)
+					WHEN MATCHED THEN
+						UPDATE SET ws.adjuststock = st.adjustqty
+					WHEN NOT MATCHED THEN
+						INSERT(reportdate,wip,partid,ok,ng,pd,qty,nextwipqty,prevstock,currentstock,adjuststock)
+						VALUES(st.reportdate, st.wip, st.partid, 0, 0, 0, 0, 0, 0, 0, st.adjustqty);
+
+	</statement>
 </sqlMap>

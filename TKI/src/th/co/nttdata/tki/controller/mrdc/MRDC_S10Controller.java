@@ -19,7 +19,7 @@ import th.co.nttdata.tki.controller.cmm.CommonController;
 public class MRDC_S10Controller extends AbstractBaseController {
 
 	private static final String PATH_URI = "MRDC/MRDC_S10";
-	private static final Integer MAXRECORD = 30000;
+	private static final Integer MAXRECORD = 1000000;
 
 	@Autowired
 	private MRDC_S10Logic mrdc_s10Logic;

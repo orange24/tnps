@@ -103,17 +103,17 @@ public class FNG_R02ExcelView extends AbstractExcelView {
 		createCell(workbook, criteriaRow, 0, criteriaStyle).setValue("Customer : " + customerCriteria);
 
 		for (int i = 0; i <= tfg.getEndDay(); i++) {
-			createCell(workbook, fsrHD, i + 4, fstHDRStyle);
+			createCell(workbook, fsrHD, i + 5, fstHDRStyle);
 			if (i != tfg.getEndDay()) {
-				createCell(workbook, sndHD, i + 4, sndHDRStyle).setValue("" + i);
+				createCell(workbook, sndHD, i + 5, sndHDRStyle).setValue("" + i);
 			} else {
-				createCell(workbook, sndHD, i + 4, lastSndHDRStyle).setValue("" + i);
+				createCell(workbook, sndHD, i + 5, lastSndHDRStyle).setValue("" + i);
 			}
 		}
 
-		createMergedRegion(sheet, 2, 2, 4, tfg.getEndDay() + 4);
-		sheet.getRow(2).getCell(4).setCellValue(monthMap.get(tfg.getMonth()) + " " + yearMap.get(tfg.getYear()));
-
+		sheet.getRow(2).getCell(5).setCellValue(monthMap.get(tfg.getMonth()) + " " + yearMap.get(tfg.getYear()));
+		createMergedRegion(sheet, 2, 2, 5, tfg.getEndDay() + 5);
+		
 		int rowNumber = 4;
 		Map<String, List<TFGStock>> listStockMap = tfg.getStocksMap();
 		Iterator<String> keyIterator = listStockMap.keySet().iterator();
@@ -150,60 +150,67 @@ public class FNG_R02ExcelView extends AbstractExcelView {
 			}
 
 			createCell(workbook, fgR01, 0, r01c00Style).setValue(customer);
-			createCell(workbook, fgR01, 1, r01c02Style).setValue(fgName + " : " + fgNo);
-			createCell(workbook, fgR01, 2, r01c02Style).setValue("Delivery");
-			createCell(workbook, fgR01, 3, r01c02Style).setValue("Plan");
+			createCell(workbook, fgR01, 1, r01c00Style).setValue(fgNo);
+			createCell(workbook, fgR01, 2, r01c00Style).setValue(fgName);
+			createCell(workbook, fgR01, 3, r01c02Style).setValue("Delivery");
+			createCell(workbook, fgR01, 4, r01c02Style).setValue("Plan");
 
 			createCell(workbook, fgR02, 0, r01c00Style).setValue(customer);
-			createCell(workbook, fgR02, 1, r01c02Style).setValue(fgName + " : " + fgNo);
-			createCell(workbook, fgR02, 2, r01c02Style).setValue("Delivery");
-			createCell(workbook, fgR02, 3, r01c02Style).setValue("Actual");
+			createCell(workbook, fgR02, 1, r01c00Style).setValue(fgNo);
+			createCell(workbook, fgR02, 2, r01c00Style).setValue(fgName);
+			createCell(workbook, fgR02, 3, r01c02Style).setValue("Delivery");
+			createCell(workbook, fgR02, 4, r01c02Style).setValue("Actual");
 
 			createCell(workbook, fgR03, 0, r01c00Style).setValue(customer);
-			createCell(workbook, fgR03, 1, r03c02Style).setValue(fgName + " : " + fgNo);
-			createCell(workbook, fgR03, 2, r03c02Style).setValue("Delivery");
-			createCell(workbook, fgR03, 3, r03c02Style).setValue("Balance");
+			createCell(workbook, fgR03, 1, r01c00Style).setValue(fgNo);
+			createCell(workbook, fgR03, 2, r01c00Style).setValue(fgName);
+			createCell(workbook, fgR03, 3, r03c02Style).setValue("Delivery");
+			createCell(workbook, fgR03, 4, r03c02Style).setValue("Balance");
 
 			createCell(workbook, fgR04, 0, r01c00Style).setValue(customer);
-			createCell(workbook, fgR04, 1, r01c02Style).setValue(fgName + " : " + fgNo);
-			createCell(workbook, fgR04, 2, r01c02Style).setValue("FG");
-			createCell(workbook, fgR04, 3, r01c02Style).setValue("In");
+			createCell(workbook, fgR04, 1, r01c00Style).setValue(fgNo);
+			createCell(workbook, fgR04, 2, r01c00Style).setValue(fgName);
+			createCell(workbook, fgR04, 3, r01c02Style).setValue("FG");
+			createCell(workbook, fgR04, 4, r01c02Style).setValue("In");
 
 			createCell(workbook, fgR05, 0, r01c00Style).setValue(customer);
-			createCell(workbook, fgR05, 1, r01c02Style).setValue(fgName + " : " + fgNo);
-			createCell(workbook, fgR05, 2, r01c02Style).setValue("FG");
-			createCell(workbook, fgR05, 3, r01c02Style).setValue("Out");
+			createCell(workbook, fgR05, 1, r01c00Style).setValue(fgNo);
+			createCell(workbook, fgR05, 2, r01c00Style).setValue(fgName);
+			createCell(workbook, fgR05, 3, r01c02Style).setValue("FG");
+			createCell(workbook, fgR05, 4, r01c02Style).setValue("Out");
 
 			createCell(workbook, fgR06, 0, r01c00Style).setValue(customer);
-			createCell(workbook, fgR06, 1, r01c02Style).setValue(fgName + " : " + fgNo);
-			createCell(workbook, fgR06, 2, r01c02Style).setValue("FG");
-			createCell(workbook, fgR06, 3, r01c02Style).setValue("Balance FG");
+			createCell(workbook, fgR06, 1, r01c00Style).setValue(fgNo);
+			createCell(workbook, fgR06, 2, r01c00Style).setValue(fgName);
+			createCell(workbook, fgR06, 3, r01c02Style).setValue("FG");
+			createCell(workbook, fgR06, 4, r01c02Style).setValue("Balance FG");
 
 			createCell(workbook, fgR07, 0, r07c00Style).setValue(customer);
-			createCell(workbook, fgR07, 1, r07c02Style).setValue(fgName + " : " + fgNo);
-			createCell(workbook, fgR07, 2, r07c02Style).setValue("FG");
-			createCell(workbook, fgR07, 3, r07c02Style).setValue("Adjust");
+			createCell(workbook, fgR07, 1, r01c00Style).setValue(fgNo);
+			createCell(workbook, fgR07, 2, r01c00Style).setValue(fgName);
+			createCell(workbook, fgR07, 3, r07c02Style).setValue("FG");
+			createCell(workbook, fgR07, 4, r07c02Style).setValue("Adjust");
 
-			for (int day = 4; day <= tfg.getEndDay() + 4; day++) {
+			for (int day = 5; day <= tfg.getEndDay() + 5; day++) {
 				createCell(workbook, fgR01, day, r01c03Style);
-				createCell(workbook, fgR02, day, r01c03Style);
-				createCell(workbook, fgR03, day, r01c03Style);
+				createCell(workbook, fgR02, day, r07c03Style);
+				createCell(workbook, fgR03, day, r07c03Style);
 				createCell(workbook, fgR04, day, r01c03Style);
 				createCell(workbook, fgR05, day, r01c03Style);
 				createCell(workbook, fgR06, day, r01c03Style);
 				createCell(workbook, fgR07, day, r07c03Style);
 			}
-			createCell(workbook, fgR01, tfg.getEndDay() + 4, rcLastStyle);
-			createCell(workbook, fgR02, tfg.getEndDay() + 4, rcLastStyle);
-			createCell(workbook, fgR03, tfg.getEndDay() + 4, rcLastStyle);
-			createCell(workbook, fgR04, tfg.getEndDay() + 4, rcLastStyle);
-			createCell(workbook, fgR05, tfg.getEndDay() + 4, rcLastStyle);
-			createCell(workbook, fgR06, tfg.getEndDay() + 4, rcLastStyle);
-			createCell(workbook, fgR07, tfg.getEndDay() + 4, r7cLasStyle);
+			createCell(workbook, fgR01, tfg.getEndDay() + 5, rcLastStyle);
+			createCell(workbook, fgR02, tfg.getEndDay() + 5, rcLastStyle);
+			createCell(workbook, fgR03, tfg.getEndDay() + 5, rcLastStyle);
+			createCell(workbook, fgR04, tfg.getEndDay() + 5, rcLastStyle);
+			createCell(workbook, fgR05, tfg.getEndDay() + 5, rcLastStyle);
+			createCell(workbook, fgR06, tfg.getEndDay() + 5, rcLastStyle);
+			createCell(workbook, fgR07, tfg.getEndDay() + 5, r7cLasStyle);
 
-			for (int d = 4; d <= tfg.getEndDay() + 4; d++) {
+			for (int d = 5; d <= tfg.getEndDay() + 5; d++) {
 				for (TFGStock stock : listStock) {
-					if (stock.getReportDay() == (d - 4)) {
+					if (stock.getReportDay() == (d - 5)) {
 						fgR01.getCell(d).setCellValue((stock.getDeliveryQty() == null) ? "" : "" + stock.getDeliveryQty());
 						fgR02.getCell(d).setCellValue((stock.getActualQty() == null) ? "" : "" + stock.getActualQty());
 						fgR03.getCell(d).setCellValue((stock.getBalanceQty() == null) ? "" : "" + stock.getBalanceQty());

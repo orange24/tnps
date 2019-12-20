@@ -22,6 +22,7 @@ $(function(){
 	reportDate 	= $("#reportDate");
 	hidRptDate 	= $("#hidRptDate");
 	fngForm 	= $("#fngForm");
+	reportType 	= $("#reportType");
 
 	//reportDate.datepicker( "option", "maxDate", '0d' );
 	
@@ -29,6 +30,7 @@ $(function(){
 	changeFgInOut();
 	if(btnOk.attr("disabled")){
 		reportDate.datepicker("disable");
+		reportType.attr("disabled", true);
 	}
 	
 	txtLotSeqOptions = {
@@ -303,8 +305,8 @@ $(function(){
 					params.push("details["+ (index) +"].fgId="+tr1.find("#hideFgId").val());
 					params.push("details["+ (index) +"].fgNo="+tr1.find("#hideFgNo").val());
 					params.push("details["+ (index) +"].fgName="+tr1.find("#fgId").text());
-					params.push("details["+ (index) +"].reportType="+tr1.find("#reportType").val());
-					params.push("details["+ (index) +"].reportTypeName="+tr1.find("#reportType option:selected").text());
+					params.push("details["+ (index) +"].reportType="+ $("#reportType").val());
+					params.push("details["+ (index) +"].reportTypeName="+ $("#reportType option:selected").text());
 					params.push("details["+ (index) +"].reportDate="+$("#reportDate").val());
 					params.push("details["+ (index) +"]."+ fgType +"="+tr1.find("#"+ fgType).val());
 					params.push("details["+ (index) +"].fgType="+ fgType);
@@ -319,8 +321,8 @@ $(function(){
 					params.push("details["+ (index) +"].fgId="+tr1.find("#hideFgId").val());
 					params.push("details["+ (index) +"].fgNo="+tr1.find("#hideFgNo").val());
 					params.push("details["+ (index) +"].fgName="+tr1.find("#fgId").text());
-					params.push("details["+ (index) +"].reportType="+tr1.find("#reportType").val());
-					params.push("details["+ (index) +"].reportTypeName="+tr1.find("#reportType option:selected").text());
+					params.push("details["+ (index) +"].reportType="+ $("#reportType").val());
+					params.push("details["+ (index) +"].reportTypeName="+$("#reportType option:selected").text());
 					params.push("details["+ (index) +"].reportDate="+$("#reportDate").val());
 					params.push("details["+ (index) +"]."+ fgType +"="+tr1.find("#"+ fgType).val());
 					params.push("details["+ (index) +"].fgType="+ fgType);

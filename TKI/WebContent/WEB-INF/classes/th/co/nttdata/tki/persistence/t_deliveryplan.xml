@@ -28,6 +28,7 @@
 		<result property="detailPlanId" column="detailPlanId"/>
 		<result property="timeHr" column="timeHr"/>
 		<result property="timeMin" column="timeMin"/>
+		<result property="customerLine" column="customerLine"/>
 		<result property="deliveryQty" column="deliveryQty"/>
 	</resultMap>
 	
@@ -259,7 +260,7 @@
 	</select>
 
 	<select id="selectTimeList" resultMap="select-timelist-result">
-		SELECT DISTINCT t.timeHr, t.timeMin, #detailPlanId# AS detailPlanId, pt.deliveryQty
+		SELECT DISTINCT t.timeHr, t.timeMin, t.customerlineid as customerline, #detailPlanId# AS detailPlanId, pt.deliveryQty
 		FROM t_deliveryplan p, t_deliveryplan_date d, t_deliveryplan_time t         
 		LEFT JOIN t_deliveryplan_time pt ON pt.detailPlanId = #detailPlanId# AND pt.timeHr = t.timeHr AND pt.timeMin = t.timeMin
 		WHERE
@@ -335,12 +336,13 @@
 	<statement id="insertTime" parameterClass="th.co.nttdata.tki.bean.TDeliveryPlanDate">
 		DELETE FROM t_deliveryplan_time WHERE detailPlanId = #detailPlanId# 
 		<iterate property="timeList">
-			INSERT INTO t_deliveryplan_time (detailplanid,deliveryqty,timehr,timemin)
+			INSERT INTO t_deliveryplan_time (detailplanid,deliveryqty,timehr,timemin,customerlineid)
 			VALUES (
 				 #detailPlanId#
 				,#timeList[].deliveryQty#
 				,#timeList[].timeHr#
 				,#timeList[].timeMin#
+				,#timeList[].customerLine#
 			)
 		</iterate>
 	</statement>
@@ -388,8 +390,8 @@
 	
 	<insert id="copyTime" parameterClass="th.co.nttdata.tki.bean.TDeliveryPlan">
 		INSERT INTO t_deliveryplan_time
-			(detailPlanId, timeHr, timeMin, deliveryQty)
-		SELECT d2.detailPlanId, t.timeHr, t.timeMin, t.deliveryQty
+			(detailPlanId, timeHr, timeMin, deliveryQty, customerlineid)
+		SELECT d2.detailPlanId, t.timeHr, t.timeMin, t.deliveryQty, t.customerlineid
 		FROM
 			t_deliveryplan_date d1
 			LEFT JOIN t_deliveryplan_date d2 ON d2.deliveryPlanId = #newDeliveryPlanId# AND d2.deliveryDate = d1.deliveryDate AND d2.fgId = d1.fgId,
@@ -568,6 +570,7 @@
 			,t.deliveryQty
 			,t.timeHr
 			,t.timeMin
+			,l.customerLineName as customerLine
 		FROM t_deliveryplan_date d
 		INNER JOIN t_deliveryplan p ON d.deliveryplanId = p.deliveryplanId 
 									AND p.revision = 
@@ -579,6 +582,7 @@
 		INNER JOIN m_customer c ON c.customerId = p.customerId
 		INNER JOIN m_fg f ON f.fgId = d.fgId
 		INNER JOIN m_user_customer u ON u.customerId = p.customerId
+		INNER JOIN m_customer_line l ON l.customerLineId = t.customerLineId
 		WHERE d.deliveryDate = #deliveryDate#
 		AND u.userName = #updateBy# AND t.deliveryQty <![CDATA[ <> ]]> 0
 		ORDER BY p.customerId,t.timeHr,t.timeMin,d.fgId
@@ -1095,9 +1099,9 @@
 				AND p.yearmonth = CAST(#year# AS VARCHAR(4)) + RIGHT('0'+ CAST(#month#+1 AS VARCHAR), 2)
 				AND p.revision = #revision#
 		LEFT JOIN t_deliveryplan_date dd ON p.deliveryplanid = dd.deliveryplanid AND dd.fgid = f.fgid
-		<dynamic prepend="WHERE">
-			<isNotEmpty prepend="AND" property="customerId"> fc.customerId = #customerId# </isNotEmpty>
-		</dynamic>
+		WHERE f.isenable = 1
+		<isNotEmpty prepend="AND" property="customerId"> fc.customerId = #customerId# </isNotEmpty>
+		
 		Order by f.fgName,f.fgNo
 	</select>
 	

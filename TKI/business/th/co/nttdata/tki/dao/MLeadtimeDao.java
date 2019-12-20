@@ -8,6 +8,8 @@ import th.co.nttdata.tki.bean.MPart;
 public interface MLeadtimeDao {
 	
 	public MLeadtime queryLeadtimeList(MLeadtime mLeadtime);
+
+	public MLeadtime queryLeadtimeExportList(MLeadtime mLeadtime);
 	
 	public void insertLeadtime(MLeadtime mLeadtime);
 	

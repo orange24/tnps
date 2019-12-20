@@ -10,7 +10,7 @@
 <%@ include file="../importResourcesSlickgrid.jsp"%>
 <script type="text/javascript" src='page/MST/S_FGM_S01.js'></script>
 <title>Insert title here</title>
-</head>
+</head> 
 <body>
 	<h1 class="header"><spring:message code='menu.FGMaster'/></h1>
 	<form:form id="fgMstForm" commandName="fgMasterExportList" action="S_FGM_S01_search.html">

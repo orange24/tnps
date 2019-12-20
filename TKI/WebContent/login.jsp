@@ -5,6 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link rel="shortcut icon" type="image/png" href="image/favicon.png"/>
 <title>Thai Kikuwa Induntry Co., Ltd.</title>
 <%@ include file="page/importResources.jsp" %>
 <script language="javascript">

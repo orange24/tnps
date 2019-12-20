@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import th.co.nttdata.tki.bean.MDocControl;
 import th.co.nttdata.tki.bean.MWip;
 import th.co.nttdata.tki.bean.TFGStock;
+import th.co.nttdata.tki.blogic.cfg.DOC_S01Logic;
 import th.co.nttdata.tki.blogic.mrdc.MRDC_S16Logic;
 import th.co.nttdata.tki.controller.AbstractBaseController;
 import th.co.nttdata.tki.controller.cmm.CommonController;
@@ -29,6 +31,9 @@ public class MRDC_S16Controller extends AbstractBaseController {
 	@Autowired
 	private MRDC_S16Logic mrdc_s16Logic;
 
+	@Autowired
+	public DOC_S01Logic doc_S01Logic;
+	
 	@RequestMapping("/MRDC_S16")
 	public ModelAndView init() {
 		Calendar cal = new GregorianCalendar(Locale.US);
@@ -45,10 +50,12 @@ public class MRDC_S16Controller extends AbstractBaseController {
 
 	@RequestMapping("/MRDC_R16_export")
 	public ModelAndView export(TFGStock tfgStock) {
-
-		return new ModelAndView("MRDC_R16ExcelView").addObject("tfgStock",
-				mrdc_s16Logic.exportMRDC_R16(tfgStock)).addObject("mwip",
-				mrdc_s16Logic.queryWip(new MWip()));
+		MDocControl docControl = doc_S01Logic.getDocNo();
+		ModelAndView mv = new ModelAndView("MRDC_R16ExcelView");
+		mv.addObject("tfgStock",mrdc_s16Logic.exportMRDC_R16(tfgStock)).addObject("mwip",mrdc_s16Logic.queryWip(new MWip()));		
+		mv.addObject("docControl",docControl);
+		
+		return mv;
 	}
 
 	@RequestMapping(value = "/MRDC_R16_export_count", method = RequestMethod.GET)

@@ -34,6 +34,39 @@
           		<isNotEmpty prepend="AND" property="partName"> CFP.PARTNAME LIKE '%' +#partName#+ '%'</isNotEmpty>
 		ORDER BY CFP.CUSTOMERCODE,CFP.FGNO,CFP.PARTNO,PW.WIPORDER
     </select>
+    
+    <select id="select_fg_part_wip_allcus" parameterClass="th.co.nttdata.tki.bean.PartRoutingMaster" resultClass="th.co.nttdata.tki.bean.PartRoutingMaster">
+        SELECT 
+ 				CFP.CUSTOMERID
+ 				,CFP.CUSTOMERCODE
+ 				,CFP.FGID
+ 				,CFP.FGNO
+ 				,CFP.FGNAME
+ 				,CFP.PARTID
+ 				,CFP.PARTNO
+ 				,CFP.PARTNAME
+ 				,PW.WIPORDER
+ 				,PW.WIP
+ 				,CONVERT(VARCHAR(10),PW.WIPORDER) +'.'+ PW.WIP  As process
+ 				,CONVERT(VARCHAR(10),PW.WIPORDER) +'.'+ case when PW.remark is null then '' else PW.remark end AS remark
+			  	,CONVERT(VARCHAR(10),PW.WIPORDER)+'.'+
+			   		CASE
+			      	WHEN	( PW.ISCALC = 1 ) 
+			      			THEN 'Yes'
+			    			ELSE  'No'    
+			    	END    	As wipCalc
+ 				,PW.ISCALC
+		FROM 	V_CUST_FG_PART CFP 
+				LEFT JOIN M_PART_WIP PW ON CFP.PARTID = PW.PARTID
+		WHERE 
+		 1=1 
+          		<isNotEmpty prepend="AND" property="fgNo">   CFP.FGNO LIKE	'%' +#fgNo#+ '%'</isNotEmpty>
+         	 	<isNotEmpty prepend="AND" property="fgName"> CFP.FGNAME LIKE '%' +#fgName#+ '%'</isNotEmpty>
+          		<isNotEmpty prepend="AND" property="partNo"> CFP.PARTNO LIKE '%' +#partNo#+ '%'</isNotEmpty>
+          		<isNotEmpty prepend="AND" property="partName"> CFP.PARTNAME LIKE '%' +#partName#+ '%'</isNotEmpty>
+		ORDER BY CFP.CUSTOMERCODE,CFP.FGNO,CFP.PARTNO,PW.WIPORDER
+    </select>
+    
     <select id="select_part_wip" resultClass="th.co.nttdata.tki.bean.PartRoutingMaster"  parameterClass="th.co.nttdata.tki.bean.PartRoutingMaster">
     	    SELECT
     	            PW.PARTID
@@ -111,6 +144,43 @@
 		 LEFT JOIN M_PART_WIP PW ON FGP.PARTID = PW.PARTID
 		 WHERE
 		       FGC.CUSTOMERID = #customerId#
+			<isNotEmpty prepend="AND" property="searchfgNo"> FG.FGNO LIKE	'%' +#searchfgNo#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="searchfgName"> FG.FGNAME LIKE	'%' +#searchfgName#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="searchpartNo"> PART.PARTNO LIKE	'%' +#searchpartNo#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="searchpartName"> PART.PARTNAME LIKE	'%' +#searchpartName#+ '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="customerCode"> CUS.CUSTOMERCODE LIKE	'%' +#customerCode#+ '%' </isNotEmpty>
+            <isNotNull prepend="AND" property="fgNo"> FG.FGNO LIKE	'%' +#fgNo#+ '%' </isNotNull>
+			<isNotNull prepend="AND" property="fgName"> FG.FGNAME LIKE	'%' +#fgName#+ '%' </isNotNull>
+			<isNotNull prepend="AND" property="partNo"> PART.PARTNO LIKE	'%' +#partNo#+ '%' </isNotNull>
+			<isNotNull prepend="AND" property="partName"> PART.PARTNAME LIKE	'%' +#partName#+ '%' </isNotNull>
+			<isNotEmpty prepend="AND" property="process">  CAST(PW.WIPORDER AS VARCHAR(3))+'. '+ PW.WIP like '%' +#wip#+ '%'</isNotEmpty>  
+			<isNotEmpty prepend="AND" property="wipCalcList"> CAST(PW.WIPORDER AS VARCHAR(3))+'. '+ CAST(PW.WIPORDER AS VARCHAR(3)) like '%' +#isCalc#+ '%'</isNotEmpty>
+			ORDER BY FG.FGNO,PART.PARTNO,PW.WIPORDER   
+			              
+    </select>
+    
+    <select id="select_export_allcus" parameterClass="th.co.nttdata.tki.bean.filter.PartRoutingMasterFilter" resultClass="th.co.nttdata.tki.bean.filter.PartRoutingMasterFilter">
+    	 SELECT 
+                 CUS.CUSTOMERID
+                 ,CUS.CUSTOMERCODE
+				 ,FG.FGID
+				 ,FG.FGNO
+				 ,FG.FGNAME
+				 ,PART.PARTID
+				 ,PART.PARTNO
+				 ,PART.PARTNAME
+				 ,PW.WIPORDER
+				 ,PW.WIP
+				 ,PW.remark
+				 ,CASE WHEN ( PW.ISCALC = 1 ) THEN 'Yes' ELSE  'No' END As isCalc  
+         FROM M_FG_PART FGP 
+		 INNER JOIN M_PART PART ON PART.PARTID = FGP.PARTID
+		 INNER JOIN M_FG FG ON FG.FGID = FGP.FGID
+		 INNER JOIN M_FG_CUSTOMER FGC ON FGC.FGID = FGP.FGID
+		 INNER JOIN M_CUSTOMER CUS ON CUS.CUSTOMERID = FGC.CUSTOMERID
+		 LEFT JOIN M_PART_WIP PW ON FGP.PARTID = PW.PARTID
+		 WHERE
+		       1=1 
 			<isNotEmpty prepend="AND" property="searchfgNo"> FG.FGNO LIKE	'%' +#searchfgNo#+ '%' </isNotEmpty>
 			<isNotEmpty prepend="AND" property="searchfgName"> FG.FGNAME LIKE	'%' +#searchfgName#+ '%' </isNotEmpty>
 			<isNotEmpty prepend="AND" property="searchpartNo"> PART.PARTNO LIKE	'%' +#searchpartNo#+ '%' </isNotEmpty>

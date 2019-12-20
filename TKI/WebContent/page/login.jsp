@@ -4,6 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>Untitled Document</title>
 <link href="css/main.css".css" rel="stylesheet" type="text/css" />
+<link rel="shortcut icon" type="image/png" href="image/favicon.png"/>
 <style type="text/css">
 <!--
 body {

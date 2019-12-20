@@ -57,6 +57,20 @@ public class FNG_S01LogicImpl implements FNG_S01Logic {
 		 */
 
 		if (tfg.getDetails() != null && tfg.getDetails().size() > 0) {
+			//Check err Out not In 
+			if("fgout".equalsIgnoreCase(tfg.getDetails().get(0).getFgType())){
+				boolean isErr = false;
+				for(TFGDetail tmpDetail : tfg.getDetails()){
+					if(tfgDetailDao.checkOutNotIn(tmpDetail)){
+						isErr = true;
+						tfg.getErrors().add(new Message("err.fng.012", new String[]{tmpDetail.getLotNo()+"-"+tmpDetail.getLotSeqNo()}));
+					}
+				}
+				if(isErr){
+					return;
+				}
+			}
+			
 			tfgDetailDao.insertFgDetail(tfg);
 			tfg.getInfos().add(new Message("inf.cmm.002", null));
 

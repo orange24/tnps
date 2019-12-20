@@ -17,7 +17,17 @@ public class TWip extends AbstractBaseBean {
 	private Integer year;
 	private String wip;
 	private Map<String,List<TWipStock>> stockMap;
-	
+
+    //TwipFG
+    private Map<String,List<TWipFgMaping>> fgMap;
+    private List<TWipFgMaping> fgList;
+    private Map<Date,List<TWipFgMaping>> fgMapKey;
+    private List<TWipFgMaping> fgListKey;
+    private Map<String,List<TWipFgMaping>> fgMapDay;
+    private List<TWipFgMaping> fgListDay;
+    private Map<String,List<TWipFgMaping>> fgMapPartDay;
+    private List<TWipFgMaping> fgListPartDay;
+    
 	//MRDC_S19
 	private Integer sorting;
 	private String 	category;
@@ -120,5 +130,53 @@ public class TWip extends AbstractBaseBean {
 	}
 	public void setSorting(Integer sorting) {
 		this.sorting = sorting;
+	}
+	public Map<String,List<TWipFgMaping>> getFgMap() {
+		return fgMap;
+	}
+	public void setFgMap(Map<String,List<TWipFgMaping>> fgMap) {
+		this.fgMap = fgMap;
+	}
+	public List<TWipFgMaping> getFgList() {
+		return fgList;
+	}
+	public void setFgList(List<TWipFgMaping> fgList) {
+		this.fgList = fgList;
+	}
+	public List<TWipFgMaping> getFgListKey() {
+		return fgListKey;
+	}
+	public void setFgListKey(List<TWipFgMaping> fgListKey) {
+		this.fgListKey = fgListKey;
+	}
+	public Map<Date,List<TWipFgMaping>> getFgMapKey() {
+		return fgMapKey;
+	}
+	public void setFgMapKey(Map<Date,List<TWipFgMaping>> fgMapKey) {
+		this.fgMapKey = fgMapKey;
+	}
+	public Map<String,List<TWipFgMaping>> getFgMapDay() {
+		return fgMapDay;
+	}
+	public void setFgMapDay(Map<String,List<TWipFgMaping>> fgMapDay) {
+		this.fgMapDay = fgMapDay;
+	}
+	public List<TWipFgMaping> getFgListDay() {
+		return fgListDay;
+	}
+	public void setFgListDay(List<TWipFgMaping> fgListDay) {
+		this.fgListDay = fgListDay;
+	}
+	public Map<String,List<TWipFgMaping>> getFgMapPartDay() {
+		return fgMapPartDay;
+	}
+	public void setFgMapPartDay(Map<String,List<TWipFgMaping>> fgMapPartDay) {
+		this.fgMapPartDay = fgMapPartDay;
+	}
+	public List<TWipFgMaping> getFgListPartDay() {
+		return fgListPartDay;
+	}
+	public void setFgListPartDay(List<TWipFgMaping> fgListPartDay) {
+		this.fgListPartDay = fgListPartDay;
 	}
 }

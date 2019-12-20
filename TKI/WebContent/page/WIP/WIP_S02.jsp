@@ -113,7 +113,8 @@
 		<table width="1200" border="1" align="center" cellpadding="3" cellspacing="1" class="ui-widget ui-widget-content" >
 			<tr >
 				<th rowspan="2" align="center" class="submit_button" >Customer</th>
-				<th rowspan="2" align="center" class="submit_button" >Part</th>
+				<th rowspan="2" align="center" class="submit_button" >Part No</th>
+				<th rowspan="2" align="center" class="submit_button" >Part Name</th>
 				<th rowspan="2" align="center" class="submit_button" >WIP</th>
 				<th rowspan="2" align="center" class="submit_button" >&nbsp;</th>
 				<th colspan="${wip.endDay + 1}" align="center" class="submit_button" ><div align="center">${monthMap[wip.month]} ${yearMap[wip.year]}</div></th>
@@ -126,7 +127,8 @@
 			<c:forEach var="stockMap" items="${wip.stockMap}" varStatus="loop" begin="0" step="1">
 				<tr >
 					<td rowspan="6" align="center" >${stockMap.value[0].customer}</td>
-					<td rowspan="6" align="center" >${stockMap.value[0].partName} : ${stockMap.value[0].partNo}</td>
+					<td rowspan="6" align="center" >${stockMap.value[0].partNo}</td>
+					<td rowspan="6" align="center" >${stockMap.value[0].partName}</td>
 					<td rowspan="6" align="center" >${stockMap.value[0].wipOrder}. ${stockMap.value[0].wipName}</td>
 					<td align="center"><strong>OK</strong></td>
 					<c:forEach varStatus="day" begin="0" end="${wip.endDay}" step="1">
@@ -213,7 +215,7 @@
 						</td>
 					</c:forEach>
 				</tr>
-				<tr ><th height="1" colspan="${wip.endDay + 5}" align="center" >&nbsp;</th></tr>
+				<tr ><th height="1" colspan="${wip.endDay + 6}" align="center" >&nbsp;</th></tr>
 			</c:forEach>
 		</table><br />
 		Stock = Stock (N-1) + OK - Next WIP.<br />

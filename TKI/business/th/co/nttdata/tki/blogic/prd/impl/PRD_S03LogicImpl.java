@@ -2,9 +2,13 @@ package th.co.nttdata.tki.blogic.prd.impl;
 
 import java.awt.print.PageFormat;
 import java.awt.print.PrinterJob;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.print.PrintService;
@@ -16,21 +20,22 @@ import javax.print.attribute.standard.MediaSizeName;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.export.JRPrintServiceExporter;
-import net.sf.jasperreports.engine.export.JRPrintServiceExporterParameter;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.converters.DateConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import net.sf.jasperreports.engine.JRExporter;
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.export.JRPrintServiceExporter;
+import net.sf.jasperreports.engine.export.JRPrintServiceExporterParameter;
 import th.co.nttdata.tki.bean.MCustomer;
 import th.co.nttdata.tki.bean.MMachine;
 import th.co.nttdata.tki.bean.MWip;
@@ -151,6 +156,7 @@ public class PRD_S03LogicImpl implements PRD_S03Logic {
 			object = new TDCPlan();
 			BeanUtils.populate(object, param.get(i));
 //			System.out.println(i+".) "+param.get(i));
+//			System.out.println(object.getOptionPrintDate()+", "+object.getOptionPrintWorker());
 			list.add(object);
 		}
 		return list;
@@ -172,8 +178,24 @@ public class PRD_S03LogicImpl implements PRD_S03Logic {
 
 		for (TDCPlan obj : list) {
 			List<TDCPlan> o = tLotNoDao.getDataForPrint(obj);
+			List<TDCPlan> oArr = new ArrayList<TDCPlan>();
 			if(o != null && o.size() > 0){
-				printList.add(o);
+				if (obj.getProcessList() != null) {
+					for(TDCPlan oTemp : o){
+							for(String process : obj.getProcessList()){
+								if(process.equals(oTemp.getWipName())){
+									oTemp.setOptionPrintDate(obj.getOptionPrintDate());
+									oTemp.setOptionPrintWorker(obj.getOptionPrintWorker());
+									oTemp.setOptionPrintQtyOK(obj.getOptionPrintQtyOK());
+									oTemp.setOptionPrintQtyNG(obj.getOptionPrintQtyNG());
+								}	
+							}
+						oArr.add(oTemp);
+					}
+				}else{
+					oArr = o;
+				}
+				printList.add(oArr);
 			}
 		}
 		if (!printList.isEmpty()) {
@@ -215,6 +237,9 @@ public class PRD_S03LogicImpl implements PRD_S03Logic {
 		PageFormat pageFormat = PrinterJob.getPrinterJob().defaultPage();
 		job.defaultPage(pageFormat);
 		try {
+			System.out.println("Printer name (selected) = "+ printerName);
+			System.out.println("Printer Id (Mapping) = "+services[selectedService]);
+			
 			job.setPrintService(services[selectedService]);
 			JRPrintServiceExporter exporter = new JRPrintServiceExporter();
 			exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
@@ -247,6 +272,116 @@ public class PRD_S03LogicImpl implements PRD_S03Logic {
 		return param;
 	}
 
+	
+
+	
+	@Override
+	public String printPDF(List<Map<String, Object>> param, TDCPlan object)
+			throws Exception {
+		List<TDCPlan> list = convertToSave(param);
+		List<List<TDCPlan>> printList = new ArrayList<List<TDCPlan>>();
+		if (null == request.getSession().getAttribute("prdS03Printer")) {
+			request.getSession().setAttribute("prdS03Printer",
+					list.get(0).getPrinterName());
+		} else {
+			request.getSession().setAttribute("prdS03Printer",
+					list.get(0).getPrinterName());
+		}
+		String printerName = list.get(0).getPrinterName();
+
+		for (TDCPlan obj : list) {
+			List<TDCPlan> o = tLotNoDao.getDataForPrint(obj);
+			if(o != null && o.size() > 0){
+				printList.add(o);
+			}
+		}
+		for (TDCPlan obj : list) {
+			if (!obj.getPrintingStatus().booleanValue()) {
+				tLotNoDao.updatePrintStatus(obj);
+			}
+		}
+		
+		if (!printList.isEmpty()) {
+//			object = 
+					return this.printJasperReportPDF(this.convertObjectList(printList),
+					printerName, object);
+		}
+		object.setPrinterName((String) request.getSession().getAttribute(
+				"prdS03Printer"));
+		for (TDCPlan obj : list) {
+			if (!obj.getPrintingStatus().booleanValue()) {
+				tLotNoDao.updatePrintStatus(obj);
+			}
+		}
+		return null;
+	}
+
+	private String printJasperReportPDF(List<TDCPlan> printList,
+			String printerName, TDCPlan param) throws Exception {
+
+		SimpleDateFormat fileFormatter = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
+		SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+		SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss", Locale.US);
+		
+		String filename = "PRD03-"+fileFormatter.format(new GregorianCalendar(Locale.US).getTime())+".pdf";
+		try{
+			Map<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put("logo", servletContext.getRealPath("image/login/logo.gif"));
+			JRBeanCollectionDataSource beanDataSource = new JRBeanCollectionDataSource(
+					printList);
+			
+			JasperReport jasperReport = JasperCompileManager.compileReport(servletContext.getRealPath("WEB-INF/classes/prd_s03.jrxml"));
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport,null, beanDataSource);
+			
+            
+            String filePath = servletContext.getRealPath("/WEB-INF/pdf/")+"/"+filename;
+            System.out.println("filePath = "+filePath);
+            
+			// exports report to pdf
+			JRExporter exporter = new JRPdfExporter();
+			exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+			exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, new FileOutputStream(filePath)); // your output goes here
+
+			PrintRequestAttributeSet printRequestAttributeSet = new HashPrintRequestAttributeSet();
+			printRequestAttributeSet.add(new Copies(1));
+			printRequestAttributeSet.add(MediaSizeName.ISO_A5);
+			exporter.setParameter(
+					JRPrintServiceExporterParameter.PRINT_REQUEST_ATTRIBUTE_SET,
+					printRequestAttributeSet);
+			exporter.setParameter(
+					JRPrintServiceExporterParameter.DISPLAY_PAGE_DIALOG,
+					Boolean.FALSE);
+			exporter.setParameter(
+					JRPrintServiceExporterParameter.DISPLAY_PRINT_DIALOG,
+					Boolean.FALSE);
+			exporter.exportReport();
+
+//	        JasperExportManager.exportReportToPdfStream(jasperPrint, response.getOutputStream());
+			/*
+			File file = new File(filename);
+			byte[] bytesArray = new byte[(int) file.length()];
+
+			FileInputStream fis = new FileInputStream(file);
+			fis.read(bytesArray); //read file into bytes[]
+			fis.close();
+			
+			return bytesArray;
+			*/
+			
+//			param.getInfos().add(new Message("inf.cmm.006", new String[] {}));
+		}catch(Exception e){
+			e.printStackTrace();
+			param.getErrors().add(
+					new Message("err.prd.003", new String[] { "" }));
+		}
+		
+		return filename;
+	}
+
+	
+	
+	
+	
 	private List<TDCPlan> convertObjectList(List<List<TDCPlan>> printList) {
 		List<TDCPlan> reportList = new ArrayList<TDCPlan>();
 		for (int i = 0; i < printList.size(); i++) {
@@ -277,4 +412,11 @@ public class PRD_S03LogicImpl implements PRD_S03Logic {
 		list.add(0, new MCustomer(null, "-- All Customer -- ", null));
 		return list;
 	}
+	
+
+	@Override
+	public List<TDCPlan> getWip(TDCPlan param) {
+		return tDCPlanDao.prdS03GetWip(param);
+	}
+
 }

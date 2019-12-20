@@ -99,15 +99,15 @@ public class WIP_R02ExcelView extends AbstractExcelView {
 		//head WIP Stock
 		HSSFRow fstHeader = sheet.getRow(4);
 		HSSFRow sndHeader = sheet.getRow(5);
-		int colNumber = 4;
+		int colNumber = 5;
 		for (int i = 0; i <= tWip.getEndDay(); i++) {
 			createCell(workbook, fstHeader, colNumber, fstHDRStyle);
 			createCell(workbook, sndHeader, colNumber, sndHDRStyle);
 			sheet.getRow(5).getCell(colNumber).setCellValue((i == 0) ? 0 : i);
 			colNumber += 1;
 		}
-		createMergedRegion(sheet, 4, 4, 4, tWip.getEndDay() + 1);
-		fstHeader.getCell(4).setCellValue(new DateFormatSymbols().getMonths()[tWip.getMonth()] + " " + tWip.getYear());
+		createMergedRegion(sheet, 4, 4, 5, tWip.getEndDay() + 5);
+		fstHeader.getCell(5).setCellValue(new DateFormatSymbols().getMonths()[tWip.getMonth()] + " " + tWip.getYear());
 
 		int rowNumber = 6;
 		int lastRow1 = rowNumber + 2;
@@ -116,7 +116,8 @@ public class WIP_R02ExcelView extends AbstractExcelView {
 		HSSFRow lastHRow2 = sheet.createRow(lastRow2);
 		Map<String, List<TWipStock>> stockMap = tWip.getStockMap();
 		String customerCode = "";
-		String part = "";
+		String partNoDesc = "";
+		String partNameDesc = "";
 		String wip = "";
 
 		for (List<TWipStock> stockList : stockMap.values()) {
@@ -133,40 +134,47 @@ public class WIP_R02ExcelView extends AbstractExcelView {
 			lastRow2 = rowNumber + 9;
 			
 			customerCode = stockList.get(0).getCustomer();
-			part = stockList.get(0).getPartNo() + ":" + stockList.get(0).getPartName();
+			partNoDesc = stockList.get(0).getPartNo();
+			partNameDesc = stockList.get(0).getPartName();
 			wip = stockList.get(0).getWipOrder() + ". " + stockList.get(0).getWipName();
 
 			createCell(workbook, fgR01, 0, txtLeftStyle).setValue(customerCode);
-			createCell(workbook, fgR01, 1, txtLeftStyle).setValue(part);
-			createCell(workbook, fgR01, 2, txtLeftStyle).setValue(wip);
-			createCell(workbook, fgR01, 3, r01Style).setValue("OK");
+			createCell(workbook, fgR01, 1, txtLeftStyle).setValue(partNoDesc);
+			createCell(workbook, fgR01, 2, txtLeftStyle).setValue(partNameDesc);
+			createCell(workbook, fgR01, 3, txtLeftStyle).setValue(wip);
+			createCell(workbook, fgR01, 4, r01Style).setValue("OK");
 
 			createCell(workbook, fgR02, 0, txtLeftStyle).setValue(customerCode);
-			createCell(workbook, fgR02, 1, txtLeftStyle).setValue(part);
-			createCell(workbook, fgR02, 2, txtLeftStyle).setValue(wip);
-			createCell(workbook, fgR02, 3, r01Style).setValue("Pending");
+			createCell(workbook, fgR02, 1, txtLeftStyle).setValue(partNoDesc);
+			createCell(workbook, fgR02, 2, txtLeftStyle).setValue(partNameDesc);
+			createCell(workbook, fgR02, 3, txtLeftStyle).setValue(wip);
+			createCell(workbook, fgR02, 4, r01Style).setValue("Pending");
 
 			createCell(workbook, fgR03, 0, txtLeftStyle).setValue(customerCode);
-			createCell(workbook, fgR03, 1, txtLeftStyle).setValue(part);
-			createCell(workbook, fgR03, 2, txtLeftStyle).setValue(wip);
-			createCell(workbook, fgR03, 3, r01Style).setValue("NG");
+			createCell(workbook, fgR03, 1, txtLeftStyle).setValue(partNoDesc);
+			createCell(workbook, fgR03, 2, txtLeftStyle).setValue(partNameDesc);
+			createCell(workbook, fgR03, 3, txtLeftStyle).setValue(wip);
+			createCell(workbook, fgR03, 4, r01Style).setValue("NG");
 
 			createCell(workbook, fgR04, 0, txtLeftStyle).setValue(customerCode);
-			createCell(workbook, fgR04, 1, txtLeftStyle).setValue(part);
-			createCell(workbook, fgR04, 2, txtLeftStyle).setValue(wip);
-			createCell(workbook, fgR04, 3, r01Style).setValue("NextWIP");
+			createCell(workbook, fgR04, 1, txtLeftStyle).setValue(partNoDesc);
+			createCell(workbook, fgR04, 2, txtLeftStyle).setValue(partNameDesc);
+			createCell(workbook, fgR04, 3, txtLeftStyle).setValue(wip);
+			createCell(workbook, fgR04, 4, r01Style).setValue("NextWIP");
 
 			createCell(workbook, fgR05, 0, txtLeftStyle).setValue(customerCode);
-			createCell(workbook, fgR05, 1, txtLeftStyle).setValue(part);
-			createCell(workbook, fgR05, 2, txtLeftStyle).setValue(wip);
-			createCell(workbook, fgR05, 3, r01Style).setValue("Stock");
+			createCell(workbook, fgR05, 1, txtLeftStyle).setValue(partNoDesc);
+			createCell(workbook, fgR05, 2, txtLeftStyle).setValue(partNameDesc);
+			createCell(workbook, fgR05, 3, txtLeftStyle).setValue(wip);
+			createCell(workbook, fgR05, 4, r01Style).setValue("Stock");
 
 			createCell(workbook, fgR06, 0, r06c00Style).setValue(customerCode);
-			createCell(workbook, fgR06, 1, r06c00Style).setValue(part);
-			createCell(workbook, fgR06, 2, r06c00Style).setValue(wip);
-			createCell(workbook, fgR06, 3, r06Style).setValue("StockAdj.");
+			createCell(workbook, fgR06, 1, r06c00Style).setValue(partNoDesc);
+			createCell(workbook, fgR06, 2, r06c00Style).setValue(partNameDesc);
+			createCell(workbook, fgR06, 3, r06c00Style).setValue(wip);
+			createCell(workbook, fgR06, 4, r06Style).setValue("StockAdj.");
 
-			colNumber = 4;
+			colNumber = 5;
 			for (int i = 0; i <= tWip.getEndDay(); i++) {
 				for (TWipStock tWipStock : stockList) {
 					if (tWipStock.getReportDay() == i) {
@@ -235,9 +243,9 @@ public class WIP_R02ExcelView extends AbstractExcelView {
 		}
 
 		// Footer
-		createMergedRegion(sheet, lastRow1, lastRow1, 0, 5);
+		createMergedRegion(sheet, lastRow1, lastRow1, 0, 6);
 		createCell(workbook, lastHRow1, 0, detailStyle).setValue("Stock = Stock (N-1) + OK - Next WIP.");
-		createMergedRegion(sheet, lastRow2, lastRow2, 0, 5);
+		createMergedRegion(sheet, lastRow2, lastRow2, 0, 6);
 		createCell(workbook, lastHRow2, 0, detailStyle).setValue("Next WIP = (OK + Pending + NG ) of next process.");
 	}
 

@@ -63,6 +63,14 @@ public class ROL_S02Controller extends AbstractBaseController {
 		.addObject("command", rolS02Logic.getRolCommand(MRole));
 	}
 	
+	@RequestMapping("/ROL_S02_copy")
+	public ModelAndView copy(MRole MRole) {
+		return new ModelAndView(PATH_URI)
+		.addObject("mRole", new MRole())
+		.addObject("menu", rolS02Logic.getRolMenu(MRole))
+		.addObject("command", rolS02Logic.getRolCommand(MRole));
+	}
+	
 	@RequestMapping("/ROL_S02_delete")
 	public ModelAndView delete(MRole MRole,HttpSession session){
 		try {

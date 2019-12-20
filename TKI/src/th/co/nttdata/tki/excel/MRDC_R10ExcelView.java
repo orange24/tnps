@@ -148,10 +148,13 @@ public class MRDC_R10ExcelView extends AbstractExcelView{
 						colNum++;
 					}
 				}
-				hour  += Integer.parseInt(daily.getSortingTime().substring(0,2));
-				min   += Integer.parseInt(daily.getSortingTime().substring(3,5));
-				sec   += Integer.parseInt(daily.getSortingTime().substring(6));
-				
+				try{
+					hour  += Integer.parseInt(daily.getSortingTime().substring(0,2));
+					min   += Integer.parseInt(daily.getSortingTime().substring(3,5));
+					sec   += Integer.parseInt(daily.getSortingTime().substring(6));
+				}catch(Exception e){
+					
+				}
 				createCell(workbook, dtRow, colNum, txtCentStyle).setValue(daily.getSortingTime());
 				createCell(workbook, dtRow, colNum+1, txtLeftTOPStyle).setValue(daily.getMachineName());
 				createCell(workbook, dtRow, colNum+2, txtLeftTOPStyle).setValue(daily.getStaff());

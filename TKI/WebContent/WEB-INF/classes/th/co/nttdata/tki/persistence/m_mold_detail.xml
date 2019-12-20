@@ -175,6 +175,15 @@
 	
 	<select id="queryMoldDetail" parameterClass="th.co.nttdata.tki.bean.MMoldDetail" resultMap="moldDetailPart" >
 		<isNotNull property="moldId" ><isNotNull property="moldNo" >
+			select * 
+			FROM V_MOLD_SRC
+			where moldId=#moldId# and moldNo=#moldNo#
+		</isNotNull></isNotNull>
+	</select>
+	
+	
+	<select id="queryMoldDetail_BKK" parameterClass="th.co.nttdata.tki.bean.MMoldDetail" resultMap="moldDetailPart" >
+		<isNotNull property="moldId" ><isNotNull property="moldNo" >
 			select * <include refid="queryProperties"/>			    
 			where moldId=#moldId# and moldNo=#moldNo#
 		</isNotNull></isNotNull>

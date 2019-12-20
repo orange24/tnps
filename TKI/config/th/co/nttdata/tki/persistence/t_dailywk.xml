@@ -222,7 +222,7 @@
 	</select>
 	
 	<select id="selectMRDC_R12" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKDetail">
-			SELECT TOP $maxRecord$ 
+			SELECT DISTINCT TOP $maxRecord$ 
 				 partid AS partId
 				,sPartNo AS partNo
 				,sPartName AS partName

@@ -100,12 +100,13 @@ $(document).ready(function() {
 					<td align="left">${role.roleDesc}&nbsp;</td>
 					<td align="center" >
 					 	<security:authorize ifAnyGranted="ROL_S01_EDIT">
-					 		<a href="ROL_S02_edit.html?roleId=${role.roleId}"><img src="image/icon/update.gif" border="0"/></a>
+					 		<a href="ROL_S02_copy.html?roleId=${role.roleId}"><img src="image/icon/copy.png" border="0" title="Copy"/></a>
+					 		<a href="ROL_S02_edit.html?roleId=${role.roleId}"><img src="image/icon/update.gif" border="0" title="Edit"/></a>
 					 	</security:authorize> 
 					 	<security:authorize ifAnyGranted="ROL_S01_DELETE">
 					 		<c:if test="${!role.isLocked}">
 					  			<a href="javascript:void(0);" onclick="fnDelete( $(this).closest('tr') );" >
-					  			<img src="image/icon/delete.gif" border="0"/></a>
+					  			<img src="image/icon/delete.gif" border="0" title="Delete"/></a>
 					 		</c:if>
 					 	</security:authorize>
 					  	&nbsp;

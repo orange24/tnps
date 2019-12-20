@@ -42,7 +42,8 @@ function fnDelete(){
 		}
 		if( confirm("<spring:message code='cfm.cmm.002'/>") ){
 			usrS02Form.attr("action","USR_S02_delete.html");
-			usrS02Form.submit();
+			/* usrS02Form.submit(); */
+			document.getElementById("usrS02Form").submit();
 		}
 	});
 }
@@ -50,7 +51,8 @@ function fnDelete(){
 function fnBack(){
 	btnBack.click(function(){
 		usrS02Form.attr("action","USR_S01_search.html?button=back");
-		usrS02Form.submit();
+		/* usrS02Form.submit(); */
+		document.getElementById("usrS02Form").submit();
 	});
 }
 
@@ -120,7 +122,8 @@ function fnCheckInput(){
 	
 	if(confirm("<spring:message code='cfm.cmm.001'/>")){
 		usrS02Form.attr("action","USR_S02_save.html");
-		usrS02Form.submit();
+		/* usrS02Form.submit(); */
+		document.getElementById("usrS02Form").submit();
 	}
 }
 

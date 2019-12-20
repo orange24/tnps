@@ -70,9 +70,14 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 				stock.setCustomerCode(mPart.getCustomerCode());
 				stock.setCustomerName(mPart.getCustomerName());
 
+				//Boy edit 2018/05/03
+				stock.setBalanceQty(0);
+//				stock.setFgBalance(0);
+				
 				stockList.add(stock);
+				
 				prevDeliver = (null == stock.getBalanceQty() ? 0 : stock.getBalanceQty());
-
+				
 				/*
 				 * Add FG Stock Adjust to Calculate FG Stock
 				 */
@@ -93,7 +98,7 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 			Integer fgOut = 0;
 			for (int i = 0; i < stockArr.length; i++) {
 				TFGStock tfgStock = stockArr[i];
-
+				
 				// <!-- Set 'deliveryQty'(delivery balance). -->
 				actualQty = (null == tfgStock.getActualQty() ? 0 : tfgStock.getActualQty());
 				deliveryQty = (null == tfgStock.getDeliveryQty() ? 0 : tfgStock.getDeliveryQty());
@@ -188,9 +193,14 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 				stock.setCustomerCode(mPart.getCustomerCode());
 				stock.setCustomerName(mPart.getCustomerName());
 
+				//Boy edit 2018/05/03
+				stock.setBalanceQty(0);
+//				stock.setFgBalance(0);
+				
 				stockList.add(stock);
+				
 				prevDeliver = (null == stock.getBalanceQty() ? 0 : stock.getBalanceQty());
-
+				
 				/*
 				 * Add FG Stock Adjust to Calculate FG Stock
 				 */
@@ -209,6 +219,7 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 			Integer deliveryQty = 0;
 			Integer fgIn = 0;
 			Integer fgOut = 0;
+			
 			for (int i = 0; i < stockArr.length; i++) {
 				TFGStock tfgStock = stockArr[i];
 				
@@ -262,7 +273,7 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 	 */
 	private List<TFGStock> calculateStatusColor(List<TFGStock> stockList, TFGStock[] stockArr, TFG tfg, MPart mPart) {
 		tfg.setFgId(mPart.getFgId());
-		tfg.setCustomerId(mPart.getCustomerId());
+//		tfg.setCustomerId(mPart.getCustomerId());
 
 		Calendar tmpCal = new GregorianCalendar();
 
@@ -270,6 +281,7 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 		for (int index = 0; index < stockArr.length; index++) {
 			TFGStock fgStock = stockArr[index];
 			int fgBalance = fgStock.getFgBalance() == null ? 0 : fgStock.getFgBalance();
+
 			int deliveryBalance = fgStock.getBalanceQty() == null ? 0 : fgStock.getBalanceQty();
 
 			if (deliveryBalance >= 0) {

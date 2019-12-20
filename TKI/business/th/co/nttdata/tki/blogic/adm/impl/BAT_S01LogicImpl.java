@@ -84,6 +84,10 @@ public class BAT_S01LogicImpl extends AbstractBaseLogic implements BAT_S01Logic 
 	@Autowired
 	@Qualifier("NIR_B02")
 	private BatchLogic NIR_B02;
+	@Autowired
+	@Qualifier("RES_ADJ")
+	private BatchLogic RES_ADJ;
+	
 
 	@Async
 	public void batchRun(Batch batch) {
@@ -124,6 +128,8 @@ public class BAT_S01LogicImpl extends AbstractBaseLogic implements BAT_S01Logic 
 				BatchRunner.execute(NIR_B01, batch.getUpdateBy(), batch.getExecuteDate());
 			} else if ("NIR_B02".equals(batch.getBatchCode())) {
 				BatchRunner.execute(NIR_B02, batch.getUpdateBy(), batch.getExecuteDate());
+			} else if ("RES_ADJ".equals(batch.getBatchCode())) {
+				BatchRunner.execute(RES_ADJ, batch.getUpdateBy(), batch.getExecuteDate());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -24,4 +24,6 @@ public interface TFGDetailDao {
 	public Boolean checkLotNotExist(TFGDetail t);
 
 	public void insertFgDetail(TFG tfg);
+	
+	public Boolean checkOutNotIn(TFGDetail workOrder);
 }

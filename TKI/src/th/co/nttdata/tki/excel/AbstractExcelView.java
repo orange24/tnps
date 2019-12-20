@@ -313,7 +313,7 @@ extends org.springframework.web.servlet.view.document.AbstractExcelView {
 		} catch( Exception e ) {
 
 			e.printStackTrace();
-
+/*
 			String redirectPage =
 				"<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" +
 				"<html>" +
@@ -330,7 +330,7 @@ extends org.springframework.web.servlet.view.document.AbstractExcelView {
 			PrintWriter out = new PrintWriter(response.getOutputStream());
 			out.print(redirectPage);
 			out.close();
-
+*/
 			throw e;
 		}
 	}

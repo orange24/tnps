@@ -17,15 +17,17 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 
+import th.co.nttdata.tki.bean.MDocControl;
 import th.co.nttdata.tki.bean.MWip;
 import th.co.nttdata.tki.bean.TFGStock;
+import th.co.nttdata.tki.excel.AbstractExcelView.Style;
 
 public class MRDC_R16ExcelView extends AbstractExcelView {
 
 	@Override
 	protected void build(Map<String, Object> model, HSSFWorkbook workbook)
 			throws Exception {
-
+		
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy",
 				Locale.US);
 		SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd",
@@ -88,16 +90,32 @@ public class MRDC_R16ExcelView extends AbstractExcelView {
 				.setBottomBorder(CellStyle.BORDER_DOUBLE).setFont(fontHD)
 				.setWrapText();
 
+		Style leftTxtStyle = createStyle(workbook, HSSFCellStyle.ALIGN_LEFT,
+				HSSFCellStyle.VERTICAL_CENTER)
+				.setLeftBorder(CellStyle.BORDER_MEDIUM)
+				.setTopBorder(CellStyle.BORDER_MEDIUM)
+				.setBottomBorder(CellStyle.BORDER_MEDIUM)
+				.setRightBorder(CellStyle.BORDER_MEDIUM).setWrapText()
+				.setFont(fontHD);
+		Style leftStyle = createStyle(workbook, HSSFCellStyle.ALIGN_CENTER,
+				HSSFCellStyle.VERTICAL_CENTER)
+				.setLeftBorder(CellStyle.BORDER_MEDIUM)
+				.setTopBorder(CellStyle.BORDER_MEDIUM)
+				.setBottomBorder(CellStyle.BORDER_MEDIUM)
+				.setRightBorder(CellStyle.BORDER_MEDIUM).setWrapText()
+				.setFont(fontHD);
+		
 		HSSFSheet sheet = workbook.getSheetAt(0);
-
-		HSSFRow criteriaRow = sheet.getRow(1);
+		int firstRow = 4;
+		
+		HSSFRow criteriaRow = sheet.getRow(firstRow);
 		criteriaRow.getCell(0).setCellValue(
 				"Period : " + formatter.format(tfgStock.getDateFrom()) + " - "
 						+ formatter.format(tfgStock.getDateTo()));
 
 		// <!-- Generate 'Header'. -->
-		HSSFRow fstHeader = sheet.getRow(2);
-		HSSFRow sndHeader = sheet.getRow(3);
+		HSSFRow fstHeader = sheet.getRow(firstRow+1);
+		HSSFRow sndHeader = sheet.getRow(firstRow+2);
 		int colNumber = 7;
 		if (wipList.size() > 0) {
 			for (MWip mwip : wipList) {
@@ -109,20 +127,20 @@ public class MRDC_R16ExcelView extends AbstractExcelView {
 				colNumber += 1;
 			}
 			// <!-- Generate: Merge Cells -->
-			createMergedRegion(sheet, 2, 2, 7, colNumber - 1);// Process
-			sheet.getRow(2).getCell(7).setCellValue("Process");
+			createMergedRegion(sheet, 3, 3, 7, colNumber - 1);// Process
+			sheet.getRow(3).getCell(7).setCellValue("Process");
 		}
 
 		createCell(workbook, fstHeader, colNumber, fstHDRStyle).setValue(
 				"Sale Unit Price");
 		createCell(workbook, sndHeader, colNumber, sndHDRStyle);
-		createMergedRegion(sheet, 2, 3, colNumber, colNumber);// Sale Unit Price
+		createMergedRegion(sheet, 5, 6, colNumber, colNumber);// Sale Unit Price
 		sheet.setColumnWidth(colNumber, 15 * 256);
 		colNumber += 1;
 		createCell(workbook, fstHeader, colNumber, fstHDRStyle).setValue(
 				"Currency");
 		createCell(workbook, sndHeader, colNumber, sndHDRStyle);
-		createMergedRegion(sheet, 2, 3, colNumber, colNumber);// Sale Unit Price
+		createMergedRegion(sheet, 5, 6, colNumber, colNumber);// Sale Unit Price
 		sheet.setColumnWidth(colNumber, 15 * 256);
 		colNumber += 1;
 		createCell(workbook, fstHeader, colNumber, fstHDRStyle).setValue(
@@ -133,7 +151,7 @@ public class MRDC_R16ExcelView extends AbstractExcelView {
 		createCell(workbook, fstHeader, colNumber, fstHDRStyle);
 		createCell(workbook, sndHeader, colNumber, sndHDRStyle).setValue(
 				"Value");
-		createMergedRegion(sheet, 2, 2, colNumber - 1, colNumber);// Material/WIP
+		createMergedRegion(sheet, 5, 5, colNumber - 1, colNumber);// Material/WIP
 		sheet.setColumnWidth(colNumber, 20 * 256);
 		colNumber += 1;
 		createCell(workbook, fstHeader, colNumber, fstHDRStyle).setValue(
@@ -144,20 +162,20 @@ public class MRDC_R16ExcelView extends AbstractExcelView {
 		createCell(workbook, fstHeader, colNumber, fstHDRStyle);
 		createCell(workbook, sndHeader, colNumber, sndHDRStyle).setValue(
 				"Value");
-		createMergedRegion(sheet, 2, 2, colNumber - 1, colNumber);// Product
+		createMergedRegion(sheet, 5, 5, colNumber - 1, colNumber);// Product
 																	// (FG)
 		sheet.setColumnWidth(colNumber, 20 * 256);
 		colNumber += 1;
 		createCell(workbook, fstHeader, colNumber, fstHDRStyle).setValue(
 				"Total Stock Value");
 		createCell(workbook, sndHeader, colNumber, sndHDRStyle);
-		createMergedRegion(sheet, 2, 3, colNumber, colNumber);// Total Stock
+		createMergedRegion(sheet, 5, 6, colNumber, colNumber);// Total Stock
 																// Value
 		sheet.setColumnWidth(colNumber, 20 * 256);
 
 		createMergedRegion(sheet, 0, 0, 0, colNumber);// Name Report
 
-		int rowNum = 4;
+		int rowNum = 4+3;
 		int total = 0;
 		MWip mwip = null;
 		BigDecimal tUnitWeight = new BigDecimal("0");
@@ -276,6 +294,23 @@ public class MRDC_R16ExcelView extends AbstractExcelView {
 			createCell(workbook, dtRow, colNumber++, douTotalStyle).setValue(
 					tStock.doubleValue(), true);
 		}
+		
+
+		HSSFRow row1 = sheet.getRow(1);
+		HSSFRow row2 = sheet.getRow(2);
+		colNumber = colNumber-3;
+		MDocControl docControl = (MDocControl) model.get("docControl");
+		
+		createCell(workbook, row1, colNumber, leftTxtStyle).setValue("DOC.NO."); 
+		createCell(workbook, row1, colNumber + 2, leftStyle);
+		createMergedRegion(sheet, row1.getRowNum(), row1.getRowNum(), colNumber+1,(colNumber + 2));
+		createCell(workbook, row1, colNumber + 1, leftStyle).setValue(docControl.getDocNoR3());
+		
+		createCell(workbook, row2, colNumber, leftTxtStyle).setValue("REV.NO."); 
+		createCell(workbook, row2, colNumber + 2, leftStyle);
+		createMergedRegion(sheet, row2.getRowNum(), row2.getRowNum(), colNumber+1, (colNumber + 2));
+		createCell(workbook, row2, colNumber + 1, leftStyle).setValue(docControl.getRevDocNoR3());
+		
 		workbook.setPrintArea(0, 0, colNumber, 0, rowNum);
 	}
 

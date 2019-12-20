@@ -13,12 +13,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import th.co.nttdata.tki.bean.CustomerLine;
 import th.co.nttdata.tki.bean.MDocControl;
 import th.co.nttdata.tki.bean.MPart;
 import th.co.nttdata.tki.bean.TDeliveryPlan;
 import th.co.nttdata.tki.blogic.DLV.DLV_S01Logic;
 import th.co.nttdata.tki.blogic.DLV.DLV_S02Logic;
 import th.co.nttdata.tki.blogic.cfg.DOC_S01Logic;
+import th.co.nttdata.tki.blogic.mst.CUS_S03Logic;
 import th.co.nttdata.tki.controller.AbstractBaseController;
 import th.co.nttdata.tki.controller.cmm.CommonController;
 
@@ -39,6 +41,8 @@ public class DLV_S02Controller extends AbstractBaseController {
 	private DLV_S02Logic dlv_S02Logic;
 	@Autowired
 	private DLV_S01Logic dlv_S01Logic;
+	@Autowired
+	private CUS_S03Logic cus_s03Logic;
 	
 	@RequestMapping("/DLV_S02")
 	public ModelAndView init(TDeliveryPlan TDeliveryPlan) {
@@ -72,8 +76,22 @@ public class DLV_S02Controller extends AbstractBaseController {
 			e.printStackTrace();
 		}
 
+		String customerLine = null;
+		try {
+			CustomerLine custLine = new CustomerLine();
+			custLine.setCustomerId(TDeliveryPlan.getCustomerId());
+			custLine = cus_s03Logic.searchCustomerLineByCustomerId(custLine);
+			
+			customerLine = "";
+			for (CustomerLine item : custLine.getCustomerLineList()) {
+				customerLine += item.getCustomerLineId() + ":" + item.getCustomerLineName() + ";";
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		return init(TDeliveryPlan).addObject("reasonMap", reason).addObject(
-				"plan", plan);
+				"plan", plan).addObject("customerLine", customerLine);
 	}
 
 	@RequestMapping(value = "/DLV_S02_save", method = RequestMethod.POST)

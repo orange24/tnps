@@ -51,5 +51,11 @@ public interface PRD_S03Logic {
 	TDCPlan print(List<Map<String, Object>> param, TDCPlan object)
 			throws Exception;
 
+	String printPDF(List<Map<String, Object>> param, TDCPlan object)
+			throws Exception;
+	
 	List<MCustomer> getAllCustomer();
+	
+
+	List<TDCPlan> getWip(TDCPlan param);
 }

@@ -17,6 +17,7 @@ $(function($){
 	$('#btnSearch').click(function(){ search(false); });
 	$('#btnSave').click(function(){ save(); });
 	$('#btnPrint').click(function(){ print(); });
+	$('#btnPrintPDF').click(function(){ printPDF(); });
 	$('#btnClear').click(function(){ enableSearchForm();});
 	$('#btnSelectAndPrint').click(function(){ selectPrinter();});
 });
@@ -64,6 +65,9 @@ function save(){
 }
 
 function search(isPrint){
+
+	showLoading();
+	
 	if(!isPrint){
 		if(isValidMandatory()){
 			postJSONObject("PRD_S03_search", getParam(), function(jsonList){ 
@@ -72,6 +76,11 @@ function search(isPrint){
 				showGrid();
 			});
 			disableSearchForm();
+			
+
+			postJSONObject("PRD_S03_get_wip", getParam(), function(jsonList){ 
+				showProcessList(jsonList);
+			});
 		}
 	}else{
 		postJSONObject("PRD_S03_search", getParam(), function(jsonList){ 
@@ -83,7 +92,8 @@ function search(isPrint){
 	}
 }
 
-function print(){ 
+
+function printPDF(){ 
 		if(undefined == printerName){
 			$("#printer").dialog("open");
 		} else {
@@ -93,7 +103,9 @@ function print(){
 				return object ;
 			});
 			showLoading();
-			postJSONObject("PRD_S03_print", param, function(bean){
+			
+			
+			postJSONObject("PRD_S03_print", param, function(blob){
 				printerName = bean.printerName;
 				message.showMessage(bean);
 				var isPrint = true;
@@ -101,6 +113,85 @@ function print(){
 			});	
 			prdS03Grid.resetFilter();
 		}
+			
+}
+
+function printPDF(){ 
+			prdS03Grid.getGrid().getEditorLock().commitCurrentEdit();		
+			var param = $.map(prdS03Grid.getFilteredRows(), function(object, index){ 
+				object.printerName = $('#cboPrinter :selected').val();
+				return object ;
+			});
+			
+			$.ajax({
+		        type: "POST",
+		        url: 'PRD_S03_print_pdf.html',
+		        'contentType': 'application/json',
+		        'data': JSON.stringify(param),
+		        'dataType': 'json'
+		    }).done(function (data) {
+		    	/*
+		        var blob = new Blob([data]);
+		        var link = document.createElement('a');
+		        link.href = window.URL.createObjectURL(blob);
+		        link.download = "Sample.pdf";
+		        link.click();
+		        */
+		        
+		        var $a = $( '<a />' ), url = URL.createObjectURL( "PRD_S03_PDF/"+data.response );
+		        $a.attr({
+		          'href' : url,
+		          'download' : 'LotControl'+new Date()+'.pdf'
+		        })
+		        .trigger( 'click' );
+		        URL.revokeObjectURL( url );
+		        
+		    }).error(function (data) {
+
+		        var url = "PRD_S03_PDF.pdf?file="+data.responseText ;
+		    	
+		    	var downloadLink = document.createElement("a");
+		    	downloadLink.href = url;
+		    	downloadLink.download ='LotControl'+new Date()+'.pdf';
+		    	downloadLink.target = "_blank";
+
+		    	document.body.appendChild(downloadLink);
+		    	downloadLink.click();
+		    	document.body.removeChild(downloadLink);
+		    	
+		    	
+		    	
+//		        var url = "PRD_S03_PDF.html?file="+data.responseText ;
+//		        w=window.open(url); 
+//		        w.print(); 
+//		        w.close(); 
+		    });
+}
+
+
+function submitform() {
+    var url = 'PRD_S03_print.html';
+    
+    prdS03Grid.getGrid().getEditorLock().commitCurrentEdit();		
+	var param = $.map(prdS03Grid.getFilteredRows(), function(object, index){ 
+		object.printerName = $('#cboPrinter :selected').val();
+		return object ;
+	});
+	
+
+    var data = $(JSON.stringify(param));
+
+    $('<form enctype="application/json" action="'+url+'" method="POST">' + 
+      '<input type="hidden" name="json" value="' + (data) + '">' +
+      '</form>').submit();
+
+//    $('#prdS03Form').attr('action', url);
+//    $('#prdS03Form').attr('enctype', "application/json" );
+//    $('#prdS03Form').attr('Content-type', "application/json" );
+//    var data = JSON.stringify(param)
+//    $('<input type="hidden" name="json"/>').val(param).appendTo('#prdS03Form');
+//    $("#prdS03Form").submit();
+//    document.getElementById("prdS03Form").submit();
 }
 
 function selectPrinter(){
@@ -462,10 +553,25 @@ function showGrid(){
 
 function sentData(){
 	prdS03Grid.getGrid().getEditorLock().commitCurrentEdit();	
-	var printSelected = $('#cboPrinter :selected').val();
+	var printSelected = $('#cboPrinter').val();
+	var optionPrintDate = $('#optionPrintDate').val();
+	var optionPrintWorker = $('#optionPrintWorker').val();
+	var optionPrintQtyOK = $('#optionPrintQtyOK').val();
+	var optionPrintQtyNG = $('#optionPrintQtyNG').val();
+	
+	var processList = [];
+	$("input[name='process']:checked").each(function() {
+		processList.push($(this).val());
+	});
+	
 			if($('#cboPrinter').val() != null && $('#cboPrinter :selected').text() != ' -- Please Select Printer -- '){
 				var param = $.map(prdS03Grid.getFilteredRows(), function(object, index){ 
 					object.printerName = printSelected;
+					object.optionPrintDate = optionPrintDate;
+					object.optionPrintWorker = optionPrintWorker;
+					object.optionPrintQtyOK = optionPrintQtyOK;
+					object.optionPrintQtyNG = optionPrintQtyNG;
+					object.processList = processList;
 					return object ;
 				});
 				showLoading();
@@ -492,8 +598,8 @@ function chkPrinter(){
 function createPrinter(){
 	$("#printer").dialog({
 		autoOpen: false,
-		height: 200,
-		width: 500,
+		height: 400,
+		width: 600,
 		modal: true,
 		buttons:{
 			   "Print"  : function(){
@@ -503,5 +609,20 @@ function createPrinter(){
 			}
 		}			
 	});
+}
+
+
+function showProcessList(dataList){
+	   var container = $('#processList');
+	   container.html("");
+	   
+		$.each(dataList,function(index,object){
+		   var inputs = container.find('input');
+		   var id = inputs.length+1;
+
+		   $('<input />', { type: 'checkbox', id: 'process'+id, name: 'process', value: object.wip }).appendTo(container);
+		   $('<label />', { 'for': 'process'+id, text: object.wipName }).appendTo(container);
+		   $('<BR />').appendTo(container);
+	    });
 }
 

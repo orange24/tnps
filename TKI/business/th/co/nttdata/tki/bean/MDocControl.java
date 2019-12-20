@@ -6,6 +6,8 @@ public class MDocControl extends AbstractBaseBean {
 	private String revDocNo;
 	private String docNoR2;
 	private String revDocNoR2;
+	private String docNoR3;
+	private String revDocNoR3;
 	
 	public MDocControl() {
 		super();
@@ -41,6 +43,22 @@ public class MDocControl extends AbstractBaseBean {
 
 	public void setRevDocNoR2(String revDocNoR2) {
 		this.revDocNoR2 = revDocNoR2;
+	}
+
+	public String getDocNoR3() {
+		return docNoR3;
+	}
+
+	public void setDocNoR3(String docNoR3) {
+		this.docNoR3 = docNoR3;
+	}
+
+	public String getRevDocNoR3() {
+		return revDocNoR3;
+	}
+
+	public void setRevDocNoR3(String revDocNoR3) {
+		this.revDocNoR3 = revDocNoR3;
 	}
 	
 }

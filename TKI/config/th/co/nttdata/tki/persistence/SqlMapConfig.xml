@@ -13,6 +13,7 @@
 	<sqlMap resource="th/co/nttdata/tki/persistence/m_action.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/m_calendar.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/m_customer.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/m_customer_line.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/m_fg.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/m_leadtime.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/m_machine.xml" />
@@ -67,6 +68,7 @@
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_lot_sequence.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_taglabel_history.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/m_doccontrol.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_wip_check_stock.xml" />
 
 	<!-- batch process -->
 	<sqlMap resource="th/co/nttdata/tki/batch/persistence/cfg_interface_mapping_batch.xml" />

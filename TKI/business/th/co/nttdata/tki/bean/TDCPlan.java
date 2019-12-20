@@ -72,6 +72,11 @@ public class TDCPlan extends AbstractBaseBean {
 	private String moldName;
 	private String moldNo;
 	private String cavNo;
+	private String optionPrintDate = "";
+	private String optionPrintWorker = "";
+	private String optionPrintQtyOK = "";
+	private String optionPrintQtyNG = "";
+	private List<String> processList;
 
 	public TDCPlan() {
 	}
@@ -587,12 +592,53 @@ public class TDCPlan extends AbstractBaseBean {
 		this.cavNo = cavNo;
 	}
 
+
+	public String getOptionPrintDate() {
+		return optionPrintDate;
+	}
+
+	public void setOptionPrintDate(String optionPrintDate) {
+		this.optionPrintDate = optionPrintDate;
+	}
+
+	public String getOptionPrintWorker() {
+		return optionPrintWorker;
+	}
+
+	public void setOptionPrintWorker(String optionPrintWorker) {
+		this.optionPrintWorker = optionPrintWorker;
+	}
+
+	public String getOptionPrintQtyOK() {
+		return optionPrintQtyOK;
+	}
+
+	public void setOptionPrintQtyOK(String optionPrintQtyOK) {
+		this.optionPrintQtyOK = optionPrintQtyOK;
+	}
+
+	public String getOptionPrintQtyNG() {
+		return optionPrintQtyNG;
+	}
+
+	public void setOptionPrintQtyNG(String optionPrintQtyNG) {
+		this.optionPrintQtyNG = optionPrintQtyNG;
+	}
+	
 	@Override
 	public String toString(){
 		String result = "";
 		result += "moldId = "+this.moldId+", moldName = "+this.moldName+" , moldNo = "+this.moldNo;
 		
 		return result;		
+	}
+
+	public List<String> getProcessList() {
+		return processList;
+	}
+
+	public void setProcessList(List<String> processList) {
+		this.processList = processList;
 	}
 	
 }

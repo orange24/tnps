@@ -49,7 +49,7 @@ public class TFGStock extends AbstractBaseBean {
 	private Integer wipQty;
 	private Integer yearFr;
 	private Integer yearTo;
-	private Integer unitWeight;
+	private Double unitWeight;
 	private String idRef;
 	private String yearMonth;
 	private String currency;
@@ -446,11 +446,11 @@ public class TFGStock extends AbstractBaseBean {
 		this.dateTo = dateTo;
 	}
 
-	public Integer getUnitWeight() {
+	public Double getUnitWeight() {
 		return unitWeight;
 	}
 
-	public void setUnitWeight(Integer unitWeight) {
+	public void setUnitWeight(Double unitWeight) {
 		this.unitWeight = unitWeight;
 	}
 

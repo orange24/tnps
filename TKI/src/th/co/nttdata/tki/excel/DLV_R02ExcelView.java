@@ -97,7 +97,7 @@ public class DLV_R02ExcelView extends AbstractExcelView {
 				createCell(workbook, fstRow, 9, r01c04Style).setValue("");
 				createCell(workbook, fstRow, 10, r01c04Style).setValue("");
 				createCell(workbook, fstRow, 11, r01c04Style).setValue("");
-				createCell(workbook, fstRow, 12, r01c04Style).setValue("");
+				createCell(workbook, fstRow, 12, r01c04Style).setValue(detail.getCustomerLine());
 			}else{
 				if(i == pList.size()-1){
 					createCell(workbook, fstRow, 0, r02c01Style).setValue("");
@@ -124,7 +124,7 @@ public class DLV_R02ExcelView extends AbstractExcelView {
 				createCell(workbook, fstRow, 9, r01c03Style).setValue("");
 				createCell(workbook, fstRow, 10, r01c03Style).setValue("");
 				createCell(workbook, fstRow, 11, r01c03Style).setValue("");
-				createCell(workbook, fstRow, 12, r01c03Style).setValue("");
+				createCell(workbook, fstRow, 12, r01c03Style).setValue(detail.getCustomerLine());
 			}
 			rowNumber++;
 		}

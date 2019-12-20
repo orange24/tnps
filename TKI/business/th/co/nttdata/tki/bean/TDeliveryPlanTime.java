@@ -7,6 +7,7 @@ public class TDeliveryPlanTime extends AbstractBaseBean {
 	private Integer detailPlanId;
 	private Integer timeHr;
 	private Integer timeMin;
+	private Integer customerLine;
 
 	public Integer getDeliveryQty() {
 		return deliveryQty;
@@ -31,5 +32,11 @@ public class TDeliveryPlanTime extends AbstractBaseBean {
 	}
 	public void setTimeMin(Integer timeMin) {
 		this.timeMin = timeMin;
+	}
+	public Integer getCustomerLine() {
+		return customerLine;
+	}
+	public void setCustomerLine(Integer customerLine) {
+		this.customerLine = customerLine;
 	}
 }

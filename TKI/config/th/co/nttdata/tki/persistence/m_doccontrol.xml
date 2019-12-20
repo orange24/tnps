@@ -8,7 +8,9 @@
 		SELECT top 1 (SELECT config_value FROM cfg_system_config WHERE config_key = 'DOC_NO') as docNo, 
 				(SELECT config_value FROM cfg_system_config WHERE config_key = 'REV_DOC_NO') as revDocNo,
 				(SELECT config_value FROM cfg_system_config WHERE config_key = 'DOC_NO_R2') as docNoR2,
-				(SELECT config_value FROM cfg_system_config WHERE config_key = 'REV_DOC_NO_R2') as revDocNoR2   
+				(SELECT config_value FROM cfg_system_config WHERE config_key = 'REV_DOC_NO_R2') as revDocNoR2,
+				(SELECT config_value FROM cfg_system_config WHERE config_key = 'DOC_NO_R3') as docNoR3,
+				(SELECT config_value FROM cfg_system_config WHERE config_key = 'REV_DOC_NO_R3') as revDocNoR3  
 		FROM cfg_system_config 
 		WHERE 1=1
 	</select>
@@ -33,6 +35,16 @@
 		SET 
 		config_value = #revDocNoR2# 					
 		WHERE config_key = 'REV_DOC_NO_R2';
+		
+		UPDATE  cfg_system_config 
+		SET 
+		config_value = #docNoR3# 					
+		WHERE config_key = 'DOC_NO_R3';
+		
+		UPDATE  cfg_system_config 
+		SET 
+		config_value = #revDocNoR3# 					
+		WHERE config_key = 'REV_DOC_NO_R3';
 	</update>
 	
 </sqlMap>

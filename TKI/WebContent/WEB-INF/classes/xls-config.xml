@@ -49,6 +49,9 @@
 	<bean id="WIP_R04ExcelView" class="th.co.nttdata.tki.excel.WIP_R04ExcelView">
 		<property name="url" value="xls/WIP_R04"/>
 	</bean>
+	<bean id="WIP_R06ExcelView" class="th.co.nttdata.tki.excel.WIP_R06ExcelView">
+		<property name="url" value="xls/WIP_R06"/>
+	</bean>
 	<!-- P3 -->
 	<bean id="MRDC_R05ExcelView" class="th.co.nttdata.tki.excel.MRDC_R05ExcelView">
 		<property name="url" value="xls/MRDC_R05"/>
@@ -127,5 +130,9 @@
 	</bean>
 	<bean id="S_PRT_S03ExcelView" class="th.co.nttdata.tki.excel.S_PRT_S03ExcelView">
 		<property name="url" value="xls/PRT_S03"/>
+	</bean>
+	
+	<bean id="LDT_R01ExcelView" class="th.co.nttdata.tki.excel.LDT_R01ExcelView">
+		<property name="url" value="xls/LDT_R01"/>
 	</bean>
 </beans>

@@ -24,6 +24,11 @@
 		DELETE FROM t_fg_stock
 		WHERE reportdate >= #value#;
 	</delete>
+
+	<delete id="deleteFGStockNew" parameterClass="java.util.Date">
+		DELETE FROM t_fg_stock_new
+		WHERE reportdate >= #value#;
+	</delete>
 	
 	<insert id="insertQueryFGStock" parameterClass="th.co.nttdata.tki.batch.bean.TFGStock" >
 		INSERT INTO t_fg_stock(reportdate, fgid, customerid, fgstock, fgin, fgout, fgbalance, fgadjust)
@@ -90,4 +95,70 @@
 		
 	</insert>
 	
+	
+	
+	<insert id="insertQueryFGStockNew" parameterClass="th.co.nttdata.tki.batch.bean.TFGStock" >
+		INSERT INTO t_fg_stock_new(reportdate, fgid, customerid, fgstock, fgin, fgout, fgbalance, fgadjust)
+		SELECT 	#reportDate# AS reportDate,
+				fg.fgId,
+				fg.customerId,
+				ISNULL(ISNULL(yesterday.fgadjust,yesterday.fgbalance),0) AS fgStock,
+			   	ISNULL(today.fgin,0) AS fgIn,
+			   	ISNULL(today.fgout,0) AS fgOut,
+			   	ISNULL(ISNULL(yesterday.fgadjust,yesterday.fgbalance),0) + ISNULL(today.fgin,0) - ISNULL(today.fgout,0) AS fgBalance,
+				adjust.fgadjust_qty AS fgAdjust
+		FROM
+			<!-- Get FG from yesterday union today  -->
+		   	(
+			   	SELECT DISTINCT fgs.fgid, fgs.customerid
+				FROM t_fg_stock_new fgs
+				WHERE fgs.reportdate = DATEADD(d,-1,#reportDate#)
+				UNION
+				SELECT DISTINCT fgd.fgid, fgd.customerid
+				FROM t_fg_detail fgd
+				WHERE fgd.reportdate = #reportDate#
+				UNION
+				SELECT fga.fgid, fga.customerid
+				FROM t_fg_stock_adjust fga
+				WHERE fga.reportdate = #reportDate#
+			) fg
+			
+		LEFT OUTER JOIN
+			<!-- Get stock from yesterday balance -->
+		   	(
+			   	SELECT  fgs.fgid, fgs.customerid, fgs.fgbalance, fgs.fgadjust
+				FROM t_fg_stock_new fgs
+				WHERE fgs.reportdate = DATEADD(d,-1,#reportDate#)
+			) yesterday
+		ON fg.fgid = yesterday.fgid AND fg.customerid = yesterday.customerid
+
+		LEFT OUTER JOIN
+			<!-- Get fg in/out from today -->
+		   	(
+		   		SELECT fg.fgid, fg.customerid, SUM(ISNULL(fg.fgin,0)) as fgin, SUM(ISNULL(fg.fgout,0)) as fgout
+				FROM t_fg_detail fg
+				WHERE fg.reportdate = #reportDate#
+				GROUP BY fg.fgid, fg.customerid
+			) today
+		ON fg.fgid = today.fgid AND fg.customerid = today.customerid
+
+		LEFT OUTER JOIN
+			<!-- Get adjust from adjust -->			 
+			(
+				SELECT fgid, customerid, fgadjust_qty
+			 	FROM dbo.t_fg_stock_adjust fgadj
+			 	WHERE EXISTS (
+			 		SELECT 1
+			 		FROM (
+			 			SELECT MAX(fgadjustid) as adjid
+				 		FROM dbo.t_fg_stock_adjust
+				 		WHERE reportdate = #reportDate#
+				 		GROUP BY customerid,fgid
+				 	) x
+			  		WHERE fgadj.fgadjustid = x.adjid
+			  	)
+			) adjust
+		ON fg.fgid = adjust.fgid AND fg.customerid = adjust.customerid		
+		
+	</insert>
 </sqlMap>

@@ -104,4 +104,15 @@ public class TFGDetailDaoImpl extends AbstractBaseDao implements TFGDetailDao {
 		}
 	}
 
+	@Override
+	public Boolean checkOutNotIn(TFGDetail workOrder) {
+		Boolean isError = false;
+		Integer sumFgin = (Integer) queryForObject(
+				"t_fg_detail.select_check_out_not_in", workOrder);
+		if (sumFgin == -1) {
+			isError = true;
+		}
+		return isError;
+	}
+
 }

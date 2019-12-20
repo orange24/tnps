@@ -524,7 +524,12 @@
 	        'contentType': 'application/json',
 	        'data': JSON.stringify(data),
 	        'dataType': 'json',
-	        'success': success
+	        'success': success,
+	        'error' : function(err){
+	        	console.log("Error : ");
+	        	console.log("response text : " + err.responseText);
+	        	console.log(err);
+	        },
 	    });
 	};
 

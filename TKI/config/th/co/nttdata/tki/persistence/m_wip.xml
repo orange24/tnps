@@ -98,7 +98,7 @@
 			remark = #wipList[].remark# ,
 			lastUpdate = GETDATE(),
 			updateBy = #updateBy#,
-			isenable = #isenable#
+			isenable = #wipList[].isenable#
 			WHERE wip = #wipList[].wip#
 		</iterate>
 	</update>

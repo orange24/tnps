@@ -311,6 +311,12 @@ function isValidForSave(data){
 			if($.trim(object.reasonName) == '' || object.reasonName == undefined){
 				errors.push({'code': 'err.cmm.002', 'arguments': [object.rowNum, 'Remark']});
 			}
+			if($.trim(object.moldName) == '' || object.moldName == undefined){
+				errors.push({'code': 'err.cmm.002', 'arguments': [object.rowNum, 'Mold Name']});
+			}
+			if($.trim(object.moldNo) == '' || object.moldNo == undefined){
+				errors.push({'code': 'err.cmm.002', 'arguments': [object.rowNum, 'Mold No']});
+			}
 //			if(object.quantity*1 < object.qtyDefault){
 //				errors.push({'code': 'err.prd.005', 'arguments': [object.rowNum]});
 //			}	

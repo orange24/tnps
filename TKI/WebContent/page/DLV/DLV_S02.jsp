@@ -5,6 +5,7 @@
 <%@ taglib prefix="page" tagdir="/WEB-INF/tags"%>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="security" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib uri = "http://java.sun.com/jsp/jstl/functions" prefix = "fn" %>
 <html>
 <head>
 <title></title>
@@ -38,7 +39,6 @@
 		plan = ${plan};
 		dateList = plan["dateList"];
 		
-
 			for(var index=1, max = dateList.length; index < max; index++){
 				time0 = dateList[index]["timeList"];
 				if(time0.length > 0){break;}
@@ -212,6 +212,7 @@
 			for(var i=0, max=time0.length; i < max; i++){
 				var timeHr = time0[i]["timeHr"];
 				var timeMin = time0[i]["timeMin"];
+				var customerLine = time0[i]["customerLine"];
 				if(
 					((prevTimeHr == undefined || prevTimeMin == undefined) || // first row
 					(prevTimeHr != timeHr || prevTimeMin != timeMin)) && // start new line
@@ -235,6 +236,8 @@
 								$(this).val(timeHr);
 							}else if(ci==1){
 								$(this).val(timeMin);
+							}else if(ci==2){
+								$(this).val(customerLine);
 							}
 						});
 					}
@@ -250,6 +253,7 @@
 				time = timePlan[i].split(".");
 				$('select[id="timeHr"]').eq(i).val(time[0]);
 				$('select[id="timeMin"]').eq(i).val(time[1]);
+				$('select[id="customerLine"]').eq(i).val(time[1]);
 				if(i == 0){
 					var tr1 = $("#selectTimeList:eq(0)");
 					var tr2 = $("#timeList:eq(0)");
@@ -404,9 +408,11 @@
 				var row     = $(this);
 				var timeHr  = $("tr[id=selectTimeList]:eq("+rowIndex+")").find("select#timeHr").val();
 				var timeMin = $("tr[id=selectTimeList]:eq("+rowIndex+")").find("select#timeMin").val();
+				var customerLine = $("tr[id=selectTimeList]:eq("+rowIndex+")").find("select#customerLine").val();
 				row.find("td > input:text").each(function(colIndex){
 					param.push("dateList["+ (colIndex+1) +"].timeList["+ rowIndex +"].timeHr="+ timeHr);
 					param.push("dateList["+ (colIndex+1) +"].timeList["+ rowIndex +"].timeMin="+ timeMin);
+					param.push("dateList["+ (colIndex+1) +"].timeList["+ rowIndex +"].customerLine="+ customerLine);
 					param.push("dateList["+ (colIndex+1) +"].timeList["+ rowIndex +"].deliveryQty="+ $(this).val());
 				});
 			});
@@ -1045,7 +1051,13 @@
 			});
 
 			boxFg.val("${deliveryPlan.fgId}");// val from click search
-			fgText.html("<strong>"+boxFg.find("option:selected").text()+"</strong>");// show at FG No(FG Name)
+			
+			var fgTxt = boxFg.find("option:selected").text();//
+			var fgName = fgTxt.split(":");
+			
+			fgText.html("<strong>"+fgName[0]+"</strong>");// show at FG No(FG Name)
+			fgText = $("table:eq(1) > tbody > tr:eq(1) > td:eq(1)");// FG No(FG Name)
+			fgText.html("<strong>"+fgName[1]+"</strong>");// show at FG No(FG Name)
 	}
 			
 </script>
@@ -1102,13 +1114,15 @@
 		<strong>Manage Delivery Plan</strong>
 		<br/>
 		<!-- 2 first column -->
-		<table id="tbl1Detail" width="250" border="1" align="center" cellpadding="0" cellspacing="0" class="ui-widget ui-widget-content" style="position:absolute">
+		<table id="tbl1Detail" width="350" border="1" align="center" cellpadding="0" cellspacing="0" class="ui-widget ui-widget-content" style="position:absolute">
 			<tr height="60">
-				<th width="150" align="center">FG Name : FG No</th>
+				<th width="150" align="center">FG Name</th>
+				<th width="150" align="center">FG No</th>
 				<th width="100" align="center">&nbsp;</th>
 			</tr>
 			<tr height="30">
-				<td rowspan="11" align="center"><strong>FG Name : FG No</strong></td>
+				<td rowspan="11" align="center"><strong>FG Name value</strong></td>
+				<td rowspan="11" align="center"><strong>FG No value</strong></td>
 				<td align="center"><strong> Forecast</strong></td>
 			</tr>
 			<tr height="30" bgcolor="white">
@@ -1141,11 +1155,12 @@
 			<tr height="34">
 				<td align="center"><strong>Reason</strong></td>
 			</tr>
-			<tr height="30"><td colspan="2">&nbsp;</td></tr>
-			<tr height="30"><td colspan="2">Manage DeliveryTime for customer</td></tr>
+			<tr height="30"><td colspan="3">&nbsp;</td></tr>
+			<tr height="30"><td colspan="3">Manage DeliveryTime for customer</td></tr>
 			<tr height="60">
 				<th align="center">&nbsp;</th>
-				<th align="center">Time<br/>HH : MM</th>			
+				<th align="center">Time<br/>HH : MM</th>
+				<th align="center">Line</th>	
 			</tr>
 			<tr id="selectTimeList">
 				<td align="center">
@@ -1242,15 +1257,25 @@
 						<option value="59">59</option>
 					</select>
 				</td>
+				<td align="center">
+					<select name="customerLine" id="customerLine" title="Customer Line">
+						<option value="">--Please Select--</option>
+						<c:forTokens items="${customerLine}" delims=";" var="name">
+      						<c:set var = "lineId" value = "${fn:split(name, ':')}" />
+							<option value="<c:out value="${lineId[0]}" />"><c:out value="${lineId[1]}" /></option>
+						</c:forTokens>
+
+					</select>
+				</td>
 			</tr>
 			<tr id="btnRow">
-				<td colspan="2">
+				<td colspan="3">
 					<input name="btnAddNewTime" type="button" id="btnAddNewTime" value="Add New Time" 
 					<c:if test="${deliveryPlan.insertFlag == 'N' || deliveryPlan.insertFlag == 'null' }">style="display:none;"</c:if> />
 				</td>
 			</tr>
 			<tr>
-				<td colspan="2">
+				<td colspan="3">
 					<input name="btnSave" type="button" id="btnSave" value="Save"
 					<c:if test="${deliveryPlan.insertFlag == 'N' || deliveryPlan.insertFlag == 'null' }">style="display:none;"</c:if> />
 					<security:authorize ifAnyGranted="DLV_S02_DELETE">
@@ -1260,7 +1285,7 @@
 				</td>
 			</tr>
 		</table>
-			<div style="margin-left:250px;display:block;overflow-x:scroll;overflow-y:hidden">
+			<div style="margin-left:350px;display:block;overflow-x:scroll;overflow-y:hidden">
 				<table id="tbl2Detail" width="100%" border="1" align="center" cellpadding="0" cellspacing="0" class="ui-widget ui-widget-content">
 					<tr height="30">
 						<th align="center">&nbsp;</th>

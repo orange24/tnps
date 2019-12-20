@@ -72,8 +72,16 @@ function createFgMasterGrid(){
 		name           : "UOM",
 		field          : "uom",
 		width          : 80,
+		cssClass       : "cell-r",
+		headerCssClass : "editable-column required-column",
 		resizable      : true,
 		filter         : common.SlickGrid.filterColumnsOptions.Fulltext,
+		editor         : common.SlickGrid.Editor.DropDownEditor,
+		editorArgs     : {
+		                   dataList : getUomList(),
+		                    value   : "uom",
+		                    label   : "uom"
+		                 },
 		sortable	   : true
 	},{
 		id             : "snpFG",
@@ -93,9 +101,11 @@ function createFgMasterGrid(){
 		field          : "weight",
 		width          : 90,
 		cssClass       : "cell-r",
+		headerCssClass : "editable-column required-column",
 		resizable      : true,
 		filter         : common.SlickGrid.filterColumnsOptions.Fulltext,
 		sortable	   : true,
+		editor         : common.SlickGrid.Editor.TextEditor,
 		formatter 	   : common.SlickGrid.Formatters.DoubleFormatter
 	},{
 		id             : "price",
@@ -289,12 +299,12 @@ function  saveFgMaster(){
 		         else if(n.weight == null  ||  !(n.weight)){
 				     errors.push({"code": "err.cmm.002", "arguments": [i+1,"Weight"]});
 			        }
-		         else if(n.price == null  ||  !(n.price)){
-				     errors.push({"code": "err.cmm.002", "arguments": [i+1,"Price"]});
-			        }
-		         else if(n.currency == null  ||  !(n.currency)){
-				     errors.push({"code": "err.cmm.002", "arguments": [i+1,"Currency"]});
-			        }
+//		         else if(n.price == null  ||  !(n.price)){
+//				     errors.push({"code": "err.cmm.002", "arguments": [i+1,"Price"]});
+//			        }
+//		         else if(n.currency == null  ||  !(n.currency)){
+//				     errors.push({"code": "err.cmm.002", "arguments": [i+1,"Currency"]});
+//			        }
 		         else{
 		        	 if(n.statusFlag == 'i'){
 		        		 if(n.isenable == undefined){

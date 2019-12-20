@@ -56,6 +56,65 @@
 		</iterate>
 	</insert>
 	<select id="selectFNG_R01" parameterClass="th.co.nttdata.tki.bean.TFG" resultClass="th.co.nttdata.tki.bean.TFGStock">
+		SELECT *
+			,(
+			   	SELECT  fgs.fgbalance
+				FROM t_fg_stock fgs
+				WHERE fgs.reportdate = DATEADD(d,-1, t.reportdate)
+				AND t.fgid = fgs.fgid AND t.customerid = fgs.customerid
+			) as fgStock
+			,(
+			   	SELECT fgs.fgadjust
+				FROM t_fg_stock fgs
+				WHERE fgs.reportdate = DATEADD(d,-1, t.reportdate)
+				AND t.fgid = fgs.fgid AND t.customerid = fgs.customerid
+			) as fgstock2
+		FROM
+		(
+				SELECT     
+					 d.reportDate
+					,d.customerId
+					,c.customerCode
+					,d.fgId
+					,f.fgNo
+					,f.fgName
+					<!-- ,s.fgStock -->
+					, sum(d.fgin) as fgin, sum(d.fgout) as fgout
+					,f.weight
+					,s.fgBalance
+					,mat.sMaterialName as material
+					,dcp.moldNo
+				FROM t_fg_stock AS s 
+				RIGHT OUTER JOIN m_customer AS c 
+				INNER JOIN t_fg_detail AS d 
+				INNER JOIN m_fg AS f 
+					ON d.fgid = f.fgid  
+					ON c.customerid = d.customerid 
+					ON s.customerid = d.customerid AND s.fgid = d.fgid AND s.reportdate = d.reportdate
+				INNER JOIN m_fg_part fgp
+					ON fgp.fgid = f.fgid
+				INNER JOIN m_part pt 
+					ON pt.partid = fgp.partid
+				LEFT JOIN m_material mat 
+					ON mat.nMaterialId = pt.materialid
+				LEFT JOIN t_lotno lot on lot.lotno = d.lotno
+				LEFT JOIN t_dcplan dcp on dcp.dcplanid = lot.dcplanid
+				<dynamic prepend="WHERE">
+					<isNotEmpty prepend="AND" property="reportDateFr"> CONVERT(DATE,d.reportdate,103) <![CDATA[ >= ]]> CONVERT(DATE,#reportDateFr#,103) </isNotEmpty>
+					<isNotEmpty prepend="AND" property="reportDateTo"> CONVERT(DATE,d.reportdate,103) <![CDATA[ <= ]]> CONVERT(DATE,#reportDateTo#,103) </isNotEmpty>
+					<isNotEmpty prepend="AND" property="customerId"> d.customerid = #customerId# </isNotEmpty>
+					<isNotEmpty prepend="AND" property="fgName"> f.fgname LIKE #fgName# + '%' </isNotEmpty>
+					<isNotEmpty prepend="AND" property="fgNo"> f.fgno LIKE #fgNo# + '%' </isNotEmpty>	
+					<isGreaterThan prepend="AND" property="reportType" compareValue="0"> d.reportType = #reportType# </isGreaterThan>
+				</dynamic>
+				GROUP BY d.reportdate, d.customerid, c.customercode, d.fgid, f.fgno, f.fgname, s.fgstock, 
+				s.fgin, s.fgout, s.fgbalance, f.weight, mat.sMaterialName, dcp.moldNo
+		) t
+		ORDER BY t.reportdate,  t.customercode,t.fgno, t.moldNo
+		
+				
+		
+		<!-- 
 		SELECT     
 			 d.reportDate
 			,d.customerId
@@ -94,10 +153,86 @@
 			<isGreaterThan prepend="AND" property="reportType" compareValue="0"> d.reportType = #reportType# </isGreaterThan>
 		</dynamic>
 		GROUP BY d.reportdate, d.customerid, c.customercode, d.fgid, f.fgno, f.fgname, s.fgstock, s.fgin, s.fgout, s.fgbalance, f.weight, mat.sMaterialName, dcp.moldNo
-		ORDER BY d.reportdate,  c.customercode,f.fgno
+		ORDER BY d.reportdate,  c.customercode,f.fgno -->
 	</select>
+	
+	
+	<select id="selectFNG_R01_NEW" parameterClass="th.co.nttdata.tki.bean.TFG" resultClass="th.co.nttdata.tki.bean.TFGStock">
+		SELECT *
+			,(
+			   	SELECT  fgs.fgbalance
+				FROM t_fg_stock fgs
+				WHERE fgs.reportdate = DATEADD(d,-1, t.reportdate)
+				AND t.fgid = fgs.fgid AND t.customerid = fgs.customerid
+			) as fgStock
+			,(
+			   	SELECT fgs.fgadjust
+				FROM t_fg_stock fgs
+				WHERE fgs.reportdate = DATEADD(d,-1, t.reportdate)
+				AND t.fgid = fgs.fgid AND t.customerid = fgs.customerid
+			) as fgstock2
+		FROM
+		(
+				SELECT     
+					 d.reportDate
+					,d.customerId
+					,c.customerCode
+					,d.fgId
+					,f.fgNo
+					,f.fgName
+					<!-- ,s.fgStock -->
+					, sum(d.fgin) as fgin, sum(d.fgout) as fgout
+					,f.weight
+					,s.fgBalance
+					,mat.sMaterialName as material
+					,s.moldNo
+				FROM t_fg_stock_new AS s 
+				RIGHT OUTER JOIN m_customer AS c 
+				INNER JOIN t_fg_detail AS d 
+				INNER JOIN m_fg AS f 
+					ON d.fgid = f.fgid  
+					ON c.customerid = d.customerid 
+					ON s.customerid = d.customerid AND s.fgid = d.fgid AND s.reportdate = d.reportdate
+				INNER JOIN m_fg_part fgp
+					ON fgp.fgid = f.fgid
+				INNER JOIN m_part pt 
+					ON pt.partid = fgp.partid
+				LEFT JOIN m_material mat 
+					ON mat.nMaterialId = pt.materialid
+				<dynamic prepend="WHERE">
+					<isNotEmpty prepend="AND" property="reportDateFr"> CONVERT(DATE,d.reportdate,103) <![CDATA[ >= ]]> CONVERT(DATE,#reportDateFr#,103) </isNotEmpty>
+					<isNotEmpty prepend="AND" property="reportDateTo"> CONVERT(DATE,d.reportdate,103) <![CDATA[ <= ]]> CONVERT(DATE,#reportDateTo#,103) </isNotEmpty>
+					<isNotEmpty prepend="AND" property="customerId"> d.customerid = #customerId# </isNotEmpty>
+					<isNotEmpty prepend="AND" property="fgName"> f.fgname LIKE #fgName# + '%' </isNotEmpty>
+					<isNotEmpty prepend="AND" property="fgNo"> f.fgno LIKE #fgNo# + '%' </isNotEmpty>	
+					<isGreaterThan prepend="AND" property="reportType" compareValue="0"> d.reportType = #reportType# </isGreaterThan>
+				</dynamic>
+				GROUP BY d.reportdate, d.customerid, c.customercode, d.fgid, f.fgno, f.fgname, s.fgstock, 
+				s.fgin, s.fgout, s.fgbalance, f.weight, mat.sMaterialName, s.moldNo
+		) t
+		ORDER BY t.reportdate,  t.customercode,t.fgno, t.moldNo
+		
+			
+	</select>
+	
 	<select id="selectFNG_R01Detail" resultClass="th.co.nttdata.tki.bean.TFGDetail">
-		SELECT 	CONVERT(VARCHAR(10),reportDate,105)+ ':' +CAST(fgid AS VARCHAR)+ ':' +CAST(customerid AS VARCHAR)+ ':' +CAST(reporttype AS VARCHAR) AS reportTypeName,
+	SELECT
+		CONVERT(VARCHAR(10),reportDate,105)+ ':' +CAST(fgid AS VARCHAR)+ ':' +CAST(d.customerid AS VARCHAR)+ ':' +CAST(reporttype AS VARCHAR)+ ':' +CAST(ISNULL(dcp.moldno,'') AS VARCHAR) AS reportTypeName,
+				reportDate,
+				fgId,
+				d.customerId,
+				reportType,
+				ISNULL(SUM(fgout),0) as fgOut
+				
+  		FROM t_fg_detail d
+		LEFT JOIN t_lotno lot on lot.lotno = d.lotno
+		LEFT JOIN t_dcplan dcp on dcp.dcplanid = lot.dcplanid
+  		
+  		group by d.reportdate, d.customerid, d.fgid, d.reporttype, dcp.moldno
+  		having ISNULL(SUM(fgout),0) > 0
+  		
+  		
+		<!-- SELECT 	CONVERT(VARCHAR(10),reportDate,105)+ ':' +CAST(fgid AS VARCHAR)+ ':' +CAST(customerid AS VARCHAR)+ ':' +CAST(reporttype AS VARCHAR) AS reportTypeName,
 				reportDate,
 				fgId,
 				customerId,
@@ -105,7 +240,7 @@
 				ISNULL(SUM(fgout),0) as fgOut
   		FROM t_fg_detail
   		group by reportdate, customerid, fgid, reporttype
-  		having ISNULL(SUM(fgout),0) > 0
+  		having ISNULL(SUM(fgout),0) > 0 -->
 	</select>
 	<select id="selectReportType" resultClass="th.co.nttdata.tki.bean.TFGDetail">
 		SELECT 	report,
@@ -141,6 +276,14 @@
 	<select id="select_check_not_exist" resultClass="Integer" parameterClass="th.co.nttdata.tki.bean.TFGDetail">
 		SELECT CASE WHEN COUNT(*)  <![CDATA[ > ]]> 0 THEN 0 ELSE 1 END is_not_exist  FROM t_lot_sequence seq
 		where seq.lotseqno = #lotNo#+'-'+#lotSeqNo#
+	</select>
+	<select id="select_check_out_not_in" resultClass="Integer" parameterClass="th.co.nttdata.tki.bean.TFGDetail">
+		
+		SELECT
+		ISNULL(sum(fgin),-1) as sum_fgin
+		FROM t_fg_detail
+		where lotno = #lotNo# and lot_seqno = #lotSeqNo#
+	  
 	</select>
 	<insert id="insertFgDetail" parameterClass="th.co.nttdata.tki.bean.TFG">
 		<iterate property="details">
