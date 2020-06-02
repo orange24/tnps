@@ -162,6 +162,7 @@ public class MRDC_R11ExcelView extends AbstractExcelView{
 			createCell(workbook, row, columnMonth++,  gTxtColumnStyle);
 			createCell(workbook, row, columnMonth++,  gTxtColumnStyle);
 			createCell(workbook, row, columnMonth++,  gTxtColumnStyle);
+			columnMonth++;
 			createCell(workbook, row, columnMonth++,  grandColumnStyle).setValue("Grand Total");
 			createCell(workbook, row, columnMonth++,  gNumColumnStyle).setValue(gradnTotalQty);
 			createCell(workbook, row, columnMonth++,  gDobColumnStyle).setValue(gradnTotalAmount);

@@ -582,7 +582,7 @@
 		INNER JOIN m_customer c ON c.customerId = p.customerId
 		INNER JOIN m_fg f ON f.fgId = d.fgId
 		INNER JOIN m_user_customer u ON u.customerId = p.customerId
-		INNER JOIN m_customer_line l ON l.customerLineId = t.customerLineId
+		LEFT JOIN m_customer_line l ON l.customerLineId = t.customerLineId
 		WHERE d.deliveryDate = #deliveryDate#
 		AND u.userName = #updateBy# AND t.deliveryQty <![CDATA[ <> ]]> 0
 		ORDER BY p.customerId,t.timeHr,t.timeMin,d.fgId

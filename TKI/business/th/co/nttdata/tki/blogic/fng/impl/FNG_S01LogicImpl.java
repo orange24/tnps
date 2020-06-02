@@ -57,65 +57,68 @@ public class FNG_S01LogicImpl implements FNG_S01Logic {
 		 */
 
 		if (tfg.getDetails() != null && tfg.getDetails().size() > 0) {
-			//Check err Out not In 
-			if("fgout".equalsIgnoreCase(tfg.getDetails().get(0).getFgType())){
-				boolean isErr = false;
-				for(TFGDetail tmpDetail : tfg.getDetails()){
+			
+			List<TFGDetail> result = new ArrayList<TFGDetail>();
+			
+			//Check err Out not In
+			for(TFGDetail tmpDetail : tfg.getDetails()){
+				if("fgout".equalsIgnoreCase(tfg.getDetails().get(0).getFgType())){
 					if(tfgDetailDao.checkOutNotIn(tmpDetail)){
-						isErr = true;
 						tfg.getErrors().add(new Message("err.fng.012", new String[]{tmpDetail.getLotNo()+"-"+tmpDetail.getLotSeqNo()}));
 					}
 				}
-				if(isErr){
-					return;
-				}
+				result.add(tmpDetail);
 			}
+			tfg.setDetails(result);
 			
 			tfgDetailDao.insertFgDetail(tfg);
 			tfg.getInfos().add(new Message("inf.cmm.002", null));
 
-			// successful msg
-			Map<String, String> maps = new TreeMap<String, String>();
-			if ("fgIn".equalsIgnoreCase(tfg.getDetails().get(0).getFgType())) {
-				// checking FG type
-				for (TFGDetail tfgDetail : tfg.getDetails()) {
-					String custCodeAndFgNo = tfgDetail.getCustomerCode()
-							+ " : " + tfgDetail.getFgName() + " Type : "
-							+ tfgDetail.getReportTypeName() + ", ";
-					if (maps.get(custCodeAndFgNo) != null) {
-						maps.put(custCodeAndFgNo, String.valueOf(Integer
-								.parseInt(maps.get(custCodeAndFgNo))
-								+ tfgDetail.getFgIn()));
-					} else {
-						maps.put(custCodeAndFgNo,
-								String.valueOf(tfgDetail.getFgIn()));
+			if(result.size()>0){
+
+				// successful msg
+				Map<String, String> maps = new TreeMap<String, String>();
+				if ("fgIn".equalsIgnoreCase(tfg.getDetails().get(0).getFgType())) {
+					// checking FG type
+					for (TFGDetail tfgDetail : tfg.getDetails()) {
+						String custCodeAndFgNo = tfgDetail.getCustomerCode()
+								+ " : " + tfgDetail.getFgName() + " Type : "
+								+ tfgDetail.getReportTypeName() + ", ";
+						if (maps.get(custCodeAndFgNo) != null) {
+							maps.put(custCodeAndFgNo, String.valueOf(Integer
+									.parseInt(maps.get(custCodeAndFgNo))
+									+ tfgDetail.getFgIn()));
+						} else {
+							maps.put(custCodeAndFgNo,
+									String.valueOf(tfgDetail.getFgIn()));
+						}
 					}
-				}
-				for (Map.Entry<String, String> e : maps.entrySet()) {
-					// display list of lotNo
-					tfg.getInfos().add(
-							new Message("inf.fng.007", new String[] {
-									e.getKey(), "in", e.getValue() + "" }));
-				}
-			} else {
-				for (TFGDetail tfgDetail : tfg.getDetails()) {
-					String custCodeAndFgNo = tfgDetail.getCustomerCode()
-							+ " : " + tfgDetail.getFgName() + " Type : "
-							+ tfgDetail.getReportTypeName() + ", ";
-					if (maps.get(custCodeAndFgNo) != null) {
-						maps.put(custCodeAndFgNo, String.valueOf(Integer
-								.parseInt(maps.get(custCodeAndFgNo))
-								+ tfgDetail.getFgOut()));
-					} else {
-						maps.put(custCodeAndFgNo,
-								String.valueOf(tfgDetail.getFgOut()));
+					for (Map.Entry<String, String> e : maps.entrySet()) {
+						// display list of lotNo
+						tfg.getInfos().add(
+								new Message("inf.fng.007", new String[] {
+										e.getKey(), "in", e.getValue() + "" }));
 					}
-				}
-				for (Map.Entry<String, String> e : maps.entrySet()) {
-					// display list of lotNo
-					tfg.getInfos().add(
-							new Message("inf.fng.007", new String[] {
-									e.getKey(), "out", e.getValue() + "" }));
+				} else {
+					for (TFGDetail tfgDetail : tfg.getDetails()) {
+						String custCodeAndFgNo = tfgDetail.getCustomerCode()
+								+ " : " + tfgDetail.getFgName() + " Type : "
+								+ tfgDetail.getReportTypeName() + ", ";
+						if (maps.get(custCodeAndFgNo) != null) {
+							maps.put(custCodeAndFgNo, String.valueOf(Integer
+									.parseInt(maps.get(custCodeAndFgNo))
+									+ tfgDetail.getFgOut()));
+						} else {
+							maps.put(custCodeAndFgNo,
+									String.valueOf(tfgDetail.getFgOut()));
+						}
+					}
+					for (Map.Entry<String, String> e : maps.entrySet()) {
+						// display list of lotNo
+						tfg.getInfos().add(
+								new Message("inf.fng.007", new String[] {
+										e.getKey(), "out", e.getValue() + "" }));
+					}
 				}
 			}
 		} else {

@@ -130,9 +130,13 @@ public class MRDC_R09ExcelView extends AbstractExcelView{
 				sheet.getRow(init).getCell(20).setCellValue(previous.getNonTime());
 				sheet.getRow(init).getCell(21).setCellValue(previous.getnActualOperatingProductivity());
 				sheet.getRow(init).getCell(22).setCellValue(previous.getnStandardProductivity());
-				sheet.getRow(init).getCell(23).setCellValue(previous.getnStandardProductionPrice());
+				if(previous.getnStandardProductionPrice()!=null){
+					sheet.getRow(init).getCell(23).setCellValue(previous.getnStandardProductionPrice());					
+				}
 				sheet.getRow(init).getCell(24).setCellValue(previous.getnActualProductionPrice());
-				sheet.getRow(init).getCell(25).setCellValue(previous.getnDiff());
+				if(previous.getnDiff()!=null){
+					sheet.getRow(init).getCell(25).setCellValue(previous.getnDiff());					
+				}
 				sheet.getRow(init).getCell(26).setCellValue(previous.getnPercentage() + "%");
 				//Merge
 				if((init != (rowNum-1)) && (detailList.size()!=1)){

@@ -53,15 +53,15 @@ public class DLV_R02ExcelView extends AbstractExcelView {
 		HSSFRow day = sheet.getRow(1);
 		HSSFRow user = sheet.getRow(2);
 
-		createCell(workbook, doc, 12, docStyle);
-		createCell(workbook, doc2, 12, docStyle);
+		createCell(workbook, doc, 13, docStyle);
+		createCell(workbook, doc2, 13, docStyle);
 		createCell(workbook, day, 1, dayc01Style);
 		createCell(workbook, user, 1, user01Style);
 		
 		day.getCell(1).setCellValue(dateFullFormatter.format(deliveryPlan.getDeliveryDate()));
 		user.getCell(1).setCellValue(deliveryPlan.getUpdateBy());
-		doc.getCell(12).setCellValue(docControl.getDocNoR2());
-		doc2.getCell(12).setCellValue(docControl.getRevDocNoR2());
+		doc.getCell(13).setCellValue(docControl.getDocNoR2());
+		doc2.getCell(13).setCellValue(docControl.getRevDocNoR2());
 		
 		int rowNumber = 7;
 		int prevCustommerId  = 0;
@@ -88,16 +88,17 @@ public class DLV_R02ExcelView extends AbstractExcelView {
 				}
 				
 				createCell(workbook, fstRow, 2, r01c04Style).setValue(detail.getTimeHr() + "." + dFmt.format(detail.getTimeMin()));
-				createCell(workbook, fstRow, 3, r01c04Style).setValue(detail.getFgName());
-				createCell(workbook, fstRow, 4, r01c05Style).setValue(detail.getDeliveryQty());
-				createCell(workbook, fstRow, 5, r01c04Style).setValue("");
+				createCell(workbook, fstRow, 3, r01c04Style).setValue(detail.getFgNo());
+				createCell(workbook, fstRow, 4, r01c04Style).setValue(detail.getFgName());
+				createCell(workbook, fstRow, 5, r01c05Style).setValue(detail.getDeliveryQty());
 				createCell(workbook, fstRow, 6, r01c04Style).setValue("");
 				createCell(workbook, fstRow, 7, r01c04Style).setValue("");
 				createCell(workbook, fstRow, 8, r01c04Style).setValue("");
 				createCell(workbook, fstRow, 9, r01c04Style).setValue("");
 				createCell(workbook, fstRow, 10, r01c04Style).setValue("");
 				createCell(workbook, fstRow, 11, r01c04Style).setValue("");
-				createCell(workbook, fstRow, 12, r01c04Style).setValue(detail.getCustomerLine());
+				createCell(workbook, fstRow, 12, r01c04Style).setValue("");
+				createCell(workbook, fstRow, 13, r01c04Style).setValue(detail.getCustomerLine());
 			}else{
 				if(i == pList.size()-1){
 					createCell(workbook, fstRow, 0, r02c01Style).setValue("");
@@ -115,20 +116,21 @@ public class DLV_R02ExcelView extends AbstractExcelView {
 					createCell(workbook, fstRow, 2, r01c04Style).setValue("");
 				}
 				
-				createCell(workbook, fstRow, 3, r01c03Style).setValue(detail.getFgName());
-				createCell(workbook, fstRow, 4, r01c05Style).setValue(detail.getDeliveryQty());
-				createCell(workbook, fstRow, 5, r01c03Style).setValue("");
+				createCell(workbook, fstRow, 3, r01c04Style).setValue(detail.getFgNo());
+				createCell(workbook, fstRow, 4, r01c03Style).setValue(detail.getFgName());
+				createCell(workbook, fstRow, 5, r01c05Style).setValue(detail.getDeliveryQty());
 				createCell(workbook, fstRow, 6, r01c03Style).setValue("");
 				createCell(workbook, fstRow, 7, r01c03Style).setValue("");
 				createCell(workbook, fstRow, 8, r01c03Style).setValue("");
 				createCell(workbook, fstRow, 9, r01c03Style).setValue("");
 				createCell(workbook, fstRow, 10, r01c03Style).setValue("");
 				createCell(workbook, fstRow, 11, r01c03Style).setValue("");
-				createCell(workbook, fstRow, 12, r01c03Style).setValue(detail.getCustomerLine());
+				createCell(workbook, fstRow, 12, r01c03Style).setValue("");
+				createCell(workbook, fstRow, 13, r01c03Style).setValue(detail.getCustomerLine());
 			}
 			rowNumber++;
 		}
 		// <!-- Setup 'Print Area'. -->
-		workbook.setPrintArea(0, 0, 12, 0, rowNumber);
+//		workbook.setPrintArea(0, 0, 13, 0, rowNumber);
 	}
 }

@@ -412,7 +412,8 @@
 				row.find("td > input:text").each(function(colIndex){
 					param.push("dateList["+ (colIndex+1) +"].timeList["+ rowIndex +"].timeHr="+ timeHr);
 					param.push("dateList["+ (colIndex+1) +"].timeList["+ rowIndex +"].timeMin="+ timeMin);
-					param.push("dateList["+ (colIndex+1) +"].timeList["+ rowIndex +"].customerLine="+ customerLine);
+					if(customerLine != null)
+						param.push("dateList["+ (colIndex+1) +"].timeList["+ rowIndex +"].customerLine="+ customerLine);
 					param.push("dateList["+ (colIndex+1) +"].timeList["+ rowIndex +"].deliveryQty="+ $(this).val());
 				});
 			});
