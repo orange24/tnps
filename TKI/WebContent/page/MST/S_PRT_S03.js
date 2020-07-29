@@ -165,6 +165,42 @@ function createpartRoutingGrid() {
 				formatter : wipCalcListFormatter,
 				filter : common.SlickGrid.filterColumnsOptions.Fulltext
 			}, {
+				id             : "createDate",
+				name           : "Create Date",
+				field          : "createDate",
+				width          : 120,
+				cssClass       : "cell-c",
+				resizable      : true,
+				formatter      : common.SlickGrid.Formatters.DateTimeFormatter,
+				filter         : common.SlickGrid.filterColumnsOptions.Fulltext,
+				sortable	   : true
+			},{
+				id             : "createBy",
+				name           : "Create By",
+				field          : "createBy",
+				width          : 120,
+				resizable      : true,
+				filter         : common.SlickGrid.filterColumnsOptions.Fulltext,
+				sortable	   : true
+			},{
+				id             : "lastUpdate",
+				name           : "Update Date",
+				field          : "lastUpdate",
+				width          : 120,
+				cssClass       : "cell-c",
+				resizable      : true,
+				formatter      : common.SlickGrid.Formatters.DateTimeFormatter,
+				filter         : common.SlickGrid.filterColumnsOptions.Fulltext,
+				sortable	   : true
+			},{
+				id             : "updateBy",
+				name           : "Update By",
+				field          : "updateBy",
+				width          : 120,
+				resizable      : true,
+				filter         : common.SlickGrid.filterColumnsOptions.Fulltext,
+				sortable	   : true
+			},{
 				id : "copyField",
 				name : "Copy",
 				field : "copyField",

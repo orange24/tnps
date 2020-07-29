@@ -112,13 +112,26 @@
 				</tr>
 				<c:forEach var="stockMap" items="${fng.stocksMap}" varStatus="loop" begin="0" step="1">
 					<tr>
-						<td rowspan="7" align="center" class="border_all">${stockMap.value[0].customerCode}</td>
-						<td rowspan="7" align="center" class="border_all">
+						<td rowspan="8" align="center" class="border_all">${stockMap.value[0].customerCode}</td>
+						<td rowspan="8" align="center" class="border_all">
 							<a
 								href="WIP_S02_search.html?customerId=${stockMap.value[0].customerId}&partId=${stockMap.value[0].partId}&month=${fng.month}&year=${fng.year}">${stockMap.value[0].fgName}
 								: ${stockMap.value[0].fgNo}</a>
 						</td>
-						<th rowspan="3" align="center" class="border_all">Delivery</th>
+						<th rowspan="4" align="center" class="border_all">Delivery</th>
+						<th align="center" class="border_all">Forcast</th>
+						<c:forEach varStatus="day" begin="0" end="${fng.endDay}" step="1">
+							<td align="center">
+								&nbsp;
+								<c:forEach var="stock" items="${stockMap.value}">
+									<c:if test="${stock.reportDay == day.current}">
+									${stock.forcastQty}
+								</c:if>
+								</c:forEach>
+							</td>
+						</c:forEach>
+					</tr>
+					<tr>
 						<th align="center" class="border_all">Plan</th>
 						<c:forEach varStatus="day" begin="0" end="${fng.endDay}" step="1">
 							<td align="center">

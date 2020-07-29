@@ -32,6 +32,7 @@
 			,FG_DEV.fgstock as fgStock
 			,FG_DEV.fgadjust as fgAdjust
 			,day(C_1.calendardate) AS reportDay
+			, del.forcastqty AS forcastQty
 		FROM
 		(
 			SELECT
@@ -64,6 +65,7 @@
 					,d.deliverydate
 					,d.deliveryqtytotal AS deliveryqty
 					,d.balanceorderqty AS balanceqty
+					,d.forcastqty
 				FROM t_deliveryplan_date AS d
 				INNER JOIN t_deliveryplan AS p ON d.deliveryplanid = p.deliveryplanid
 				<dynamic prepend="WHERE">

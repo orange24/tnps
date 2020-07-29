@@ -123,13 +123,14 @@ public class FNG_R02ExcelView extends AbstractExcelView {
 		String fgNo = "";
 		String fgName = "";
 		while (keyIterator.hasNext()) {
-			HSSFRow fgR01 = sheet.createRow(rowNumber);
-			HSSFRow fgR02 = sheet.createRow(rowNumber + 1);
-			HSSFRow fgR03 = sheet.createRow(rowNumber + 2);
-			HSSFRow fgR04 = sheet.createRow(rowNumber + 3);
-			HSSFRow fgR05 = sheet.createRow(rowNumber + 4);
-			HSSFRow fgR06 = sheet.createRow(rowNumber + 5);
-			HSSFRow fgR07 = sheet.createRow(rowNumber + 6);
+			HSSFRow fgR00 = sheet.createRow(rowNumber);
+			HSSFRow fgR01 = sheet.createRow(rowNumber + 1);
+			HSSFRow fgR02 = sheet.createRow(rowNumber + 2);
+			HSSFRow fgR03 = sheet.createRow(rowNumber + 3);
+			HSSFRow fgR04 = sheet.createRow(rowNumber + 4);
+			HSSFRow fgR05 = sheet.createRow(rowNumber + 5);
+			HSSFRow fgR06 = sheet.createRow(rowNumber + 6);
+			HSSFRow fgR07 = sheet.createRow(rowNumber + 7);
 
 			key = (String) keyIterator.next();
 			listStock = (List<TFGStock>) listStockMap.get(key);
@@ -149,6 +150,12 @@ public class FNG_R02ExcelView extends AbstractExcelView {
 				}
 			}
 
+			createCell(workbook, fgR00, 0, r01c00Style).setValue(customer);
+			createCell(workbook, fgR00, 1, r01c00Style).setValue(fgNo);
+			createCell(workbook, fgR00, 2, r01c00Style).setValue(fgName);
+			createCell(workbook, fgR00, 3, r01c02Style).setValue("Delivery");
+			createCell(workbook, fgR00, 4, r01c02Style).setValue("Forcast");
+			
 			createCell(workbook, fgR01, 0, r01c00Style).setValue(customer);
 			createCell(workbook, fgR01, 1, r01c00Style).setValue(fgNo);
 			createCell(workbook, fgR01, 2, r01c00Style).setValue(fgName);
@@ -186,20 +193,22 @@ public class FNG_R02ExcelView extends AbstractExcelView {
 			createCell(workbook, fgR06, 4, r01c02Style).setValue("Balance FG");
 
 			createCell(workbook, fgR07, 0, r07c00Style).setValue(customer);
-			createCell(workbook, fgR07, 1, r01c00Style).setValue(fgNo);
-			createCell(workbook, fgR07, 2, r01c00Style).setValue(fgName);
+			createCell(workbook, fgR07, 1, r07c00Style).setValue(fgNo);
+			createCell(workbook, fgR07, 2, r07c00Style).setValue(fgName);
 			createCell(workbook, fgR07, 3, r07c02Style).setValue("FG");
 			createCell(workbook, fgR07, 4, r07c02Style).setValue("Adjust");
 
 			for (int day = 5; day <= tfg.getEndDay() + 5; day++) {
+				createCell(workbook, fgR00, day, r01c03Style);
 				createCell(workbook, fgR01, day, r01c03Style);
-				createCell(workbook, fgR02, day, r07c03Style);
-				createCell(workbook, fgR03, day, r07c03Style);
+				createCell(workbook, fgR02, day, r01c03Style);
+				createCell(workbook, fgR03, day, r01c03Style);
 				createCell(workbook, fgR04, day, r01c03Style);
 				createCell(workbook, fgR05, day, r01c03Style);
 				createCell(workbook, fgR06, day, r01c03Style);
 				createCell(workbook, fgR07, day, r07c03Style);
 			}
+			createCell(workbook, fgR00, tfg.getEndDay() + 5, rcLastStyle);
 			createCell(workbook, fgR01, tfg.getEndDay() + 5, rcLastStyle);
 			createCell(workbook, fgR02, tfg.getEndDay() + 5, rcLastStyle);
 			createCell(workbook, fgR03, tfg.getEndDay() + 5, rcLastStyle);
@@ -211,6 +220,7 @@ public class FNG_R02ExcelView extends AbstractExcelView {
 			for (int d = 5; d <= tfg.getEndDay() + 5; d++) {
 				for (TFGStock stock : listStock) {
 					if (stock.getReportDay() == (d - 5)) {
+						fgR00.getCell(d).setCellValue((stock.getForcastQty() == null) ? "" : "" + stock.getForcastQty());
 						fgR01.getCell(d).setCellValue((stock.getDeliveryQty() == null) ? "" : "" + stock.getDeliveryQty());
 						fgR02.getCell(d).setCellValue((stock.getActualQty() == null) ? "" : "" + stock.getActualQty());
 						fgR03.getCell(d).setCellValue((stock.getBalanceQty() == null) ? "" : "" + stock.getBalanceQty());
@@ -221,7 +231,7 @@ public class FNG_R02ExcelView extends AbstractExcelView {
 					}
 				}
 			}
-			rowNumber += 7;
+			rowNumber += 8;
 		}
 		// <!-- Setup 'Print Area'. -->
 		workbook.setPrintArea(0, 1, 36, 0, rowNumber);

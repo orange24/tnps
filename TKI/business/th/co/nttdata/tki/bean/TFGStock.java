@@ -32,6 +32,7 @@ public class TFGStock extends AbstractBaseBean {
 	private String partNo;
 	private String partName;
 	private String moldNo;
+	private Integer forcastQty;
 
 	// MRDC_S16
 	private Date dateFrom;
@@ -484,5 +485,13 @@ public class TFGStock extends AbstractBaseBean {
 
 	public void setMoldNo(String moldNo) {
 		this.moldNo = moldNo;
+	}
+
+	public Integer getForcastQty() {
+		return forcastQty;
+	}
+
+	public void setForcastQty(Integer forcastQty) {
+		this.forcastQty = forcastQty;
 	}
 }

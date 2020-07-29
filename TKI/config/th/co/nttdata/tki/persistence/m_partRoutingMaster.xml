@@ -24,6 +24,10 @@
 			    			ELSE  'No'    
 			    	END    	As wipCalc
  				,PW.ISCALC
+				,PW.createby
+				,PW.createdate
+				,PW.updateby
+				,PW.lastupdate
 		FROM 	V_CUST_FG_PART CFP 
 				LEFT JOIN M_PART_WIP PW ON CFP.PARTID = PW.PARTID
 		WHERE 
@@ -56,6 +60,10 @@
 			    			ELSE  'No'    
 			    	END    	As wipCalc
  				,PW.ISCALC
+				,PW.createby
+				,PW.createdate
+				,PW.updateby
+				,PW.lastupdate
 		FROM 	V_CUST_FG_PART CFP 
 				LEFT JOIN M_PART_WIP PW ON CFP.PARTID = PW.PARTID
 		WHERE 
@@ -220,13 +228,21 @@
                       ,WIP
                       ,WIPORDER
                       ,remark
-                      ,ISCALC)
+                      ,ISCALC
+                      ,createBy
+                      ,createDate
+                      ,updateBy
+                      ,lastUpdate)
                 VALUES
                       ( #partRoutinglist[].partId#
                       ,#partRoutinglist[].wip#
                       ,#partRoutinglist[].wipOrder#
                       ,#partRoutinglist[].remark#
-                      ,#partRoutinglist[].isCalc#)
+                      ,#partRoutinglist[].isCalc#
+                      ,#partRoutinglist[].createBy#
+                      ,GETDATE()
+                      ,#partRoutinglist[].updateBy#
+                      ,GETDATE())
     	</iterate>
     </insert>
     <select id="select_part_row"  parameterClass="th.co.nttdata.tki.bean.PartRoutingMaster"  resultClass="th.co.nttdata.tki.bean.PartRoutingMaster">
