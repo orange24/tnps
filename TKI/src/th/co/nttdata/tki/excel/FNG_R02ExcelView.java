@@ -154,7 +154,7 @@ public class FNG_R02ExcelView extends AbstractExcelView {
 			createCell(workbook, fgR00, 1, r01c00Style).setValue(fgNo);
 			createCell(workbook, fgR00, 2, r01c00Style).setValue(fgName);
 			createCell(workbook, fgR00, 3, r01c02Style).setValue("Delivery");
-			createCell(workbook, fgR00, 4, r01c02Style).setValue("Forcast");
+			createCell(workbook, fgR00, 4, r01c02Style).setValue("Forecast");
 			
 			createCell(workbook, fgR01, 0, r01c00Style).setValue(customer);
 			createCell(workbook, fgR01, 1, r01c00Style).setValue(fgNo);

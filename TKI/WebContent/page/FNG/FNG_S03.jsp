@@ -119,7 +119,7 @@
 								: ${stockMap.value[0].fgNo}</a>
 						</td>
 						<th rowspan="4" align="center" class="border_all">Delivery</th>
-						<th align="center" class="border_all">Forcast</th>
+						<th align="center" class="border_all">Forecast</th>
 						<c:forEach varStatus="day" begin="0" end="${fng.endDay}" step="1">
 							<td align="center">
 								&nbsp;
