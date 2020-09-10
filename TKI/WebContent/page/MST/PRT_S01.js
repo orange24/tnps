@@ -250,6 +250,18 @@ function createGrid(){
 	    },
 		filter 		: common.SlickGrid.filterColumnsOptions.Fulltext
 	},{
+		id 			: "weight",
+		name 		: "Unit Weight (DC)",
+		field 		: "weight",
+		width          : 90,
+		cssClass       : "cell-r",
+		headerCssClass : "editable-column required-column",
+		resizable      : true,
+		filter         : common.SlickGrid.filterColumnsOptions.Fulltext,
+		sortable	   : true,
+		editor         : common.SlickGrid.Editor.TextEditor,
+		formatter 	   : common.SlickGrid.Formatters.DoubleFormatter
+	},{
 		id 			: "choose",
 		name 		: "Enable",
 		field 		: "choose",

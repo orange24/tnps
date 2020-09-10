@@ -6,7 +6,7 @@
 		});
 		
 		$('form').submit(function() {
-			if(!this.action.contains('.xls') && !this.action.contains('export')){
+			if($(this).attr('action').indexOf('.xls')==-1 && $(this).attr('action').indexOf('export')==-1){
 				$("#preparing-file-modal-page").show();
 				$("#preparing-file-modal-page-img").show();
 			}

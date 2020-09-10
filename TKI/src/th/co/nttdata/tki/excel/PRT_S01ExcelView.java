@@ -41,6 +41,9 @@ public class PRT_S01ExcelView extends AbstractExcelView {
 		Style numRightStyle = createStyle(workbook, HSSFCellStyle.ALIGN_RIGHT,
 				HSSFCellStyle.VERTICAL_CENTER).setFormat("#,##0").setRightBorder()
 				.setBottomBorder().setWrapText().setFont(font);
+		Style decimalRightStyle = createStyle(workbook, HSSFCellStyle.ALIGN_RIGHT,
+				HSSFCellStyle.VERTICAL_CENTER).setFormat("#,##0.00").setRightBorder()
+				.setBottomBorder().setWrapText().setFont(font);
 
 		HSSFSheet sheet = workbook.getSheetAt(0);
 		int rowNumber = 3;
@@ -58,15 +61,16 @@ public class PRT_S01ExcelView extends AbstractExcelView {
 			createCell(workbook, row, 2, txtStyle).setValue(obj.getPartName());
 			createCell(workbook, row, 3, numRightStyle).setValue(Integer.valueOf(obj.getLot()));
 			createCell(workbook, row, 4, txtStyle).setValue(obj.getMaterial());
+			createCell(workbook, row, 5, decimalRightStyle).setValue(obj.getWeight());
 			if (obj.getChoose()) {
-				createCell(workbook, row, 5, txtCenterStyle).setValue("Yes");
+				createCell(workbook, row, 6, txtCenterStyle).setValue("Yes");
 			} else {
-				createCell(workbook, row, 5, txtCenterStyle).setValue("No");
+				createCell(workbook, row, 6, txtCenterStyle).setValue("No");
 			}
-			createCell(workbook, row, 6, txtCenterStyle).setValue(createDate);
-			createCell(workbook, row, 7, txtStyle).setValue(obj.getCreatedBy());
-			createCell(workbook, row, 8, txtCenterStyle).setValue(lastUpdate);
-			createCell(workbook, row, 9, txtStyle).setValue(obj.getUpdatedBy());
+			createCell(workbook, row, 7, txtCenterStyle).setValue(createDate);
+			createCell(workbook, row, 8, txtStyle).setValue(obj.getCreatedBy());
+			createCell(workbook, row, 9, txtCenterStyle).setValue(lastUpdate);
+			createCell(workbook, row, 10, txtStyle).setValue(obj.getUpdatedBy());
 			rowNumber++;
 		}
 	}

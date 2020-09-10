@@ -331,6 +331,7 @@
 			PART.REMARK 		AS remark, 
 			PART.SNP_WIP 		AS lot, 
 			PART.MATERIALID 	AS materialId, 
+			PART.WEIGHT 	AS weight, 
 			MAT.SMATERIALCODE + ' : ' + MAT.SMATERIALNAME AS materialName,
 			PART.ISENABLE 		AS choose, 
 			PART.CREATEDATE 	AS createDate, 
@@ -356,6 +357,7 @@
 			 part.remark 		AS remark,
 			 part.materialId 	AS materialId,
 			 mat.sMaterialCode + ' : ' + mat.sMaterialName as material,
+			 part.weight   		AS weight,
 			 part.createDate	AS createDate,
 			 part.createBy   	AS createdBy,
 			 part.lastUpdate	AS lastUpdate,
@@ -408,10 +410,10 @@
 	<insert id="prt_S01SaveInsert" parameterClass="th.co.nttdata.tki.bean.MPart">
 		<iterate property="partList">	
 			INSERT INTO 
-				M_PART (partNo, partName, snp_wip, materialId, isEnable,createDate, createBy, lastUpdate, updateBy)
+				M_PART (partNo, partName, snp_wip, materialId, isEnable, weight, createDate, createBy, lastUpdate, updateBy)
 			VALUES 
 				(#partList[].partNo#, #partList[].partName#, #partList[].lot#,#partList[].materialId#, 
-				 #partList[].choose#, SYSDATETIME(), #createBy#, SYSDATETIME(), #updateBy#)
+				 #partList[].choose#, #partList[].weight#,  SYSDATETIME(), #createBy#, SYSDATETIME(), #updateBy#)
 		</iterate>
 	</insert>
 	
@@ -426,6 +428,7 @@
 						snp_wip 	= #partList[].lot#, 
 				 		materialId 	= #partList[].materialId#, 
 				 		isEnable 	= #partList[].choose#, 
+				 		weight 		= #partList[].weight#, 
 				 		lastUpdate 	= GETDATE(),
 				 		updateBy 	= #updateBy#
 				WHERE 	

@@ -39,6 +39,7 @@ public class MPart extends AbstractBaseBean {
 	private String updatedBy;
 	private String material;
 	private String lineNumber;
+	private Double weight;
 	private List<MPartWip> wipList;
 	private List<MPart> partList;
 	private Map<String, Object> partSync;
@@ -268,6 +269,14 @@ public class MPart extends AbstractBaseBean {
 
 	public void setMaterialName(String materialName) {
 		this.materialName = materialName;
+	}
+
+	public Double getWeight() {
+		return weight;
+	}
+
+	public void setWeight(Double weight) {
+		this.weight = weight;
 	}
 
 }
