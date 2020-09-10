@@ -1,1 +1,0 @@
-INDEX VERSION 1.130+/Volumes/Works/Workspace/J2EE/TNPS project/.metadata/.plugins/org.eclipse.jdt.core

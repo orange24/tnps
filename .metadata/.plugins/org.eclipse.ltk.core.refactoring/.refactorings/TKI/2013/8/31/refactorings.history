@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring accessors="true" comment="Delete 5 elements from project &apos;TKI&apos;&#x0D;&#x0A;- Original project: &apos;TKI&apos;&#x0D;&#x0A;- Original elements:&#x0D;&#x0A;     iReport.jar&#x0D;&#x0A;     jasper-compiler.jar&#x0D;&#x0A;     jasper-compiler-jdt.jar&#x0D;&#x0A;     jasperreports-2.0.5.jar&#x0D;&#x0A;     jasper-runtime.jar" description="Delete elements" element1="WebContent/WEB-INF/lib/jasper-compiler-jdt.jar" element2="WebContent/WEB-INF/lib/iReport.jar" element3="WebContent/WEB-INF/lib/jasper-compiler.jar" element4="WebContent/WEB-INF/lib/jasperreports-2.0.5.jar" element5="WebContent/WEB-INF/lib/jasper-runtime.jar" elements="0" flags="589830" id="org.eclipse.jdt.ui.delete" resources="5" stamp="1375332679409" subPackages="false" version="1.0"/>
-</session>
