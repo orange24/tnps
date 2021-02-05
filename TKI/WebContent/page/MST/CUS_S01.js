@@ -155,10 +155,12 @@ function createGrid(){
 		id 			: "customerCode",
 		name 		: "Customer Code",
 		field 		: "customerCode",
+		headerCssClass : "editable-column",
 		width 		: 130,
 		resizable 	: true,
 		filter 		: common.SlickGrid.filterColumnsOptions.Fulltext,
-		sortable	: true
+		sortable	: true,
+		editor 		: common.SlickGrid.Editor.TextEditor
 	},{
 		id 			: "customerName",
 		name 		: "Customer Name",

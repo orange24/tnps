@@ -372,14 +372,18 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 		TDeliveryPlanDate tDeliveryPlanDate = null;
 
 		if (deliveryPlans != null && deliveryPlans.size() > 0) {
-			for (int i = 1; i <= limitDay; i++) {
-				tDeliveryPlanDate = deliveryPlans.get(index + i);
-				if (null != tDeliveryPlanDate) {
-					if (null != tDeliveryPlanDate.getBalanceDeliveryQty()
-							&& tDeliveryPlanDate.getBalanceDeliveryQty() != 0) {
-						nextDeliveryPlan = tDeliveryPlanDate.getBalanceDeliveryQty();
-						break;
+			for (int i = 1; i <= limitDay && i < deliveryPlans.size(); i++) {
+				try {
+					tDeliveryPlanDate = deliveryPlans.get(index + i);
+					if (null != tDeliveryPlanDate) {
+						if (null != tDeliveryPlanDate.getBalanceDeliveryQty()
+								&& tDeliveryPlanDate.getBalanceDeliveryQty() != 0) {
+							nextDeliveryPlan = tDeliveryPlanDate.getBalanceDeliveryQty();
+							break;
+						}
 					}
+				}catch(Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}
@@ -398,14 +402,19 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 		if (deliveryPlans != null && deliveryPlans.size() > 0) {
 			while (havePlan < stockHoldDay) {
 				index++;
-				tDeliveryPlanDate = deliveryPlans.get(index);
-				if (null != tDeliveryPlanDate) {
-					if (null != tDeliveryPlanDate.getBalanceDeliveryQty()
-							&& tDeliveryPlanDate.getBalanceDeliveryQty() != 0) {
-						sumDeliveryPlan += tDeliveryPlanDate.getBalanceDeliveryQty();
-						havePlan++;
+				try {
+					tDeliveryPlanDate = deliveryPlans.get(index);
+					if (null != tDeliveryPlanDate) {
+						if (null != tDeliveryPlanDate.getBalanceDeliveryQty()
+								&& tDeliveryPlanDate.getBalanceDeliveryQty() != 0) {
+							sumDeliveryPlan += tDeliveryPlanDate.getBalanceDeliveryQty();
+							havePlan++;
+						}
+						count++;
 					}
-					count++;
+				}catch(Exception e) {
+					e.printStackTrace();
+					break;
 				}
 
 				if (count >= limitDay) {

@@ -70,6 +70,7 @@
 				INNER JOIN t_deliveryplan AS p ON d.deliveryplanid = p.deliveryplanid
 				<dynamic prepend="WHERE">
 					<isNotEmpty prepend="AND" property="fgId"> d.fgid = #fgId# </isNotEmpty>
+					<isNotEmpty prepend="AND" property="customerId"> p.customerid = #customerId# </isNotEmpty>
 					<isNotEmpty prepend="AND" property="reportDateFr"> d.deliverydate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
 					<isNotEmpty prepend="AND" property="reportDateTo"> d.deliverydate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
 				</dynamic>
