@@ -530,8 +530,8 @@ function checkShot(){
 	  <tr>
 	    <th align="center" >Initial Shot <span class="textred">*</span></th>
 	    <td align="left"><form:input tabindex="10" path="initialShot" id="initialShotBox" maxlength="10" /></td>
-	    <th align="left" >&nbsp;</th>
-	    <td align="left" >&nbsp;</td>
+	    <th align="left" >Mold Order Sheet</th>
+	    <td align="left" ><form:input tabindex="9" path="moldOrderSheet" id="moldOrderSheet" maxlength="20" /></td>
 	  </tr>
 	  <tr>
 	    <th align="center" >Total Shot</th>

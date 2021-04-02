@@ -51,11 +51,12 @@ public class MLD_R01ExcelView extends AbstractExcelView {
 			createCell(workbook, fstRow, 8, r01c06Style).setValue(detail.getAlertShot(),true);
 			createCell(workbook, fstRow, 9, r01c06Style).setValue(detail.getGuaranteeShot(),true);
 			createCell(workbook, fstRow, 10, r01c06Style).setValue(detail.getInitialShot(),true);
-			createCell(workbook, fstRow, 11, r01c06Style).setValue(detail.getTotalDCShot(),true);
-			createCell(workbook, fstRow, 12, r01c04Style).setValue(detail.getStatusDcName());
-			createCell(workbook, fstRow, 13, r01c06Style).setValue(detail.getTotalFGSold(),true);
-			createCell(workbook, fstRow, 14, r01c04Style).setValue(detail.getStatusFgName());
-			createCell(workbook, fstRow, 15, r01c15Style).setValue(detail.getRemark());
+			createCell(workbook, fstRow, 11, r01c06Style).setValue(detail.getMoldOrderSheet());
+			createCell(workbook, fstRow, 12, r01c06Style).setValue(detail.getTotalDCShot(),true);
+			createCell(workbook, fstRow, 13, r01c04Style).setValue(detail.getStatusDcName());
+			createCell(workbook, fstRow, 14, r01c06Style).setValue(detail.getTotalFGSold(),true);
+			createCell(workbook, fstRow, 15, r01c04Style).setValue(detail.getStatusFgName());
+			createCell(workbook, fstRow, 16, r01c15Style).setValue(detail.getRemark());
 			
 			rowNumber++;
 		}

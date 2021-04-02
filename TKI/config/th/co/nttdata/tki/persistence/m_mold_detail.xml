@@ -164,6 +164,7 @@
 		<result property="dcStatus" column="dcStatus" />
 		<result property="fgStatus" column="fgStatus" />
 		<result property="createDate" column="createDate" />
+		<result property="moldOrderSheet" column="moldOrderSheet" />
 		<result property="mPartList" resultMap="m_mold_detail.mPartListMap" />
 	</resultMap>
 	
@@ -190,7 +191,7 @@
 	</select>
 	
 	<select id="queryMoldDetailList" parameterClass="th.co.nttdata.tki.bean.MMoldDetail" resultClass="th.co.nttdata.tki.bean.MMoldDetail" >
-		select md.moldid as moldId,md.moldno as moldNo,md.startdate as startDate,md.enddate as endDate 
+		select md.moldid as moldId,md.moldno as moldNo,md.startdate as startDate,md.enddate as endDate, md.moldordersheet as moldOrderSheet
 		from m_mold_detail md where md.moldid = #moldId# order by md.startdate asc
 	</select>
 	
@@ -209,6 +210,7 @@
            ,[dcstatus]
            ,[totalfgsold]
            ,[fgstatus]
+           ,[moldordersheet]
            ,[remark]
            ,[createby]
            ,[updateby])
@@ -227,6 +229,7 @@
            ,#dcStatus#
            ,#totalFGSold#
            ,#fgStatus#
+           ,#moldOrderSheet#
            ,#remark#
            ,#createBy#
            ,#updateBy#)
@@ -252,6 +255,7 @@
       	,dcstatus = #dcStatus# 
       	,totalfgsold = #totalFGSold# 
       	,fgstatus = #fgStatus# 
+      	,moldOrderSheet = #moldOrderSheet# 
       	,remark = #remark# 
       	,updateby = #updateBy# 
       	,lastupdate = getDate()

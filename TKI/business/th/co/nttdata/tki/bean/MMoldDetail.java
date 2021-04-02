@@ -33,6 +33,7 @@ public class MMoldDetail extends AbstractBaseBean {
 	private String partNo;
 	private String statusDcName;
 	private String statusFgName;
+	private String moldOrderSheet;
 	
 	//MRDC_S21
 	private Integer categoryType;
@@ -285,6 +286,14 @@ public class MMoldDetail extends AbstractBaseBean {
 
 	public void setPercent(Double percent) {
 		this.percent = percent;
+	}
+
+	public String getMoldOrderSheet() {
+		return moldOrderSheet;
+	}
+
+	public void setMoldOrderSheet(String moldOrderSheet) {
+		this.moldOrderSheet = moldOrderSheet;
 	}
 
 }

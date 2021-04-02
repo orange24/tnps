@@ -136,6 +136,7 @@ public class MLD_S02Controller extends AbstractBaseController {
 		mDetail.setMoldId((request.getParameter("moldId")==null)?0:Integer.parseInt(request.getParameter("moldId")));
 		mDetail.setMoldNo((request.getParameter("moldNo")==null)?"":request.getParameter("moldNo"));
 		mDetail = mld_S02Logic.getMoldDetail(mDetail);
+		System.out.println("mDetail.getMoldOrderSheet = "+mDetail.getMoldOrderSheet());
 		String action = request.getParameter("action");
 		return new ModelAndView(PATH)
 		.addObject("mDetail", mDetail)
