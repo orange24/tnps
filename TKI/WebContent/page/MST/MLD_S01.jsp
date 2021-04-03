@@ -149,6 +149,7 @@ function fnDelete( row ) {
 								<th rowspan="2" align="center"  >Cav No.</th>
 								<th rowspan="2" align="center"  >Alert Shot</th>
 								<th rowspan="2" align="center"  >Guarantee Shot</th>
+								<th rowspan="2" align="center"  >Mold Order Sheet</th>
 								<th rowspan="2" align="center"  >Status</th>
 								<th colspan="2" align="center"  >DC Shot<span class="textred">*</span></th>
 								<th colspan="2" align="center"  >FG Sold<span class="textred"> **</span></th>
@@ -171,6 +172,7 @@ function fnDelete( row ) {
 									<td align="center"  >${moldDetail.cavNo}</td>
 									<td align="center"  >${moldDetail.alertShot}</td>
 									<td align="center"  >${moldDetail.guaranteeShot}</td>
+									<td align="center"  >${moldDetail.moldOrderSheet}</td>
 									<td align="center"  >
 										<c:if test="${moldDetail.statusActive==1}"><font class="textblue" >Active</font></c:if>
 										<c:if test="${moldDetail.statusActive==2}"><font class="textred" >Inactive</font></c:if>&nbsp;
