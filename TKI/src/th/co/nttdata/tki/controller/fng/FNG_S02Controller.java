@@ -91,4 +91,14 @@ public class FNG_S02Controller extends AbstractBaseController {
 				"reportTypeMap", reportTypeMap);
 	}
 
+	@RequestMapping(value = "/FNG_S05_export", method = RequestMethod.POST)
+	public ModelAndView exportFNG_S05(TFG criteria) {
+
+		// <!-- Generating: reportTypeMap -->
+		List<MReportType> reportTypeList = masterDao.selectReportTypeList(new MReportType().setReportCategory(new String[] { "fgin", "fgout" }));
+
+		return new ModelAndView("FNG_R05ExcelView").addObject("TFG",
+				fng_S02Logic.exportFNG_R05(criteria));
+	}
+
 }

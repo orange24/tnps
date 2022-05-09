@@ -104,12 +104,12 @@ public class DAL_R03ExcelView extends AbstractExcelView {
 			TDailyWKDetail nextDetail = details[++i < max ? i : max - 1];
 
 			// <!-- First Row: Create Cells. -->
-			createCell(workbook, fstRow,  0, r01c00Style);
-			createCell(workbook, fstRow,  1, r01c01Style);
-			createCell(workbook, fstRow,  2, r01c02Style);
-			createCell(workbook, fstRow,  3, r01c03Style);
-			createCell(workbook, fstRow,  4, r01c04Style);
-			createCell(workbook, fstRow,  5, r01c05Style).setValue("Day");
+			createCell(workbook, fstRow,  0, r02c00Style);
+			createCell(workbook, fstRow,  1, r02c01Style);
+			createCell(workbook, fstRow,  2, r02c02Style);
+			createCell(workbook, fstRow,  3, r02c03Style);
+			createCell(workbook, fstRow,  4, r02c04Style);
+			createCell(workbook, fstRow,  5, r02c05Style).setValue("Day");
 
 			// <!-- Second Row: Create Cells. -->
 			createCell(workbook, sndRow,  0, r02c00Style);
@@ -133,6 +133,13 @@ public class DAL_R03ExcelView extends AbstractExcelView {
 			
 //			createMergedRegion(sheet, rowNumber, rowNumber+1, 4, 4);
 			sheet.getRow(rowNumber).getCell(4).setCellValue(currDetail.getPartName());
+
+			//Set double row value
+			sheet.getRow(rowNumber+1).getCell(0).setCellValue(dateFormatter.format(currDetail.getReportDate()));
+			sheet.getRow(rowNumber+1).getCell(1).setCellValue(currDetail.getCustomerCode());
+			sheet.getRow(rowNumber+1).getCell(2).setCellValue(currDetail.getWip());
+			sheet.getRow(rowNumber+1).getCell(3).setCellValue(currDetail.getPartNo());
+			sheet.getRow(rowNumber+1).getCell(4).setCellValue(currDetail.getPartName());
 
 			if( (currDetail != nextDetail) && currDetail.getDatailRef().equals(nextDetail.getDatailRef()) ) {
 

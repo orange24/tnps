@@ -25,6 +25,9 @@
 	<bean id="FNG_R04ExcelView" class="th.co.nttdata.tki.excel.FNG_R04ExcelView">
 		<property name="url" value="xls/FNG_R04"/>
 	</bean>
+	<bean id="FNG_R05ExcelView" class="th.co.nttdata.tki.excel.FNG_R05ExcelView">
+		<property name="url" value="xls/FNG_R05"/>
+	</bean>
 	<bean id="FNG_S07ExcelView" class="th.co.nttdata.tki.excel.FNG_S07ExcelView">
 		<property name="url" value="xls/FNG_S07"/>
 	</bean>

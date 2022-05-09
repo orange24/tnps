@@ -45,8 +45,8 @@
 		// <!-- Initial: Auto Completion. -->
 		var workOrderList = {
 			source: function( request, response ) {
-				var customerId = this.element.closest("tr").find("select#customerId");
-				var partId     = this.element.closest("tr").find("select#partId");
+				var customerId = $(this).closest("tr").find("select#customerId");
+				var partId     = $(this).closest("tr").find("select#partId");
 	
 				getJSON("DAL_S04_workOrderNoList", {
 					         "wip": boxWIP.val()

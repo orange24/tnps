@@ -35,4 +35,9 @@ public class FNG_S02LogicImpl implements FNG_S02Logic {
 		return tfgDetailDao.queryReportType();
 	}
 
+	@Override
+	public TFG exportFNG_R05(TFG TFG) {
+		return tfgDetailDao.selectFNG_R05(TFG);
+	}
+
 }

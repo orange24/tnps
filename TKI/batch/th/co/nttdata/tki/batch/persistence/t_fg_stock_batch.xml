@@ -158,7 +158,7 @@
 			  		WHERE fgadj.fgadjustid = x.adjid
 			  	)
 			) adjust
-		ON fg.fgid = adjust.fgid AND fg.customerid = adjust.customerid		
-		
+		ON fg.fgid = adjust.fgid AND fg.customerid = adjust.customerid
+
 	</insert>
 </sqlMap>

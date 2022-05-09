@@ -11,6 +11,7 @@ public class MCustomer extends AbstractBaseBean {
 	private String customerName;
 	private String vendorCode;
 	private Boolean isBarcodeQty;
+	private Boolean isEnable;
 
 	private List<MCustomer> customerList = new ArrayList<MCustomer>();
 
@@ -87,6 +88,14 @@ public class MCustomer extends AbstractBaseBean {
 
 	public void setIsBarcodeQty(Boolean isBarcodeQty) {
 		this.isBarcodeQty = isBarcodeQty;
+	}
+
+	public Boolean getIsEnable() {
+		return isEnable;
+	}
+
+	public void setIsEnable(Boolean isEnable) {
+		this.isEnable = isEnable;
 	}
 
 }

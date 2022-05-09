@@ -68,8 +68,10 @@ public class CommonController extends AbstractBaseController {
 
 		Map<Integer, String> map = new LinkedHashMap<Integer, String>();
 		map.put(Integer.MIN_VALUE, startValue);
-		for (MCustomer MCustomer : customers)
+		for (MCustomer MCustomer : customers) {
+			if (MCustomer.getIsEnable() == false) continue;
 			map.put(MCustomer.getCustomerId(), MCustomer.getCustomerCode());
+		}
 		return map;
 	}
 

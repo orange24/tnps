@@ -17,6 +17,8 @@ public interface TFGDetailDao {
 
 	public TFG selectFNG_R03(TFG TFG);
 
+	public TFG selectFNG_R05(TFG TFG);
+
 	public List<TFGDetail> queryReportType();
 
 	public Boolean checkLotNo(TFGDetail workOrder);

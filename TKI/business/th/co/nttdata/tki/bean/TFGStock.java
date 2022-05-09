@@ -57,6 +57,12 @@ public class TFGStock extends AbstractBaseBean {
 	private String material;
 	private String category;
 
+	private Integer remain;
+	private Integer lotSeqQty;
+	private Integer sumIn;
+	private Integer sumOut;
+	private String lotSeqNo;
+
 	private List<TFGDetail> detailList;
 	private List<TFGStock> tfgStockList;
 	private Map<String, TFGStock> wipMap;
@@ -493,5 +499,45 @@ public class TFGStock extends AbstractBaseBean {
 
 	public void setForcastQty(Integer forcastQty) {
 		this.forcastQty = forcastQty;
+	}
+
+	public Integer getRemain() {
+		return remain;
+	}
+
+	public void setRemain(Integer remain) {
+		this.remain = remain;
+	}
+
+	public Integer getLotSeqQty() {
+		return lotSeqQty;
+	}
+
+	public void setLotSeqQty(Integer lotSeqQty) {
+		this.lotSeqQty = lotSeqQty;
+	}
+
+	public Integer getSumIn() {
+		return sumIn;
+	}
+
+	public void setSumIn(Integer sumIn) {
+		this.sumIn = sumIn;
+	}
+
+	public Integer getSumOut() {
+		return sumOut;
+	}
+
+	public void setSumOut(Integer sumOut) {
+		this.sumOut = sumOut;
+	}
+
+	public String getLotSeqNo() {
+		return lotSeqNo;
+	}
+
+	public void setLotSeqNo(String lotSeqNo) {
+		this.lotSeqNo = lotSeqNo;
 	}
 }

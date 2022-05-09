@@ -73,11 +73,11 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 				//Boy edit 2018/05/03
 				stock.setBalanceQty(0);
 //				stock.setFgBalance(0);
-				
+
 				stockList.add(stock);
-				
+
 				prevDeliver = (null == stock.getBalanceQty() ? 0 : stock.getBalanceQty());
-				
+
 				/*
 				 * Add FG Stock Adjust to Calculate FG Stock
 				 */
@@ -101,8 +101,9 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 				
 				// <!-- Set 'deliveryQty'(delivery balance). -->
 				actualQty = (null == tfgStock.getActualQty() ? 0 : tfgStock.getActualQty());
-				deliveryQty = (null == tfgStock.getDeliveryQty() ? 0 : tfgStock.getDeliveryQty());
-				prevDeliver = (prevDeliver + actualQty) - deliveryQty;
+				deliveryQty = (null == tfgStock.getDeliveryQty() ? null : tfgStock.getDeliveryQty());
+				Integer deliveryQtyTmp = (null == tfgStock.getDeliveryQty() ? 0 : tfgStock.getDeliveryQty());
+				prevDeliver = (prevDeliver + actualQty) - deliveryQtyTmp;
 				tfgStock.setBalanceQty(prevDeliver);
 
 				// <!-- Set 'balanceQty'(FG balance). -->
@@ -212,7 +213,7 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 			}
 
 			List<TFGStock> stocks = fgStockDao.query(tfg, mPart);
-			TFGStock[] stockArr = stocks.toArray(new TFGStock[stocks.size()]);
+			// TFGStock[] stockArr = stocks.toArray(new TFGStock[stocks.size()]);
 
 			// <!-- Providing the completion data. -->
 			Integer actualQty = 0;
@@ -220,8 +221,8 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 			Integer fgIn = 0;
 			Integer fgOut = 0;
 			
-			for (int i = 0; i < stockArr.length; i++) {
-				TFGStock tfgStock = stockArr[i];
+			for (int i = 0; i < stocks.size(); i++) {
+				TFGStock tfgStock = stocks.get(i);
 				
 				// <!-- Set 'deliveryQty'(delivery balance). -->
 				actualQty = (null == tfgStock.getActualQty() ? 0 : tfgStock.getActualQty());
@@ -247,8 +248,8 @@ public class FNG_S03LogicImpl extends AbstractBaseLogic implements FNG_S03Logic 
 			}
 
 			// <!-- Start Processing. -->
-			for (int current = 0; current < stockArr.length; current++) {
-				TFGStock tfgStock = stockArr[current];
+			for (int current = 0; current < stocks.size(); current++) {
+				TFGStock tfgStock = stocks.get(current);
 
 				// <!-- Checking if 'reportDate' is the same month. -->
 				tmpCal.setTime(tfgStock.getReportDate());

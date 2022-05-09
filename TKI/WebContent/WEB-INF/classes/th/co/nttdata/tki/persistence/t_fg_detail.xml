@@ -41,13 +41,13 @@
 		<include refid="queryProperties"/>
 		ORDER BY f.lastUpdate DESC
 	</select>
-	
+
 	<select id="count" parameterClass="th.co.nttdata.tki.bean.TFG" resultClass="int">
 		SELECT
 			count(*)
 		<include refid="queryProperties"/>
 	</select>
-	
+
 	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TFG">
 		<iterate property="details">
 			INSERT INTO t_fg_detail(reportdate, customerid, fgin, fgout, fgid, lotno, reporttype, createby, updateby, lot_seqno) 
@@ -55,6 +55,7 @@
 				#details[].fgId#, #details[].workOrderNo#+#details[].lotNo#, #details[].reportType#, #updateBy#, #updateBy#, #details[].lotSeqNo#);
 		</iterate>
 	</insert>
+
 	<select id="selectFNG_R01" parameterClass="th.co.nttdata.tki.bean.TFG" resultClass="th.co.nttdata.tki.bean.TFGStock">
 		SELECT *
 			,(
@@ -155,8 +156,8 @@
 		GROUP BY d.reportdate, d.customerid, c.customercode, d.fgid, f.fgno, f.fgname, s.fgstock, s.fgin, s.fgout, s.fgbalance, f.weight, mat.sMaterialName, dcp.moldNo
 		ORDER BY d.reportdate,  c.customercode,f.fgno -->
 	</select>
-	
-	
+
+
 	<select id="selectFNG_R01_NEW" parameterClass="th.co.nttdata.tki.bean.TFG" resultClass="th.co.nttdata.tki.bean.TFGStock">
 		SELECT *
 			,(
@@ -211,10 +212,8 @@
 				s.fgin, s.fgout, s.fgbalance, f.weight, mat.sMaterialName, s.moldNo
 		) t
 		ORDER BY t.reportdate,  t.customercode,t.fgno, t.moldNo
-		
-			
 	</select>
-	
+
 	<select id="selectFNG_R01Detail" resultClass="th.co.nttdata.tki.bean.TFGDetail">
 	SELECT
 		CONVERT(VARCHAR(10),reportDate,105)+ ':' +CAST(fgid AS VARCHAR)+ ':' +CAST(d.customerid AS VARCHAR)+ ':' +CAST(reporttype AS VARCHAR)+ ':' +CAST(ISNULL(dcp.moldno,'') AS VARCHAR) AS reportTypeName,
@@ -242,6 +241,7 @@
   		group by reportdate, customerid, fgid, reporttype
   		having ISNULL(SUM(fgout),0) > 0 -->
 	</select>
+
 	<select id="selectReportType" resultClass="th.co.nttdata.tki.bean.TFGDetail">
 		SELECT 	report,
 				typecode AS reportType,
@@ -250,7 +250,7 @@
 		WHERE report = 'fgout'
 		ORDER BY typecode
 	</select>
-	
+
 	<select id="queryWoNoDetail" resultClass="th.co.nttdata.tki.bean.MWorkOrder" parameterClass="th.co.nttdata.tki.bean.MWorkOrder">		
 		SELECT	wo.workOrderNo, cust_fg.fgId, cust_fg.fgNo, cust_fg.fgName, SUM(wo.workorderqty) AS workOrderQty, cust_fg.customerId
 		FROM	dbo.v_cust_fg_part AS cust_fg INNER JOIN
@@ -258,13 +258,14 @@
 		WHERE 	wo.workorderno = #workOrderNo# 
 		GROUP BY wo.workorderno, cust_fg.partid, cust_fg.fgid, cust_fg.fgno,cust_fg.fgName, cust_fg.customerid
 	</select>
-	
+
 	<select id="queryClotSeqNo" parameterClass="th.co.nttdata.tki.bean.MWorkOrder" resultClass="Integer">			
 		SELECT 	
 			Qty AS lotQty
 		FROM tpics_clotseqno
 		WHERE LotNo = #workOrderNo#+#lotNo# AND SeqNo = SUBSTRING(#lotSeqNo#,2,3)	
-	</select>		
+	</select>
+
 	<select id="select_check_lotseq"  resultClass="Integer" parameterClass="th.co.nttdata.tki.bean.TFGDetail">
 		SELECT 
 			case when (SUM($fgType$)+(#fgIn#)+(#fgOut#) <![CDATA[ > ]]> max(seq.lotseqqty)) 
@@ -302,5 +303,68 @@
 		      INSERT (reportdate, customerid, fgin, fgout, fgid, lotno, reporttype, createby, updateby, lot_seqno)
 		      values(dt.reportdate, dt.customerid, dt.fgin, dt.fgout, dt.fgid, dt.lotno, dt.reporttype, dt.createby, dt.updateby, dt.lot_seqno);
 		</iterate>
-	</insert>	
+	</insert>
+
+	<select id="selectFNG_R05" parameterClass="th.co.nttdata.tki.bean.TFG" resultClass="th.co.nttdata.tki.bean.TFGStock">
+		<!-- SELECT
+			c.customercode
+			, f.fgno
+			, f.fgname
+			, d.lotseqno as lotSeqNo
+			, dc.moldNo
+			, MAX(t.lotseqqty) as lotSeqQty
+			, MAX(t.lotseqqty) - sum(d.sumin)  as remain
+			, SUM(d.sumin) as sumIn
+			, SUM(d.sumout) as sumOut
+		FROM  
+		(
+			SELECT 
+				lotno + '-' + lot_seqno as lotseqno
+				, customerid
+				, fgid
+				, lotno
+				, lot_seqno
+				, SUM(fgin) as sumin
+				, SUM(fgout) as sumout
+			FROM t_fg_detail
+			GROUP BY customerid, fgid, lotno, lot_seqno
+		) d
+		LEFT JOIN t_lot_sequence t on d.lotseqno = t.lotseqno
+		LEFT JOIN t_lotno lt on lt.lotno = d.lotno
+		INNER JOIN t_dcplan dc ON dc.dcplanid = lt.dcplanid
+		LEFT JOIN m_customer AS c ON  c.customerid = d.customerid 
+		INNER JOIN m_fg AS f ON d.fgid = f.fgid  
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="customerId"> d.customerid = #customerId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgName"> f.fgname LIKE #fgName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgNo"> f.fgno LIKE #fgNo# + '%' </isNotEmpty>	
+		</dynamic>
+		GROUP BY c.customercode, f.fgno, f.fgname, d.lotseqno, dc.moldNo
+		HAVING (MAX(t.lotseqqty) - SUM(d.sumin)) > 0
+		ORDER BY d.lotseqno, dc.moldNo, f.fgno -->
+		
+		SELECT
+			c.customercode
+			, f.fgno
+			, f.fgname
+			, d.lotno + '-' + d.lot_seqno as lotSeqNo
+			, dc.moldNo
+			, SUM(d.fgin) as lotSeqQty
+			, SUM(d.fgin) as sumin
+			, SUM(d.fgout) as sumout
+			, SUM(d.fgin) - SUM(d.fgout)  as remain
+		FROM t_fg_detail d
+		LEFT JOIN t_lotno lt on lt.lotno = d.lotno
+		INNER JOIN t_dcplan dc ON dc.dcplanid = lt.dcplanid
+		LEFT JOIN m_customer AS c ON  c.customerid = d.customerid 
+		INNER JOIN m_fg AS f ON d.fgid = f.fgid
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="customerId"> d.customerid = #customerId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgName"> f.fgname LIKE #fgName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="fgNo"> f.fgno LIKE #fgNo# + '%' </isNotEmpty>	
+		</dynamic>
+		GROUP BY c.customercode, f.fgno, f.fgname,d.customerid, d.fgid, d.lotno, d.lot_seqno, dc.moldNo
+			having (SUM(d.fgin) - SUM(d.fgout)) > 0
+		ORDER BY d.lotno, d.lot_seqno, dc.moldNo, f.fgno
+	</select>
 </sqlMap>

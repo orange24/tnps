@@ -205,6 +205,18 @@ function createGrid(){
 		formatter	: common.SlickGrid.Formatters.YesNo,
 		filter 		: common.SlickGrid.filterColumnsOptions.Checkbox,
 		editor 		: common.SlickGrid.Editor.Checkbox
+	},{
+		id 			: "isEnable",
+		name 		: "Enable",
+		field 		: "isEnable",
+		width 		: 110,
+		cssClass 	: "cell-c",
+		resizable 	: true,
+		sortable	: true,
+		headerCssClass: "editable-column",
+		formatter	: common.SlickGrid.Formatters.YesNo,
+		filter 		: common.SlickGrid.filterColumnsOptions.Checkbox,
+		editor 		: common.SlickGrid.Editor.Checkbox
 	}, {
 		id 			: "createDate",
 		name 		: "Create Date",

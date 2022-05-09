@@ -102,8 +102,6 @@ function printPDF(){
 				object.printerName = $('#cboPrinter :selected').val();
 				return object ;
 			});
-			showLoading();
-			
 			
 			postJSONObject("PRD_S03_print", param, function(blob){
 				printerName = bean.printerName;
@@ -117,6 +115,8 @@ function printPDF(){
 }
 
 function printPDF(){ 
+			showLoading();
+			setTimeout(function(){ hideLoading(); }, 4000);
 			prdS03Grid.getGrid().getEditorLock().commitCurrentEdit();		
 			var param = $.map(prdS03Grid.getFilteredRows(), function(object, index){ 
 				object.printerName = $('#cboPrinter :selected').val();
@@ -138,6 +138,7 @@ function printPDF(){
 		        link.click();
 		        */
 		        
+				hideLoading();
 		        var $a = $( '<a />' ), url = URL.createObjectURL( "PRD_S03_PDF/"+data.response );
 		        $a.attr({
 		          'href' : url,
@@ -147,7 +148,7 @@ function printPDF(){
 		        URL.revokeObjectURL( url );
 		        
 		    }).error(function (data) {
-
+				hideLoading();
 		        var url = "PRD_S03_PDF.pdf?file="+data.responseText ;
 		    	
 		    	var downloadLink = document.createElement("a");
@@ -158,8 +159,6 @@ function printPDF(){
 		    	document.body.appendChild(downloadLink);
 		    	downloadLink.click();
 		    	document.body.removeChild(downloadLink);
-		    	
-		    	
 		    	
 //		        var url = "PRD_S03_PDF.html?file="+data.responseText ;
 //		        w=window.open(url); 

@@ -25,7 +25,7 @@
 			,C_1.fgNo
 			,ISNULL(FG_DEV.fgout,0) as actualQty
 			,del.balanceqty as balanceQty
-			,ISNULL(del.deliveryqty,0) as deliveryQty
+			,del.deliveryqty as deliveryQty
 			,FG_DEV.fgbalance as fgBalance
 			,FG_DEV.fgin as fgIn
 			,FG_DEV.fgout as fgOut

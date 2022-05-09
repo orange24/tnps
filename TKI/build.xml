@@ -130,7 +130,7 @@
     	<copy file="config/jdbc-test.properties" tofile="WebContent/WEB-INF/classes/jdbc.properties" overwrite="true"/>
     	<copy file="config/settings-prod.properties" tofile="WebContent/WEB-INF/classes/settings.properties" overwrite="true"/>
     	<replace file="WebContent/WEB-INF/classes/settings.properties">
-    		<replacefilter token="E:\\LOG" value="C:\\LOG_TEST"/>
+    		<replacefilter token="D:\\LOG" value="D:\\LOG_TEST"/>
     	</replace>
     	<replace file="WebContent/WEB-INF/classes/th/co/nttdata/messages.properties">
     		<replacefilter token="@softwareVersion@" value="version 2.2.${build.revision} (Built on: ${build.time})"/>

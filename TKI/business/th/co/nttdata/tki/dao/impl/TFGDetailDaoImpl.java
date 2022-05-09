@@ -115,4 +115,10 @@ public class TFGDetailDaoImpl extends AbstractBaseDao implements TFGDetailDao {
 		return isError;
 	}
 
+	@Override
+	public TFG selectFNG_R05(TFG TFG) {
+		TFG.setStockList(queryForList("t_fg_detail.selectFNG_R05", TFG));
+		return TFG;
+	}
+
 }

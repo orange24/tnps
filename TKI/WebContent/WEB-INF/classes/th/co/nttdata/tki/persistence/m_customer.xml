@@ -16,6 +16,7 @@
 			,c.remark
 			,c.vendorCode
 			,c.isbarcodeqty
+			,c.isenable
 	</sql>
 	
 	<sql id="queryFrom">
@@ -83,6 +84,7 @@
 			vendorCode = #customerList[].vendorCode# ,
 			remark = #customerList[].remark# ,
 			isBarcodeQty = #customerList[].isBarcodeQty# ,
+			isEnable = #customerList[].isEnable# ,
 			lastUpdate = GETDATE(),
 			updateBy = #updateBy#							
 			WHERE customerId = #customerList[].customerId#;
@@ -94,11 +96,11 @@
 		<isNotNull  property="customerList[].customerCode">		
 			INSERT INTO  m_customer 
 				(customerCode,customerName,
-				vendorCode,remark, isbarcodeqty, 
+				vendorCode,remark, isbarcodeqty, isEnable,
 				createDate,createBy,lastUpdate,updateBy) 
 			VALUES 
 				(#customerList[].customerCode#,#customerList[].customerName#,
-				#customerList[].vendorCode#,#customerList[].remark#, #customerList[].isBarcodeQty#,
+				#customerList[].vendorCode#,#customerList[].remark#, #customerList[].isBarcodeQty#, #customerList[].isEnable#,
 				GETDATE(),#createBy#,GETDATE(),#updateBy#);
 		</isNotNull>
 		</iterate>
@@ -214,6 +216,7 @@
 	      	CUSTOMERCODE AS customerCode
 		FROM 
 			M_CUSTOMER 
+		WHERE ISENABLE = 1
 		ORDER BY 
 			CUSTOMERCODE
 	</select>

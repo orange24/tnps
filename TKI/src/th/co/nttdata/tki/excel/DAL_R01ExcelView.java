@@ -109,20 +109,20 @@ public class DAL_R01ExcelView extends AbstractExcelView {
 			TDailyMCDetail nhtDetail = d.getDetails().get(1);
 
 			// <!-- First Row: Create Cells. -->
-			createCell(workbook, fstRow,  0, r01c00Style);
-			createCell(workbook, fstRow,  1, r01c01Style);
-			createCell(workbook, fstRow,  2, r01c02Style);
-			createCell(workbook, fstRow,  3, r01c03Style);
-			createCell(workbook, fstRow,  4, r01c04Style);
-			createCell(workbook, fstRow,  5, r01c05Style);
-			createCell(workbook, fstRow,  6, r01c06Style);
-			createCell(workbook, fstRow,  7, r01c07Style);
-			createCell(workbook, fstRow,  8, r01c08Style);
-			createCell(workbook, fstRow,  9, r01c09Style).setValue("Day");
-			createCell(workbook, fstRow, 10, r01c10Style).setValue(dayDetail.getOk());
-			createCell(workbook, fstRow, 11, r01c11Style).setValue(dayDetail.getNg());
-			createCell(workbook, fstRow, 12, r01c12Style).setValue(dayDetail.getPd());
-			createCell(workbook, fstRow, 13, r01c13Style).setValue(new Integer[] { dayDetail.getOk(), dayDetail.getNg(), dayDetail.getPd() });
+			createCell(workbook, fstRow,  0, r02c00Style);
+			createCell(workbook, fstRow,  1, r02c01Style);
+			createCell(workbook, fstRow,  2, r02c02Style);
+			createCell(workbook, fstRow,  3, r02c03Style);
+			createCell(workbook, fstRow,  4, r02c04Style);
+			createCell(workbook, fstRow,  5, r02c05Style);
+			createCell(workbook, fstRow,  6, r02c06Style);
+			createCell(workbook, fstRow,  7, r02c07Style);
+			createCell(workbook, fstRow,  8, r02c08Style);
+			createCell(workbook, fstRow,  9, r02c09Style).setValue("Day");
+			createCell(workbook, fstRow, 10, r02c10Style).setValue(dayDetail.getOk());
+			createCell(workbook, fstRow, 11, r02c11Style).setValue(dayDetail.getNg());
+			createCell(workbook, fstRow, 12, r02c12Style).setValue(dayDetail.getPd());
+			createCell(workbook, fstRow, 13, r02c13Style).setValue(new Integer[] { dayDetail.getOk(), dayDetail.getNg(), dayDetail.getPd() });
 			Cell c14 = createCell(workbook, fstRow, 14, r01c14Style);
 			Cell c15 = createCell(workbook, fstRow, 15, r01c15Style);
 			Cell c16 = createCell(workbook, fstRow, 16, r01c16Style);
@@ -174,7 +174,18 @@ public class DAL_R01ExcelView extends AbstractExcelView {
 			
 //			createMergedRegion(sheet, rowNumber, rowNumber+1, 8, 8);
 			sheet.getRow(rowNumber).getCell(8).setCellValue(d.getCavUsed() + (d.getCavDefault() == null ? "" : "/"+d.getCavDefault()));
-			
+
+//			Set Double row value
+			sheet.getRow(rowNumber+1).getCell(0).setCellValue(dateFormatter.format(d.getReportDate()));
+			sheet.getRow(rowNumber+1).getCell(1).setCellValue(d.getCustomerCode());
+			sheet.getRow(rowNumber+1).getCell(2).setCellValue(d.getWip());
+			sheet.getRow(rowNumber+1).getCell(3).setCellValue(d.getMachineNo() +" : "+ d.getMachineName());
+			sheet.getRow(rowNumber+1).getCell(4).setCellValue(d.getPartNo());
+			sheet.getRow(rowNumber+1).getCell(5).setCellValue(d.getPartName());
+			sheet.getRow(rowNumber+1).getCell(6).setCellValue(d.getMoldName());
+			sheet.getRow(rowNumber+1).getCell(7).setCellValue(d.getMoldNo());
+			sheet.getRow(rowNumber+1).getCell(8).setCellValue(d.getCavUsed() + (d.getCavDefault() == null ? "" : "/"+d.getCavDefault()));
+
 //			createMergedRegion(sheet, rowNumber, rowNumber+1, 14, 14);
 			c14.setValue(new Integer[] { dayDetail.getOk(), nhtDetail.getOk() });
 			

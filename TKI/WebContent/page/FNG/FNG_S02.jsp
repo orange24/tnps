@@ -69,6 +69,7 @@
       <td colspan="2" align="right">
       	<security:authorize ifAnyGranted="FNG_R01_EXPORT">
       		<input name="btnExport" type="button" id="btnExportNirvana" value="Export to Nirvana"/>
+      		<input name="btnExportLotRemain" type="button" id="btnLotRemainExport" value="Lot Remain Report" onclick="exportLotRemain()"/>
       		<input name="btnExport" type="button" id="btnExport2" value="History Report"/>
         	<input name="btnExport" type="button" id="btnExport" value="Summary Report"/>
         </security:authorize>
@@ -126,4 +127,31 @@
   </c:if>
 </form:form>
 </body>
+<script>
+		function exportLotRemain() {
+			console.log('Click lot remain');
+			message.clear();
+			/* if (customerId.val() === ""
+					&& fgNo.val() === ""
+					&& fgName.val() === ""
+				) {
+				message.setErrors([ {
+					"code" : "err.cmm.001",
+					"arguments" : [ "Search Criteria" ]
+				} ]);
+			} */
+			if (message.isNoError()) {
+				// <!-- notify before export report -->
+				downloadNotify($("<div title='"
+						+ message.getMessage("downloadAlertContent")
+						+ "'/>"
+						+ message.getMessage("downloadAlertContent")
+						+ "</div>"));
+
+				fngForm.attr("action", "FNG_S05_export.xls");
+				fngForm.submit();
+				fngForm.attr("action", "FNG_S02_search.html");
+			}
+		}
+</script>
 </html>

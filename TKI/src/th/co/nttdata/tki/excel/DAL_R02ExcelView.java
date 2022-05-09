@@ -186,19 +186,19 @@ public class DAL_R02ExcelView extends AbstractExcelView {
 					}
 				}
 			}else{
-				createCell(workbook, fstRow,  0, r01c00Style);
-				createCell(workbook, fstRow,  1, r01c01Style);
-				createCell(workbook, fstRow,  2, r01c02Style);
-				createCell(workbook, fstRow,  3, r01c03Style);
-				createCell(workbook, fstRow,  4, r01c04Style);
-				createCell(workbook, fstRow,  5, r01c05Style).setValue("Day");
-				createCell(workbook, fstRow,  6, r01c06Style).setValue(mcwk.getMachineNo() +" : "+ mcwk.getMachineName());
-				createCell(workbook, fstRow,  7, r01c07Style).setValue(dayDetail.getOk());
-				createCell(workbook, fstRow,  8, r01c08Style).setValue(dayDetail.getNg());
-				createCell(workbook, fstRow,  9, r01c09Style).setValue(dayDetail.getPd());
-				createCell(workbook, fstRow, 10, r01c10Style).setValue(dayDetail.getQty());
-				createCell(workbook, fstRow, 11, r01c11Style).setValue(dayDetail.getTimeUsed());
-				createCell(workbook, fstRow, 12, r01c12Style).setValue(dayDetail.getManPower());
+				createCell(workbook, fstRow,  0, r02c00Style);
+				createCell(workbook, fstRow,  1, r02c01Style);
+				createCell(workbook, fstRow,  2, r02c02Style);
+				createCell(workbook, fstRow,  3, r02c03Style);
+				createCell(workbook, fstRow,  4, r02c04Style);
+				createCell(workbook, fstRow,  5, r02c05Style).setValue("Day");
+				createCell(workbook, fstRow,  6, r02c06Style).setValue(mcwk.getMachineNo() +" : "+ mcwk.getMachineName());
+				createCell(workbook, fstRow,  7, r02c07Style).setValue(dayDetail.getOk());
+				createCell(workbook, fstRow,  8, r02c08Style).setValue(dayDetail.getNg());
+				createCell(workbook, fstRow,  9, r02c09Style).setValue(dayDetail.getPd());
+				createCell(workbook, fstRow, 10, r02c10Style).setValue(dayDetail.getQty());
+				createCell(workbook, fstRow, 11, r02c11Style).setValue(dayDetail.getTimeUsed());
+				createCell(workbook, fstRow, 12, r02c12Style).setValue(dayDetail.getManPower());
 				Cell c13 = createCell(workbook, fstRow, 13, r01c13Style);
 				Cell c14 = createCell(workbook, fstRow, 14, r01c14Style);
 				Cell c15 = createCell(workbook, fstRow, 15, r01c15Style);
@@ -221,7 +221,7 @@ public class DAL_R02ExcelView extends AbstractExcelView {
 				createCell(workbook, sndRow, 14, r02c14Style);
 				createCell(workbook, sndRow, 15, r02c15Style);
 				createCell(workbook, sndRow, 16, r02c16Style);
-				
+
 //				createMergedRegion(sheet, rowNumber, rowNumber+1, 0, 0);
 				sheet.getRow(rowNumber).getCell(0).setCellValue(dateFormatter.format(mcwk.getReportDate()));
 				
@@ -248,7 +248,15 @@ public class DAL_R02ExcelView extends AbstractExcelView {
 				
 //				createMergedRegion(sheet, rowNumber, rowNumber+1, 16, 16);
 				c16.setValue(new Integer[] { dayDetail.getOk(), dayDetail.getNg(), dayDetail.getPd(), nightDetail.getOk(), nightDetail.getNg(), nightDetail.getPd() });
-				
+
+
+				//Set double row value
+				sheet.getRow(rowNumber+1).getCell(0).setCellValue(dateFormatter.format(mcwk.getReportDate()));
+				sheet.getRow(rowNumber+1).getCell(1).setCellValue(mcwk.getCustomerCode());
+				sheet.getRow(rowNumber+1).getCell(2).setCellValue(mcwk.getWip());
+				sheet.getRow(rowNumber+1).getCell(3).setCellValue(mcwk.getPartNo());
+				sheet.getRow(rowNumber+1).getCell(4).setCellValue(mcwk.getPartName());
+
 				colNumber = 17;
 				if (reasonList.size() > 0) {
 					for (MReason reason : reasonList) {
