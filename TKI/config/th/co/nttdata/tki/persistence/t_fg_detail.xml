@@ -306,7 +306,7 @@
 	</insert>
 
 	<select id="selectFNG_R05" parameterClass="th.co.nttdata.tki.bean.TFG" resultClass="th.co.nttdata.tki.bean.TFGStock">
-		<!-- SELECT
+		SELECT
 			c.customercode
 			, f.fgno
 			, f.fgname
@@ -341,9 +341,10 @@
 		</dynamic>
 		GROUP BY c.customercode, f.fgno, f.fgname, d.lotseqno, dc.moldNo
 		HAVING (MAX(t.lotseqqty) - SUM(d.sumin)) > 0
-		ORDER BY d.lotseqno, dc.moldNo, f.fgno -->
-		
-		SELECT
+		ORDER BY d.lotseqno, dc.moldNo, f.fgno
+
+		<!-- V2 -->
+		<!-- SELECT
 			c.customercode
 			, f.fgno
 			, f.fgname
@@ -365,6 +366,62 @@
 		</dynamic>
 		GROUP BY c.customercode, f.fgno, f.fgname,d.customerid, d.fgid, d.lotno, d.lot_seqno, dc.moldNo
 			having (SUM(d.fgin) - SUM(d.fgout)) > 0
-		ORDER BY d.lotno, d.lot_seqno, dc.moldNo, f.fgno
+		ORDER BY d.lotno, d.lot_seqno, dc.moldNo, f.fgno -->
+
+		<!-- V3 -->
+		<!-- SELECT 
+		c.customercode
+		,f.fgno
+		,f.fgname
+		,d.lotno + '-' + d.lot_seqno as lotSeqNo
+		,dc.moldNo
+		,a.fgbalance as remain
+		,a.fgstock as lotSeqQty
+		FROM
+		(
+			SELECT * 
+			, ROW_NUMBER() OVER(PARTITION BY s.fgid, s.customerid
+				   ORDER BY s.reportdate DESC) AS row_num
+			FROM  t_fg_stock s
+			WHERE s.fgbalance <![CDATA[ <> ]]> 0
+			and MONTH(reportdate) = MONTH(getdate()) 
+			and YEAR(reportdate) = YEAR(getdate()) 
+		LEFT JOIN (
+			SELECT fgid, customerid, lotno, lot_seqno
+				, SUM(fgin) as sumfgin
+				, SUM(fgout) as sumfgout
+			FROM
+			(
+				SELECT *
+					, ROW_NUMBER() OVER(PARTITION BY d.fgid, d.customerid
+						   ORDER BY d.reportdate DESC) AS row_num
+					FROM  t_fg_detail d
+			) b
+			WHERE b.row_num = 1
+			GROUP BY fgid, customerid, lotno, lot_seqno
+
+		) d ON d.fgid = a.fgid and d.customerid = a.customerid
+		LEFT JOIN m_fg f ON f.fgid = a.fgid
+		LEFT JOIN m_customer c ON c.customerid = a.customerid
+		LEFT JOIN t_lotno lt ON lt.lotno = d.lotno
+		LEFT JOIN t_dcplan dc ON dc.dcplanid = lt.dcplanid
+		WHERE
+		a.row_num = 1
+		AND a.fgbalance <![CDATA[ <> ]]> 0
+		<isNotEmpty prepend="AND" property="customerId"> a.customerid = #customerId# </isNotEmpty>
+		<isNotEmpty prepend="AND" property="fgName"> f.fgname LIKE #fgName# + '%' </isNotEmpty>
+		<isNotEmpty prepend="AND" property="fgNo"> f.fgno LIKE #fgNo# + '%' </isNotEmpty>	
+		GROUP BY c.customercode
+		,f.fgno
+		,f.fgname
+		,d.lotno + '-' + d.lot_seqno 
+		,dc.moldNo
+		,a.fgbalance 
+		,a.fgstock
+		ORDER BY c.customercode
+		,f.fgno
+		,f.fgname
+		,d.lotno + '-' + d.lot_seqno 
+		,dc.moldNo -->
 	</select>
 </sqlMap>

@@ -129,7 +129,8 @@ public class MRDC_R12ExcelView extends AbstractExcelView{
 					row.getCell(8).setCellFormula("SUM(I"+(startPart+1)+":I"+(rowNumber-1)+")");
 					createCell(workbook, row, 9,  sumDobColumnStyle);
 					createCell(workbook, row, 10, sumTimeStyle);
-					createCell(workbook, row, 11, sumColumnStyle);
+					createCell(workbook, row, 11, sumDobColumnStyle);
+					row.getCell(11).setCellFormula("SUM(L"+(startPart+1)+":L"+(rowNumber-1)+")");
 					createCell(workbook, row, 12, sumColumnStyle);
 					createCell(workbook, row, 13, sumDobColumnStyle);
 					row.getCell(13).setCellFormula("SUM(N"+(startPart+1)+":N"+(rowNumber-1)+")");
@@ -322,7 +323,7 @@ public class MRDC_R12ExcelView extends AbstractExcelView{
 			createCell(workbook, row, 8,  gSumColumnStyle);
 			createCell(workbook, row, 9,  gtxtColumnStyle);
 			createCell(workbook, row, 10,  GrandTimeStyle).setValue(this.calTime(hrTotal, minTotal, secTotal));
-			createCell(workbook, row, 11, gtxtColumnStyle);
+			createCell(workbook, row, 11, gSumDoubleColumnStyle);
 			createCell(workbook, row, 12, gtxtColumnStyle);
 			createCell(workbook, row, 13, gSumDoubleColumnStyle);
 			createCell(workbook, row, 14, gSumDoubleColumnStyle);
@@ -336,6 +337,7 @@ public class MRDC_R12ExcelView extends AbstractExcelView{
 			row.getCell(0).setCellValue("Grand Total");
 			row.getCell(7).setCellFormula("SUMIF(A5:A"+ rowNumber +",\"Total\",H5:H"+ rowNumber +")");
 			row.getCell(8).setCellFormula("SUMIF(A5:A"+ rowNumber +",\"Total\",I5:I"+ rowNumber +")");
+			row.getCell(11).setCellFormula("SUMIF(A5:A"+ rowNumber +",\"Total\",L5:L"+ rowNumber +")");
 			row.getCell(13).setCellFormula("SUMIF(A5:A"+ rowNumber +",\"Total\",N5:N"+ rowNumber +")");
 			row.getCell(14).setCellFormula("SUMIF(A5:A"+ rowNumber +",\"Total\",O5:O"+ rowNumber +")");
 			row.getCell(15).setCellFormula("SUMIF(A5:A"+ rowNumber +",\"Total\",P5:P"+ rowNumber +")");

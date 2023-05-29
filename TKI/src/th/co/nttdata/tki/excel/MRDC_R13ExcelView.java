@@ -78,19 +78,20 @@ public class MRDC_R13ExcelView extends AbstractExcelView{
 		for( int i = 0, max = dList.size(); i < max; i++ ) {
 			TDailyWKDetail currDetail = details[i];
 			HSSFRow row = sheet.createRow(rowNumber);
-			createCell(workbook, row, 0,  fstColumnStyle).setValue(currDetail.getPartNo());
-			createCell(workbook, row, 1,  secColumnStyle).setValue(currDetail.getPartName());
-			createCell(workbook, row, 2,  secColumnStyle).setValue(currDetail.getWipName());
-			createCell(workbook, row, 3,  numColumnStyle).setValue(currDetail.getQty(),true);
-			createCell(workbook, row, 4,  numColumnStyle).setValue(currDetail.getNg(),true);
-			createCell(workbook, row, 5,  numColumnStyle).setValue(currDetail.getOk(),true);
-			createCell(workbook, row, 6,  txtCenterStyle).setValue(currDetail.getnOperationTime());
-			createCell(workbook, row, 7,  dobColumnStyle).setValue(currDetail.getActualProductivity(),true);
-			createCell(workbook, row, 8,  dobColumnStyle).setValue(currDetail.getStandardProductivity(),true);
-			createCell(workbook, row, 9,  dobColumnStyle).setValue(currDetail.getStandardProduction(),true);
-			createCell(workbook, row, 10,  dobColumnStyle).setValue(currDetail.getActualProduction(),true);
-			createCell(workbook, row, 11, dobColumnStyle).setValue(currDetail.getDiff(),true);
-			createCell(workbook, row, 12, perColumnStyle).setValue(dobFormat.format(currDetail.getPercentage())+"%");
+			createCell(workbook, row, 0,  fstColumnStyle).setValue(dateFormatter.format(currDetail.getReportDate()));
+			createCell(workbook, row, 1,  fstColumnStyle).setValue(currDetail.getPartNo());
+			createCell(workbook, row, 2,  secColumnStyle).setValue(currDetail.getPartName());
+			createCell(workbook, row, 3,  secColumnStyle).setValue(currDetail.getWipName());
+			createCell(workbook, row, 4,  numColumnStyle).setValue(currDetail.getQty(),true);
+			createCell(workbook, row, 5,  numColumnStyle).setValue(currDetail.getNg(),true);
+			createCell(workbook, row, 6,  numColumnStyle).setValue(currDetail.getOk(),true);
+			createCell(workbook, row, 7,  txtCenterStyle).setValue(currDetail.getnOperationTime());
+			createCell(workbook, row, 8,  dobColumnStyle).setValue(currDetail.getActualProductivity(),true);
+			createCell(workbook, row, 9,  dobColumnStyle).setValue(currDetail.getStandardProductivity(),true);
+			createCell(workbook, row, 10,  dobColumnStyle).setValue(currDetail.getStandardProduction(),true);
+			createCell(workbook, row, 11,  dobColumnStyle).setValue(currDetail.getActualProduction(),true);
+			createCell(workbook, row, 12, dobColumnStyle).setValue(currDetail.getDiff(),true);
+			createCell(workbook, row, 13, perColumnStyle).setValue(dobFormat.format(currDetail.getPercentage())+"%");
 			//sum time
 			hour += Integer.parseInt(currDetail.getnOperationTime().substring(0,2));
 			min += Integer.parseInt(currDetail.getnOperationTime().substring(3,5));
@@ -102,29 +103,31 @@ public class MRDC_R13ExcelView extends AbstractExcelView{
 				// Grand total
 				createCell(workbook, row, 0,  grandColumnStyle);
 				createCell(workbook, row, 1,  grandColumnStyle);
-				createCell(workbook, row, 2,  grandColumnStyle).setValue("Grand Total");
-				createCell(workbook, row, 3,  gNumColumnStyle);
+				createCell(workbook, row, 2,  grandColumnStyle);
+				createCell(workbook, row, 3,  grandColumnStyle).setValue("Grand Total");
 				createCell(workbook, row, 4,  gNumColumnStyle);
 				createCell(workbook, row, 5,  gNumColumnStyle);
-				createCell(workbook, row, 6,  grandTimeStyle).setValue(this.calTime(hour, min, sec));
-				createCell(workbook, row, 7,  gDobColumnStyle);
+				createCell(workbook, row, 6,  gNumColumnStyle);
+				createCell(workbook, row, 7,  grandTimeStyle).setValue(this.calTime(hour, min, sec));
 				createCell(workbook, row, 8,  gDobColumnStyle);
 				createCell(workbook, row, 9,  gDobColumnStyle);
 				createCell(workbook, row, 10,  gDobColumnStyle);
-				createCell(workbook, row, 11, gDobColumnStyle);
-				row.getCell(3).setCellFormula("SUM(D5:D"+rowNumber+")");
+				createCell(workbook, row, 11,  gDobColumnStyle);
+				createCell(workbook, row, 12, gDobColumnStyle);
 				row.getCell(4).setCellFormula("SUM(E5:E"+rowNumber+")");
 				row.getCell(5).setCellFormula("SUM(F5:F"+rowNumber+")");
-				row.getCell(7).setCellFormula("SUM(H5:H"+rowNumber+")");
+				row.getCell(6).setCellFormula("SUM(G5:G"+rowNumber+")");
 				row.getCell(8).setCellFormula("SUM(I5:I"+rowNumber+")");
 				row.getCell(9).setCellFormula("SUM(J5:J"+rowNumber+")");
 				row.getCell(10).setCellFormula("SUM(K5:K"+rowNumber+")");
 				row.getCell(11).setCellFormula("SUM(L5:L"+rowNumber+")");
+				row.getCell(12).setCellFormula("SUM(M5:M"+rowNumber+")");
 			}
 		}// for loop
 		// <!-- Setup 'Print Area'. -->
-		workbook.setPrintArea(0, 0, 11, 0, rowNumber);
+		workbook.setPrintArea(0, 0, 12, 0, rowNumber);
 	}
+
 	public String calTime(int hour,int min,int sec){
 		//calculate Time
 		String time = "";

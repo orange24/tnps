@@ -69,7 +69,7 @@
       <td colspan="2" align="right">
       	<security:authorize ifAnyGranted="FNG_R01_EXPORT">
       		<input name="btnExport" type="button" id="btnExportNirvana" value="Export to Nirvana"/>
-      		<input name="btnExportLotRemain" type="button" id="btnLotRemainExport" value="Lot Remain Report" onclick="exportLotRemain()"/>
+      		<!-- <input name="btnExportLotRemain" type="button" id="btnLotRemainExport" value="Lot Remain Report" onclick="exportLotRemain()"/> -->
       		<input name="btnExport" type="button" id="btnExport2" value="History Report"/>
         	<input name="btnExport" type="button" id="btnExport" value="Summary Report"/>
         </security:authorize>

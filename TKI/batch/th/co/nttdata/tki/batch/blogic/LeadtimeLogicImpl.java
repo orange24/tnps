@@ -100,7 +100,7 @@ public class LeadtimeLogicImpl extends BatchLogicImpl {
 		for(BigDecimal av : avg){
 			avgSum = avgSum.add(av);
 		}
-		if((avgSum.compareTo(new BigDecimal(0))==1)&&(avg.size()>0)){
+		if((avgSum.compareTo(new BigDecimal(0)) == 1) && (avg.size() > 0)){
 			return avgSum.divide(new BigDecimal(avg.size()),2,RoundingMode.HALF_UP);
 		}else{
 			return new BigDecimal(0);
