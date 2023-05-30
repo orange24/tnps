@@ -42,6 +42,7 @@ public class MRDC_R12ExcelView extends AbstractExcelView{
 		Style sumTimeStyle     	= createStyle(workbook, HSSFCellStyle.ALIGN_CENTER, HSSFCellStyle.VERTICAL_TOP).setBottomBorder(CellStyle.BORDER_MEDIUM).setRightBorder().setWrapText().setFont(fontHD);
 		Style sumColumnStyle   	= createStyle(workbook, HSSFCellStyle.ALIGN_RIGHT, HSSFCellStyle.VERTICAL_TOP).setFormat("#,##0").setBottomBorder(CellStyle.BORDER_MEDIUM).setRightBorder().setWrapText().setFont(fontHD);
 		Style sumDobColumnStyle = createStyle(workbook, HSSFCellStyle.ALIGN_RIGHT, HSSFCellStyle.VERTICAL_TOP).setFormat("#,##0.00").setBottomBorder(CellStyle.BORDER_MEDIUM).setRightBorder().setWrapText().setFont(fontHD);
+		Style sumDobPercentStyle = createStyle(workbook, HSSFCellStyle.ALIGN_RIGHT, HSSFCellStyle.VERTICAL_TOP).setFormat("#,##0.00\"%\"").setBottomBorder(CellStyle.BORDER_MEDIUM).setRightBorder().setWrapText().setFont(fontHD);
 		Style lstColumnStyle 	= createStyle(workbook, HSSFCellStyle.ALIGN_CENTER, HSSFCellStyle.VERTICAL_TOP).setBottomBorder(CellStyle.BORDER_MEDIUM).setRightBorder(CellStyle.BORDER_MEDIUM).setWrapText().setFont(font);
 		Style txtColumnStyle 	= createStyle(workbook, HSSFCellStyle.ALIGN_CENTER, HSSFCellStyle.VERTICAL_TOP).setBottomBorder().setRightBorder().setWrapText().setFont(font);
 		Style c13ColumnStyle 	= createStyle(workbook, HSSFCellStyle.ALIGN_CENTER, HSSFCellStyle.VERTICAL_TOP).setBottomBorder().setRightBorder(CellStyle.BORDER_MEDIUM).setWrapText().setFont(font);
@@ -97,7 +98,7 @@ public class MRDC_R12ExcelView extends AbstractExcelView{
 				createCell(workbook, row, 6,  txtColumnStyle).setValue(currDetail.getStaff());
 				createCell(workbook, row, 7,  numColumnStyle).setValue(currDetail.getOk());
 				createCell(workbook, row, 8,  numColumnStyle).setValue(currDetail.getNg());
-				createCell(workbook, row, 9,  rightColumnStyle).setValue(currDetail.getNgRatio());
+				createCell(workbook, row, 9,  dobPencentColumnStyle).setValue(currDetail.getNgRatio());
 				createCell(workbook, row, 10,  txtColumnStyle).setValue(currDetail.getnOperationTime());
 				createCell(workbook, row, 11, dobColumnStyle).setValue(currDetail.getSecondQty());
 				createCell(workbook, row, 12, dobColumnStyle).setValue(currDetail.getShotQty());
@@ -109,6 +110,7 @@ public class MRDC_R12ExcelView extends AbstractExcelView{
 				createCell(workbook, row, 18, dobPencentColumnStyle).setValue(currDetail.getPercentage());
 				createCell(workbook, row, 19, txtColumnStyle).setValue(currDetail.getWorkOrderNo());
 				createCell(workbook, row, 20, c13ColumnStyle).setValue(currDetail.getTypeName());
+
 //				createCell(workbook, row, 21, txtColumnStyle).setValue(currDetail.getId());
 //				sheet.setColumnHidden(21,true);
 				
@@ -127,25 +129,32 @@ public class MRDC_R12ExcelView extends AbstractExcelView{
 					row.getCell(7).setCellFormula("SUM(H"+(startPart+1)+":H"+(rowNumber-1)+")");
 					createCell(workbook, row, 8,  sumColumnStyle);
 					row.getCell(8).setCellFormula("SUM(I"+(startPart+1)+":I"+(rowNumber-1)+")");
-					createCell(workbook, row, 9,  sumDobColumnStyle);
+					createCell(workbook, row, 9,  sumDobPercentStyle);
 					createCell(workbook, row, 10, sumTimeStyle);
 					createCell(workbook, row, 11, sumDobColumnStyle);
-					row.getCell(11).setCellFormula("SUM(L"+(startPart+1)+":L"+(rowNumber-1)+")");
+					// row.getCell(11).setCellFormula("SUM(L"+(startPart+1)+":L"+(rowNumber-1)+")");
 					createCell(workbook, row, 12, sumColumnStyle);
 					createCell(workbook, row, 13, sumDobColumnStyle);
-					row.getCell(13).setCellFormula("SUM(N"+(startPart+1)+":N"+(rowNumber-1)+")");
+					// row.getCell(13).setCellFormula("SUM(N"+(startPart+1)+":N"+(rowNumber-1)+")");
 					createCell(workbook, row, 14, sumDobColumnStyle);
-					row.getCell(14).setCellFormula("SUM(O"+(startPart+1)+":O"+(rowNumber-1)+")");
+					// row.getCell(14).setCellFormula("SUM(O"+(startPart+1)+":O"+(rowNumber-1)+")");
 					createCell(workbook, row, 15, sumDobColumnStyle);
 					row.getCell(15).setCellFormula("SUM(P"+(startPart+1)+":P"+(rowNumber-1)+")");
 					createCell(workbook, row, 16, sumDobColumnStyle);
 					row.getCell(16).setCellFormula("SUM(Q"+(startPart+1)+":Q"+(rowNumber-1)+")");
 					createCell(workbook, row, 17, sumDobColumnStyle);
 					row.getCell(17).setCellFormula("SUM(R"+(startPart+1)+":R"+(rowNumber-1)+")");
-					createCell(workbook, row, 18, sumColumnStyle);
+					createCell(workbook, row, 18, sumDobPercentStyle);
 					createCell(workbook, row, 19, totalColumnStyle);
 					createCell(workbook, row, 20, lstColumnStyle);
 //					createCell(workbook, row, 21, lstColumnStyle).setValue(-1);
+
+					row.getCell(9).setCellFormula(" IF(I"+ rowNumber + " = \"\",0, I"+ rowNumber + ") / ( IF(H"+ rowNumber + " = \"\",0, H"+ rowNumber + ") + IF(I"+ rowNumber + " = \"\",0, I"+ rowNumber + ")) * 100");
+					row.getCell(11).setCellFormula("86400 * K"+ rowNumber + "/ H"+ rowNumber + "");
+					row.getCell(13).setCellFormula("86400 * K"+ rowNumber + "/ ( IF(H"+ rowNumber + " = \"\",0, H"+ rowNumber + ") + IF(I"+ rowNumber + " = \"\",0, I"+ rowNumber + "))");
+					row.getCell(14).setCellFormula("AVERAGE(O"+(startPart+1)+":O"+(rowNumber-1)+")");
+					row.getCell(18).setCellFormula("Q"+ rowNumber + "/ P"+ rowNumber + " * 100");
+
 					startPart = rowNumber ;
 				}
 			}
