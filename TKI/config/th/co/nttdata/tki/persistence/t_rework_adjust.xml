@@ -27,6 +27,8 @@
 	</sql>
 	
 	<select id="query" parameterClass="th.co.nttdata.tki.bean.TReworkAdjust" resultClass="th.co.nttdata.tki.bean.TReworkAdjust">
+		SELECT * 
+		FROM (
 		SELECT 
 			 tpr.pdReworkId
 			,wip.wipName as wipFr
@@ -35,21 +37,35 @@
 			,mc.customerCode 
 			,p.partNo 
 			,p.partName 
-			,tpr.reworkQty - ISNULL(tpr.reworkAdjustQty,0) as reworkQty				         
+			,tpr.reworkQty - ISNULL(tpr.reworkAdjustQty,0) as reworkQty
 		<include refid="querySql"/>
+		) tbl
+		WHERE tbl.reworkQty > 0
 		ORDER BY 
-			 wip.wipName
-			,wiprw.wipName
-			,tpa.reportDate DESC
-			,p.partNo 
+			 wipFr
+			,wipTo
+			,reportDate DESC
+			,partNo 
 	</select>
 
 	<select id="count" parameterClass="th.co.nttdata.tki.bean.TReworkAdjust" resultClass="int">
 		SELECT
 			count(*)
-		<include refid="querySql"/>
+		FROM (
+			SELECT 
+			 tpr.pdReworkId
+			,wip.wipName as wipFr
+			,wiprw.wipName as wipTo
+			,tpa.reportDate
+			,mc.customerCode 
+			,p.partNo 
+			,p.partName 
+			,tpr.reworkQty - ISNULL(tpr.reworkAdjustQty,0) as reworkQty
+			<include refid="querySql"/>
+		) tbl 
+		WHERE tbl.reworkQty > 0
 	</select>
-	
+
 	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TReworkAdjust">		
 		<iterate property="adjustList">
 			UPDATE t_pending_rework SET reworkAdjustQty = ISNULL(reworkAdjustQty,0) + #adjustList[].ok# + #adjustList[].ng# 
