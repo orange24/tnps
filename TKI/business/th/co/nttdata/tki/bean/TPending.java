@@ -15,8 +15,11 @@ public class TPending extends AbstractBaseBean {
 	private String partNo;
 	private String partName;
 	private String workorderNo;
+	private String wipRework;
+	private String remark;
 	private List<TPendingAdjust> adjustList;
 	private List<MWip> wipList;
+	private List<MReason> reasonList;
 
 	public void setReportDate(Date reportDate) {
 		this.reportDate = reportDate;
@@ -89,5 +92,11 @@ public class TPending extends AbstractBaseBean {
 	}
 	public void setWipList(List<MWip> wipList) {
 		this.wipList = wipList;
+	}
+	public List<MReason> getReasonList() {
+		return reasonList;
+	}
+	public void setReasonList(List<MReason> reasonList) {
+		this.reasonList = reasonList;
 	}
 }

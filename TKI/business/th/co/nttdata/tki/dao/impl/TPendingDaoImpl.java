@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import th.co.nttdata.tki.bean.MReason;
 import th.co.nttdata.tki.bean.MWip;
 import th.co.nttdata.tki.bean.TPending;
 import th.co.nttdata.tki.bean.TPendingAdjust;
@@ -29,7 +30,8 @@ public class TPendingDaoImpl extends AbstractBaseDao implements TPendingDao {
 	public TPending query(TPending pending) {
 		query(pending, "");
 		if (pending.getPageTotal() > 0) {
-			pending.setWipList((List<MWip>) queryForList("t_pending.queryWip"));			
+			pending.setWipList((List<MWip>) queryForList("t_pending.queryWip"));
+			pending.setReasonList((List<MReason>) queryForList("m_reason.select_reason_type1"));
 		}
 		return pending;
 	}

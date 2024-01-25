@@ -135,12 +135,12 @@ public class MRDC_R17ExcelView extends AbstractExcelView{
 		TDailyMCNGReason rs = new TDailyMCNGReason();
 		int hour = 0;
 		int min  = 0;
-		int sec  = 0;
-		int msec = 0; // minlisec
+		//int sec  = 0;
+		//int msec = 0; // minlisec
 		List<Integer> hhList = new ArrayList<Integer>();
 		List<Integer> mmList = new ArrayList<Integer>();
-		List<Integer> ssList = new ArrayList<Integer>();
-		List<Integer> msList = new ArrayList<Integer>();
+		//List<Integer> ssList = new ArrayList<Integer>();
+		//List<Integer> msList = new ArrayList<Integer>();
 	
 		for(TDailyMCDetail detail : details){
 			HSSFRow dtRow = sheet.createRow(rowNum);
@@ -174,24 +174,24 @@ public class MRDC_R17ExcelView extends AbstractExcelView{
 						if(rs != null){
 							hour = rs.getnMCStopTime() != null?Integer.parseInt(rs.getnMCStopTime().substring(0,2)):0;
 							min  = rs.getnMCStopTime() != null?Integer.parseInt(rs.getnMCStopTime().substring(3,5)):0;
-							sec  = rs.getnMCStopTime() != null?Integer.parseInt(rs.getnMCStopTime().substring(6)):0;
-							msec = 0;
+							// sec  = rs.getnMCStopTime() != null?Integer.parseInt(rs.getnMCStopTime().substring(6)):0;
+							// msec = 0;
 						}else{
 							hour = 0;
 							min  = 0;
-							sec  = 0;
-							msec  = 0;
+							//sec  = 0;
+							//msec  = 0;
 						}
 						if(hhList.size() <= countRs || hhList.get(countRs) == null){
 							hhList.add(hour);
 							mmList.add(min);
-							ssList.add(sec);
-							msList.add(msec);
+							//ssList.add(sec);
+							//msList.add(msec);
 						}else{
 							hhList.set(countRs, hhList.get(countRs)+hour);
 							mmList.set(countRs, mmList.get(countRs)+min);
-							ssList.set(countRs, ssList.get(countRs)+sec);
-							msList.set(countRs, msList.get(countRs)+msec);
+							//ssList.set(countRs, ssList.get(countRs)+sec);
+							//msList.set(countRs, msList.get(countRs)+msec);
 						}
 						countRs++;
 						colNum++;
@@ -204,54 +204,54 @@ public class MRDC_R17ExcelView extends AbstractExcelView{
 			//sum ActualOperationTime
 			hour = (detail.getnActualOperationTime() != null?Integer.parseInt(detail.getnActualOperationTime().substring(0,2)):0);
 			min  = (detail.getnActualOperationTime() != null?Integer.parseInt(detail.getnActualOperationTime().substring(3,5)):0);
-			sec  = (detail.getnActualOperationTime() != null?Integer.parseInt(detail.getnActualOperationTime().substring(6)):0);
+			//sec  = (detail.getnActualOperationTime() != null?Integer.parseInt(detail.getnActualOperationTime().substring(6)):0);
 			
 			if(hhList.size() <= countRs || hhList.get(countRs) == null){
 				hhList.add(hour);
 				mmList.add(min);
-				ssList.add(sec);
-				msList.add(msec);
+				//ssList.add(sec);
+				//msList.add(msec);
 			}else{
 				hhList.set(countRs, hhList.get(countRs)+hour);
 				mmList.set(countRs, mmList.get(countRs)+min);
-				ssList.set(countRs, ssList.get(countRs)+sec);
-				msList.set(countRs, msList.get(countRs)+msec);
+				//ssList.set(countRs, ssList.get(countRs)+sec);
+				//msList.set(countRs, msList.get(countRs)+msec);
 			}
 			
 			createCell(workbook, dtRow, colNum+2, txtCentStyle).setValue(detail.getnMachineStopTime());
 			//sum MachineStopTime
 			hour = (detail.getnMachineStopTime() != null?Integer.parseInt(detail.getnMachineStopTime().substring(0,2)):0);
 			min  = (detail.getnMachineStopTime() != null?Integer.parseInt(detail.getnMachineStopTime().substring(3,5)):0);
-			sec  = (detail.getnMachineStopTime() != null?Integer.parseInt(detail.getnMachineStopTime().substring(6)):0);
+			//sec  = (detail.getnMachineStopTime() != null?Integer.parseInt(detail.getnMachineStopTime().substring(6)):0);
 			
 			if(hhList.size() <= countRs+1 || hhList.get(countRs+1) == null){
 				hhList.add(hour);
 				mmList.add(min);
-				ssList.add(sec);
-				msList.add(msec);
+				//ssList.add(sec);
+				//msList.add(msec);
 			}else{
 				hhList.set(countRs+1, hhList.get(countRs+1)+hour);
 				mmList.set(countRs+1, mmList.get(countRs+1)+min);
-				ssList.set(countRs+1, ssList.get(countRs+1)+sec);
-				msList.set(countRs+1, msList.get(countRs+1)+msec);
+				//ssList.set(countRs+1, ssList.get(countRs+1)+sec);
+				//msList.set(countRs+1, msList.get(countRs+1)+msec);
 			}
 			createCell(workbook, dtRow, colNum+3, txtCentStyle).setValue(detail.getnOKCycelTime());
 			//sum OKCycelTime
 			hour = (detail.getnOKCycelTime() != null?Integer.parseInt(detail.getnOKCycelTime().substring(0,2)):0);
 			min  = (detail.getnOKCycelTime() != null?Integer.parseInt(detail.getnOKCycelTime().substring(3,5)):0);
-			sec  = (detail.getnOKCycelTime() != null?Integer.parseInt(detail.getnOKCycelTime().substring(6,8)):0);
-			msec = (detail.getnOKCycelTime() != null?Integer.parseInt(detail.getnOKCycelTime().substring(9)):0);
+			//sec  = (detail.getnOKCycelTime() != null?Integer.parseInt(detail.getnOKCycelTime().substring(6,8)):0);
+			//msec = (detail.getnOKCycelTime() != null?Integer.parseInt(detail.getnOKCycelTime().substring(9)):0);
 			
 			if(hhList.size() <= countRs+2 || hhList.get(countRs+2) == null){
 				hhList.add(hour);
 				mmList.add(min);
-				ssList.add(sec);
-				msList.add(msec);
+				//ssList.add(sec);
+				//msList.add(msec);
 			}else{
 				hhList.set(countRs+2, hhList.get(countRs+2)+hour);
 				mmList.set(countRs+2, mmList.get(countRs+2)+min);
-				ssList.set(countRs+2, ssList.get(countRs+2)+sec);
-				msList.set(countRs+2, msList.get(countRs+2)+msec);
+				//ssList.set(countRs+2, ssList.get(countRs+2)+sec);
+				//msList.set(countRs+2, msList.get(countRs+2)+msec);
 			}
 			createCell(workbook, dtRow, colNum+4, doubleStyle).setValue(detail.getnOKDiecastingCost(),true);
 			
@@ -284,14 +284,14 @@ public class MRDC_R17ExcelView extends AbstractExcelView{
 			// sum reason time
 			colNum = 13;
 			for(int a=0;a<hhList.size()-3;a++){
-				createCell(workbook, dtRow, colNum, sumTimeStyle).setValue(this.calTime(hhList.get(a), mmList.get(a), ssList.get(a)));
+				createCell(workbook, dtRow, colNum, sumTimeStyle).setValue(this.calTime(hhList.get(a), mmList.get(a)));
 				colNum++;
 			}
 			// sum after reason
 			createCell(workbook, dtRow, colNum, sumPerStyle);
-			createCell(workbook, dtRow, colNum+1, sumTimeStyle).setValue(this.calTime(hhList.get(hhList.size()-3), mmList.get(mmList.size()-3), ssList.get(ssList.size()-3)));
-			createCell(workbook, dtRow, colNum+2, sumTimeStyle).setValue(this.calTime(hhList.get(hhList.size()-2), mmList.get(mmList.size()-2), ssList.get(ssList.size()-2)));
-			createCell(workbook, dtRow, colNum+3, sumTimeStyle).setValue(this.calTime(hhList.get(hhList.size()-1), mmList.get(mmList.size()-1), ssList.get(ssList.size()-1), msList.get(msList.size()-1)));
+			createCell(workbook, dtRow, colNum+1, sumTimeStyle).setValue(this.calTime(hhList.get(hhList.size()-3), mmList.get(mmList.size()-3)));
+			createCell(workbook, dtRow, colNum+2, sumTimeStyle).setValue(this.calTime(hhList.get(hhList.size()-2), mmList.get(mmList.size()-2)));
+			createCell(workbook, dtRow, colNum+3, sumTimeStyle).setValue(this.calTime(hhList.get(hhList.size()-1), mmList.get(mmList.size()-1)));
 			createCell(workbook, dtRow, colNum+4, sumDouStyle).setValue(sumCost.doubleValue(),true);
 			dtRow.getCell(colNum).setCellFormula("FIXED(IF("+dtRow.getCell(10).getCellFormula()+"<>0,("+dtRow.getCell(10).getCellFormula()+"/("+dtRow.getCell(10).getCellFormula()+"+"+dtRow.getCell(12).getCellFormula()+")*100),0),2,FALSE) & \"%\"");
 		}
@@ -299,12 +299,12 @@ public class MRDC_R17ExcelView extends AbstractExcelView{
 		workbook.setPrintArea(0, 0, colNum+4, 0, rowNum);
 	}
 	
-	public String calTime(int hour,int min,int sec){
+	public String calTime(int hour,int min){
 		//calculate Time
 		String time = "";
-		int ss = sec%60;
-		int mm = (min+(sec/60))%60;
-		int hh = hour+((min+(sec/60))/60);
+		//int ss = sec%60;
+		int mm = (min)%60;
+		int hh = hour+((min)/60);
 		if(hh < 10){
 			time = "0"+hh;
 		}else{
@@ -315,11 +315,11 @@ public class MRDC_R17ExcelView extends AbstractExcelView{
 		}else{
 			time += ":"+mm;
 		}
-		if(ss < 10){
-			time += ":0"+ss;
-		}else{
-			time += ":"+ss;
-		}		
+//		if(ss < 10){
+//			time += ":0"+ss;
+//		}else{
+//			time += ":"+ss;
+//		}		
 		return time;
 	}
 	

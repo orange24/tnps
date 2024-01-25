@@ -109,6 +109,20 @@
 		ORDER BY reasondigit,reasonCode
 	</select>
 	
+	<select id="select_reason_type1" resultClass="th.co.nttdata.tki.bean.MReason">
+		SELECT 
+			reasonId 	AS reasonId,
+			reasonCode 	AS reasonCode,
+			reasonName 	AS reasonName,
+			reasonType 	AS reasonType
+  		FROM 
+  			M_REASON
+  		WHERE 
+  			REASONTYPE = 1
+		ORDER BY 
+			reasonName
+	</select>
+
 	<select id="select_reason_type3" resultClass="th.co.nttdata.tki.bean.MReason">
 		SELECT 
 			reasonId 	AS reasonId,

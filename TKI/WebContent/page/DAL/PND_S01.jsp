@@ -86,8 +86,8 @@
 		$(clonedRow).removeClass("sampleRow");
 		$(clonedRow).css("display", "");
 		$(clonedRow).attr("id", "tr_sublist");
-		
-		
+
+
 		var tr = $(this).parents("#mainRow");
 		var o = tr.find("[id=tdout_sublist]").find("[id=tbl_sublist]");
 		clonedRow.find("[id=reworkQty]").attr("class",o.find("[id=reworkQty]").attr("class"));
@@ -310,13 +310,16 @@
 					<th align="center" colspan="5" width="39%">Actual Product Qty</th>
 				</tr>
 				<tr class="submit_button">
+				 	<th align="center">Problem (Ng Reason)</th>
 				 	<th align="center">Pending</th>
 				  	<th align="center">OK</th>
 				  	<th align="center">NG</th>
-				  	<th align="center" width="230">Rework (WIP : Qty)</th>
+				  	<th align="center" width="180">Rework (WIP : Qty)</th>
+				 	<th align="center">WIP (Rework)</th>
+				  	<th align="center">Remark</th>
 				  	<th align="center">Action</th>
 				</tr>
-			     
+
 				<c:forEach var="dailyPD" items="${searchCriteria.adjustList}" varStatus="prop" begin="0" step="1">
 				    <tr id="mainRow">
 						<td align="center" class="border_all" >${prop.index + 1} <input type="hidden" name="pdAdjustQty" value=""/><input type="hidden" name="pdId" value="${dailyPD.pdId}"/></td>
@@ -326,6 +329,14 @@
 						<td align="left" class="border_all">${dailyPD.workorderNo}&nbsp;</td>
 						<td align="center" class="border_all">${dailyPD.lotNo}&nbsp;</td>
 						<td align="center" class="border_all">${dailyPD.wipName}&nbsp;</td>
+						<td align="center" class="border_all">
+							<select id="ng_reason" name="ng_reason">
+								<option value="">-- Select Reason --</option>
+							  	<c:forEach var="item" items="${searchCriteria.resonList}">
+									<option value="${item.reasonId}">${item.reasonId}:${item.reasonName}</option>
+								</c:forEach>
+							</select>
+						</td>
 						<td align="center" class="border_all">${dailyPD.pdQty}&nbsp;<input type="hidden" name="pdQty" value="${dailyPD.pdQty}"/></td>
 						<td align="center" class="border_all"><input type="text" name="ok" id="ok" size="3" class="posInt"/></td>
 						<td align="center" class="border_all"><input type="text" name="ng" id="ng" size="3" class="posInt"/></td>
@@ -339,11 +350,11 @@
 												<option value="${item.wip}">${item.wip}:${item.wipName}</option>
 											</c:forEach>
 										</select>
-						  				: 
+										: 
 										<input type="text" id="reworkQty" name="reworkQty" size="5" class="posInt"/>
 										<a id="delRow" style=cursor:hand;>
-						    				<img id="deleteRow" src="image/icon/delete.gif" width="16" height="16" class="delete"/>
-						  				</a>
+										  	<img id="deleteRow" src="image/icon/delete.gif" width="16" height="16" class="delete"/>
+										</a>
 									</td>
 				   				</tr>
 				     		</table>
@@ -356,7 +367,7 @@
 								            <option value="${item.wip}">${item.wip}:${item.wipName}</option>
 								          </c:forEach>
 								        </select>
-							    	    : 
+										: 
 										<input type="text" id="reworkQty" name="reworkQty" size="5" class="posInt"/>
 										<a id="delRow" style=cursor:hand;>
 										  	<img id="deleteRow" src="image/icon/delete.gif" width="16" height="16" class="delete"/>
@@ -365,6 +376,15 @@
 							    </tr>
 							</table>
 						</td>
+						<td align="center" class="border_all">
+							<select name="wip">
+								<option value="">-- Select WIP --</option>
+								<c:forEach var="item" items="${searchCriteria.wipList}">
+									<option value="${item.wip}">${item.wip}:${item.wipName}</option>
+								</c:forEach>
+							</select>
+						</td>
+						<td align="center" class="border_all"><input type="text" name="remark" size="30"/></td>
 				      	<td align="center" class="border_all">
 							<a id="btnAdd" style=cursor:hand;>
 							  	<img id="addButton" src="image/icon/plus.gif" width="16" height="16" alt=""/>
