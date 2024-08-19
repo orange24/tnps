@@ -43,6 +43,8 @@ public interface CommonLogic {
 
 	public MReason getReason(MReason MReason);
 
+	public List<MReason> getReasonMCStopList();
+
 	public List<MReason> getReasonCat(String wip);
 
 	public List<MReason> getReasonInCat(Integer parentReasonId, String wip);

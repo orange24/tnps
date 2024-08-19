@@ -18,6 +18,8 @@ public class TDailyWKDetail {
 	private Integer pd;
 	private Integer qty;
 	private Integer workOrderQty;
+	private Integer lossTime;
+	private Integer mcStopReasonId;
 	private String customerCode;
 	private String datailRef;// idRef of DAL_R03
 	private String lotNo;
@@ -32,6 +34,7 @@ public class TDailyWKDetail {
 	private String currency;
 	private List<TDailyWKNGReason> reasonList;
 	private Map<Integer, Integer> ngReasonMap;
+	private Map<Integer, Integer> stopReason;
 
 	// MRDC_S12
 	private Double secondQty;
@@ -503,4 +506,29 @@ public class TDailyWKDetail {
 	public void setCurrency(String currency) {
 		this.currency = currency;
 	}
+
+	public Integer getTimestop() {
+		return lossTime;
+	}
+
+	public void setTimestop(Integer timestop) {
+		this.lossTime = timestop;
+	}
+
+	public Map<Integer, Integer> getStopReason() {
+		return stopReason;
+	}
+
+	public void setStopReason(Map<Integer, Integer> stopReason) {
+		this.stopReason = stopReason;
+	}
+
+	public void setMcStopReasonId(Integer mcStopReasonId) {
+		this.mcStopReasonId = mcStopReasonId;
+	}
+
+	public Integer getMcStopReasonId() {
+		return mcStopReasonId;
+	}
+
 }

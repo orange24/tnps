@@ -41,6 +41,7 @@ public class DAL_S04Controller extends AbstractBaseController {
 
 	@RequestMapping("/DAL_S04")
 	public ModelAndView init() {
+		System.out.println("reason = " + commonController.getReasonMCStopList());
 		return new ModelAndView(PATH_URI)
 				.addObject("dailyWK", new TDailyWK())
 				.addObject(
@@ -49,10 +50,9 @@ public class DAL_S04Controller extends AbstractBaseController {
 								.setReportCategory(new String[] { "wip" })))
 				.addObject("wipMap", commonController.getWIPSel(2))
 				.addObject("customerMap", commonController.getCustomerSel())
-				.addObject("partMap",
-						commonController.getPartNameNo(null, null, null))
-				.addObject("minReportDate",
-						settings.getProperty("DAL.reportDate.minDate", "-40d"));
+				.addObject("stopReasonMap", commonController.getReasonMCStopList())
+				.addObject("partMap", commonController.getPartNameNo(null, null, null))
+				.addObject("minReportDate", settings.getProperty("DAL.reportDate.minDate", "-40d"));
 	}
 
 	@RequestMapping("/DAL_S04_edit")
@@ -97,8 +97,8 @@ public class DAL_S04Controller extends AbstractBaseController {
 								.setReportCategory(new String[] { "wip" })))
 				.addObject("wipMap", commonController.getWIPSel(2))
 				.addObject("customerMap", commonController.getCustomerSel())
-				.addObject("reasonNGList",
-						commonController.getReasonNGList(TDailyWK.getWip()))
+				.addObject("stopReasonMap", commonController.getReasonMCStopList())
+				.addObject("reasonNGList", commonController.getReasonNGList(TDailyWK.getWip()))
 				.addObject("minDate", calendar.getTime());
 	}
 
@@ -130,8 +130,7 @@ public class DAL_S04Controller extends AbstractBaseController {
 								.setReportCategory(new String[] { "wip" })))
 				.addObject("wipMap", commonController.getWIPSel(2))
 				.addObject("customerMap", commonController.getCustomerSel())
-				.addObject("partMap",
-						commonController.getPartNameNo(null, null, null));
+				.addObject("partMap", commonController.getPartNameNo(null, null, null));
 	}
 
 	@RequestMapping(value = "/DAL_S04_save", method = RequestMethod.POST)

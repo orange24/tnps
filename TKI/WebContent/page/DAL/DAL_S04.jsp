@@ -14,6 +14,7 @@
 	var dailyWKForm;
 	var boxCustomer;
 	var boxPartNo;
+	var boxMcStopReason;
 	var boxReportDate;
 	var boxReportType;
 	var boxShift;
@@ -27,7 +28,7 @@
 	var tblDetailPart;
 	var ngReasons = {};
 	var dailyWKdailyWKDetailList;
-	
+
 	$(document).ready(function(){
 		dailyWKForm     = $("form#dailyWKForm");
 		boxReportDate   = $("input#reportDate");
@@ -230,6 +231,7 @@
 			var wrkOdr   = $("<input size='12' maxlength='11' />").autocomplete(workOrderList);
 			var custom   = boxCustomer.clone(true);
 			var partNo   = boxPartNo.clone(true);
+			var mcStopReason   = boxMcStopReason.clone(true);
 	
 			// <!-- Generating Row Template. -->
 			rowTemplt.append( $("<td align='center'></td>").html( $("tbody > tr", tblDetailPart).length - 1 ) );
@@ -245,6 +247,8 @@
 			rowTemplt.append( $("<td align='center'></td>").html( "<input size='4'  maxlength='10' />" ).keypress(IntegerFilter) );
 			rowTemplt.append( $("<td align='center'></td>").html( "<input size='4'  maxlength='10' />" ).keypress(IntegerFilter) );
 			rowTemplt.append( $("<td align='center'></td>").html( "<input size='12' maxlength='50'/>" ) );
+			rowTemplt.append( $("<td align='center'></td>").html( "<input size='12' maxlength='50'/>" ) );
+			rowTemplt.append( $("<td align='left'></td>").append( mcStopReason ) );
 			if (cntColumn > 14) {
 				rowTemplt.append( $("<td align='center'></td>").attr('id','total').html('&nbsp;') );
 			}
@@ -427,7 +431,8 @@
 	
 	// <!-- Initial Processing. -->
 	comboBox.setCustomer(boxCustomer = $("<select id='customerId'></select>"));
-	comboBox.setPartNo  (boxPartNo   = $("<select id='partId'></select>"));
+	comboBox.setPartNo(boxPartNo   = $("<select id='partId'></select>"));
+	comboBox.setMcStopReason(boxMcStopReason   = $("<select id='lossTimeReason'></select>"));
 </script>
 <style type="text/css">
 <!--
@@ -503,6 +508,8 @@
 						<th colspan="4">Actual Product<span class="textred">*</span></th>
 						<th rowspan="2">Time<br />(min) <span class="textred">*</span></th>
 						<th rowspan="2">Man<br /> Power</th>
+						<th rowspan="2">Loss Time (min)</th>
+						<th rowspan="2">Reason</th>
 						<th rowspan="2">Worker</th>
 						<c:if test="${fn:length(reasonNGList) > 0}">
 						<th colspan="${fn:length(reasonNGList)+1}">NG Reason Qty <span class="textred">*</span></th>
@@ -557,9 +564,22 @@
 						<td align="center"><input size="4"  readonly="readonly" value="${detail.qty}" tabindex=-1/></td>
 						<td align="center"><input size="4"  maxlength="10" value="<fmt:formatNumber pattern="#,##0" value="${detail.timeUsed}"/>"/></td>
 						<td align="center"><input size="4"  maxlength="10" value="<fmt:formatNumber pattern="#,##0" value="${detail.manPower}"/>"/></td>
+						<td align="center"><input size="4"  maxlength="10" value="<fmt:formatNumber pattern="#,##0" value="${detail.lossTime}"/>"/></td>
+						<td align="center">
+							<select id='lossTimeReason'>
+								<c:forEach var="custom" items="${stopReasonMap}">
+									<c:if test="${custom.key == detail.mcStopReasonId}">
+										<option value="${custom.key}" selected="selected">${custom.value}</option>
+									</c:if>
+									<c:if test="${custom.key != detail.mcStopReasonId}">
+										<option value="${custom.key}">${custom.value}</option>
+									</c:if>
+								</c:forEach>
+							</select>
+						</td>
 						<td align="center"><input size="12" maxlength="50" value="${detail.staff}"/></td>
 						<c:if test="${fn:length(detail.ngReasonMap) > 0}">
-						<td align="center" id=total >
+						<td align="center" id="total" >
 							<c:set value="${0}" var="total"></c:set>
 							<c:forEach var="reason" items="${detail.ngReasonMap}">
 								<c:set value="${total + (reason.value)}" var="total"></c:set>

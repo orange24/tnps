@@ -25,7 +25,25 @@
 		</dynamic>
 		ORDER BY reasondigit,reasonCode
 	</select>
-	
+
+	<select id="queryReasonMCStopList" resultClass="th.co.nttdata.tki.bean.MReason">
+		SELECT
+			 createDate
+			,lastUpdate
+			,parentReasonId
+			,reasonId
+			,reasonType
+			,createBy
+			,description
+			,reasonCode
+			,reasonName
+			,updateBy
+			,LEN(reasonCode) as reasondigit
+		FROM m_reason
+		WHERE reasonType = 2
+		ORDER BY reasondigit,reasonCode
+	</select>
+
 	<sql id="queryProperties">
 		FROM m_reason r
 		<dynamic prepend="WHERE">

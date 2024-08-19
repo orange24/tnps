@@ -289,6 +289,19 @@ public class CommonController extends AbstractBaseController {
 		return commonLogic.getReason(MReason);
 	}
 
+	@RequestMapping(value = "/getReasonMCStopList", method = RequestMethod.GET)
+	public @ResponseBody
+	Map<Integer, String> getReasonMCStopList() {
+		List<MReason> reasons = commonLogic.getReasonMCStopList();
+
+		Map<Integer, String> map = new LinkedHashMap<Integer, String>();
+		map.put(Integer.MIN_VALUE, "-- Select Reason --");
+		for (MReason MReason : reasons)
+			map.put(MReason.getReasonId(), MReason.getReasonCode() + " : "
+					+ MReason.getReasonName());
+		return map;
+	}
+
 	@RequestMapping(value = "/boxReasonCat", method = RequestMethod.GET)
 	public @ResponseBody
 	Map<Integer, String> getReasonCat(@RequestParam String wip) {
