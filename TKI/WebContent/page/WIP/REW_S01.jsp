@@ -27,9 +27,9 @@ var dateTo;
 
 function calAdjRework(){
 	tbResult.each(function(index){
-		var qty = parseInt($(this).find("td:eq(6)").html() || 0);
-		var ok  = $(this).find("input:eq(0)");
-		var ng  = $(this).find("input:eq(1)");
+		var qty = parseInt($(this).find("td:eq(8)").html() || 0);
+		var ok  = $(this).find(".adjOK");
+		var ng  = $(this).find(".adjNG");
 		var evt = function(){
 			if( parseInt(ok.val() || 0) + parseInt(ng.val() || 0) > qty ) {
 				ok.removeClass("highlightGreen highlightYellow").addClass("highlightRed");
@@ -63,7 +63,6 @@ function checkDigit(nameClass){
 //JQuery
 //initialze script run
 $(document).ready(function() {
-	
 	btnSearch = $("#btnSearch");
 	rewS01Form = $("#rewS01Form");
 	hidStatus = $("#hidStatus");
@@ -76,15 +75,14 @@ $(document).ready(function() {
 	adjOK = $(".adjOK");
 	dateFrom = $("#dateFrom");
 	dateTo = $("#dateTo");
-	
+
 	$("#selWipFr").focus();
-	
+
 	calAdjRework();
 	checkDigit(adjOK);
 	checkDigit(adjNG);
-	
+
 	btnSearch.click(function(){
-		
 		if( dateFrom.datepicker("getDate") > dateTo.datepicker("getDate") ) {
 			message.setErrors([{"code":"err.cmm.008","arguments":["Rework Date (From)","Rework Date (To)"]}]);
 			return;
@@ -107,7 +105,6 @@ $(document).ready(function() {
 			var ok  = $(this).find("input:eq(0)");
 			var ng  = $(this).find("input:eq(1)");
 			if (ok.val() != "" || ng.val() != "" ) {
-								
 				if (parseInt(ok.val() || 0) + parseInt(ng.val() || 0) > qty) {
 					listLine.push([line]);
 					//msg.push(({"code":"err.rew.001","arguments":[listLine,""]}));
@@ -212,7 +209,7 @@ $(document).ready(function() {
 <c:if test="${fn:length(searchCriteria.adjustList) > 0 }">
 <table id="detail" width="100%" border="1" align="center" cellpadding="3" cellspacing="0" class="ui-widget ui-widget-content " >
   <tr>
-  	<td colspan="9">
+  	<td colspan="12">
 	  <div style="float:left" ><page:display item="${searchCriteria}"/></div>
 	  <div style="float:right"><page:number item="${searchCriteria}"/></div>
 	</td>
@@ -224,8 +221,11 @@ $(document).ready(function() {
     <th rowspan="2" align="center" >Customer</th>
  	<th rowspan="2" align="center" >Part No.</th>
     <th rowspan="2" align="center" >Part Name</th>
+    <th rowspan="2" align="center" >WIP. (Rework)</th>
+    <th rowspan="2" align="center" >Problem (Ng.Reason)</th>
     <th rowspan="2" align="center" >Rework Qty</th>
     <th colspan="2" align="center" >Adjust Rework</th>
+    <th rowspan="2" align="center" >Remark</th>
   </tr>
   <tr>
     <th align="center" >OK</th>
@@ -242,6 +242,8 @@ $(document).ready(function() {
 	    <td align="center" >${tReworkAdjust.customerCode}&nbsp;</td>
 	    <td align="center" >${tReworkAdjust.partNo}&nbsp;</td>
 	    <td align="left" >${tReworkAdjust.partName}&nbsp;</td>
+	    <td align="left" >${tReworkAdjust.wipRework}&nbsp;</td>
+	    <td align="left" >${tReworkAdjust.ngReason}&nbsp;</td>
 	    <td align="center" >${tReworkAdjust.reworkQty}&nbsp;</td>
 	    <td align="center" >
 	    	<input name="adjustList[${status.count-1}].ok" type="text" 
@@ -252,13 +254,14 @@ $(document).ready(function() {
 	    	id="adjustList[${status.count-1}].ng" tabindex="15" size="2" class="adjNG" maxlength="10" />
 	    	<input type="hidden" name="adjustList[${status.count-1}].pdReworkId" value="${tReworkAdjust.pdReworkId}" />
 	    </td>
+	    <td align="left"> <input type="text" name="reworkRemark" size="30"/> </td>
 	    <%--<td align="center" >
 	    	 <input type="checkbox" id="chkBoxClosed[${status.count-1}]" class="boxClosed" name="adjustList[${status.count-1}].status" value="1" />  
 	    </td>--%>
   	</tr>
   </c:forEach>
   <tr>
-  	<td colspan="9">
+  	<td colspan="12">
 	  <div style="float:left" ><page:display item="${searchCriteria}"/></div>
 	  <div style="float:right"><page:number item="${searchCriteria}"/></div>
 	</td>

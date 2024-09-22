@@ -289,9 +289,9 @@ public class CommonController extends AbstractBaseController {
 		return commonLogic.getReason(MReason);
 	}
 
-	@RequestMapping(value = "/getReasonMCStopList", method = RequestMethod.GET)
+	@RequestMapping(value = "/getLossTimeReasonList", method = RequestMethod.GET)
 	public @ResponseBody
-	Map<Integer, String> getReasonMCStopList() {
+	Map<Integer, String> getLossTimeReasonList() {
 		List<MReason> reasons = commonLogic.getReasonMCStopList();
 
 		Map<Integer, String> map = new LinkedHashMap<Integer, String>();

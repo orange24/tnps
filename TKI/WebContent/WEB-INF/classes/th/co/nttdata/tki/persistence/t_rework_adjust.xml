@@ -12,7 +12,9 @@
 	   INNER JOIN m_part p ON tp.partid = p.partid
        INNER JOIN m_wip wip ON tp.wip = wip.wip  
        INNER JOIN m_wip wiprw ON tpr.wip = wiprw.wip    
-	   INNER JOIN m_customer mc ON tp.customerid = mc.customerid 
+	   INNER JOIN m_customer mc ON tp.customerid = mc.customerid
+	   LEFT JOIN m_wip wiprw2 ON tpa.wip_rework = wiprw2.wip
+	   LEFT JOIN m_reason r on r.reasonid = tpa.ng_reason
 	   <dynamic prepend="WHERE">  
 			<isNotEmpty prepend="AND" property="wipFr"> tp.wip = #wipFr# </isNotEmpty>
 			<isNotEmpty prepend="AND" property="wipTo"> tpr.wip = #wipTo# </isNotEmpty>
@@ -38,6 +40,8 @@
 			,p.partNo 
 			,p.partName 
 			,tpr.reworkQty - ISNULL(tpr.reworkAdjustQty,0) as reworkQty
+			,tpa.ng_reason , tpa.remark as reworkRemark, tpa.wip_rework 
+			, wiprw2.wipname as wipRework, r.reasonname as ngReason
 		<include refid="querySql"/>
 		) tbl
 		WHERE tbl.reworkQty > 0
@@ -66,14 +70,14 @@
 		WHERE tbl.reworkQty > 0
 	</select>
 
-	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TReworkAdjust">		
+	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TReworkAdjust">
 		<iterate property="adjustList">
 			UPDATE t_pending_rework SET reworkAdjustQty = ISNULL(reworkAdjustQty,0) + #adjustList[].ok# + #adjustList[].ng# 
 				<isEqual property="adjustList[].status" compareValue="1">,isClosed = '1'</isEqual>
 			WHERE pdReworkId = #adjustList[].pdReworkId#;
 			
-			INSERT INTO t_rework_adjust(pdReworkId, reportdate, ok, ng, createby, updateby) 
-			VALUES (#adjustList[].pdReworkId#, CONVERT(DATE,GETDATE()), #adjustList[].ok#, #adjustList[].ng#, #createBy#, #updateBy#);
+			INSERT INTO t_rework_adjust(pdReworkId, reportdate, ok, ng, createby, updateby, remark) 
+			VALUES (#adjustList[].pdReworkId#, CONVERT(DATE,GETDATE()), #adjustList[].ok#, #adjustList[].ng#, #createBy#, #updateBy#, #reworkRemark#);
 		</iterate>
 	</insert>
 	
@@ -98,7 +102,7 @@
 			<isEqual prepend="AND" property="status" compareValue="2"> (tpr.reworkQty <![CDATA[ <= ]]> ISNULL(tpr.reworkAdjustQty,0)) </isEqual>
 		</dynamic>  
 	</sql>
-	
+
 	<select id="queryHis" parameterClass="th.co.nttdata.tki.bean.TReworkAdjust" resultClass="th.co.nttdata.tki.bean.TReworkAdjust">
 		SELECT 
 			 tpr.pdReworkId
@@ -113,14 +117,15 @@
 			,tra.reportDate
 			,tra.createBy 
 			,tra.lastUpdate
-		<include refid="queryHisSql"/>           
+			,tra.remark as reworkRemark
+		<include refid="queryHisSql"/>
 		ORDER by 
 			 wip.wipName
 			,wiprw.wipName
 			,tra.reportDate DESC
 			,p.partNo 
 	</select>
-	
+
 	<select id="countHis" parameterClass="th.co.nttdata.tki.bean.TReworkAdjust" resultClass="int">
 		SELECT
 			count(*)

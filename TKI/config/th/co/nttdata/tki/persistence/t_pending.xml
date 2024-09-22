@@ -17,7 +17,7 @@
 			<isNotEmpty prepend="AND" property="partName"> p.partName like #partName# + '%' </isNotEmpty>
 			<isNotEmpty prepend="AND" property="workorderNo"> tp.workorderno like #workorderNo# + '%' </isNotEmpty>
 	</sql>
-	
+
 	<select id="query" parameterClass="th.co.nttdata.tki.bean.TPending" resultClass="th.co.nttdata.tki.bean.TPendingAdjust">
 		SELECT 
 			 tp.pdId
@@ -29,7 +29,7 @@
 			,tp.lotno
 			,tp.wip 
 			,wip.wipName  
-			,tp.pd - ISNULL(tp.pdadjust,0) as pdQty			         
+			,tp.pd - ISNULL(tp.pdadjust,0) as pdQty
 		<include refid="querySql"/>
 		ORDER BY p.partNo
 	</select>
@@ -40,33 +40,32 @@
 		<include refid="querySql"/>
 	</select>
 
-	<select id="queryWip" parameterClass="th.co.nttdata.tki.bean.TPending" resultClass="th.co.nttdata.tki.bean.MWip">		
-  		SELECT w.wip, w.wipName
-		FROM m_wip w 
-		ORDER BY w.wip 	
+	<select id="queryWip" parameterClass="th.co.nttdata.tki.bean.TPending" resultClass="th.co.nttdata.tki.bean.MWip">
+		SELECT w.wip, w.wipName
+		FROM m_wip w
+		ORDER BY w.wip
 	</select>
-	
-	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TPendingAdjust">		
+
+	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TPendingAdjust">
 		UPDATE t_pending SET pdAdjust = ISNULL(pdAdjust,0) + #pdAdjustQty# WHERE pdId = #pdId#;
-		
-		INSERT INTO t_pending_adjust(pdid, reportdate, ok, ng, createby, updateby) 
-		VALUES (#pdId#, CONVERT(DATE,GETDATE()), #ok#, #ng#, #createBy#, #createBy#);
+
+		INSERT INTO t_pending_adjust(pdid, reportdate, ok, ng, createby, updateby, ng_reason, wip_rework, remark) 
+		VALUES (#pdId#, CONVERT(DATE,GETDATE()), #ok#, #ng#, #createBy#, #createBy#, #ngReason#, #wipRework#, #adjustRemark#);
 		<selectKey resultClass="int" >
 			SELECT @@IDENTITY AS pdAdjustId
 		</selectKey>
 	</insert>
-	
+
 	<insert id="insertRework" parameterClass="th.co.nttdata.tki.bean.TPendingAdjust">
-		<iterate property="reworkList">		
+		<iterate property="reworkList">
 			<isNotNull property="reworkList[].reworkQty">
-      		INSERT INTO t_pending_rework (pdadjustid, wip, reworkqty)
+			INSERT INTO t_pending_rework (pdadjustid, wip, reworkqty)
 			VALUES (#pdAdjustId#, #reworkList[].wip#, #reworkList[].reworkQty#);
-			</isNotNull>	
+			</isNotNull>
 		</iterate>
 	</insert>
-	
+
 	<!-- WIP_S04 -->
-	
 	<resultMap class="th.co.nttdata.tki.bean.TPendingAdjust" id="pending-map">
 		<result property="pdAdjustId"/>
 		<result property="pdId"/>
@@ -82,10 +81,13 @@
 		<result property="ok"/>
 		<result property="ng"/>
 		<result property="createBy"/>
+		<result property="wipRework"/>
+		<result property="remark"/>
+		<result property="ngReason"/>
 		<result property="lastUpdate" column="reportDate"/>
 		<result property="reworkList" column="pdAdjustId" select="t_pending.queryPendingRework"/>
 	</resultMap>
-	
+
 	<select id="queryPendingRework" parameterClass="integer" resultClass="th.co.nttdata.tki.bean.TPendingRework">
 		SELECT 
 			 tpr.wip
@@ -94,22 +96,22 @@
 		 FROM t_pending_rework tpr INNER JOIN m_wip wip ON wip.wip = tpr.wip
 		WHERE tpr.pdAdjustId = #value#
 	</select>
-	
-	<sql id="queryHisSql">   
+
+	<sql id="queryHisSql">
 		FROM t_pending tp 
 	   INNER JOIN m_part p ON tp.partid = p.partid
-	   INNER JOIN t_pending_adjust tpa ON tp.pdId = tpa.pdId	    
-       INNER JOIN m_wip wip ON tp.wip = wip.wip     
+	   INNER JOIN t_pending_adjust tpa ON tp.pdId = tpa.pdId
+       INNER JOIN m_wip wip ON tp.wip = wip.wip
 	   INNER JOIN m_customer mc ON tp.customerid = mc.customerid 
 	    <dynamic prepend="WHERE">
-	    	<isNotEmpty prepend="AND" property="wip"> tp.wip = #wip# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip"> tp.wip = #wip# </isNotEmpty>
 			<isGreaterThan prepend="AND" property="customerId" compareValue="0"> tp.customerId = #customerId# </isGreaterThan>	
-	   		<isNotEmpty prepend="AND" property="partNo"> p.partNo like #partNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo"> p.partNo like #partNo# + '%' </isNotEmpty>
 			<isNotEmpty prepend="AND" property="partName"> p.partName like #partName# + '%' </isNotEmpty>
 			<isNotEmpty prepend="AND" property="workorderNo"> tp.workorderno like #workorderNo# + '%' </isNotEmpty>
 			<isNotEmpty prepend="AND" property="reportDateFr"> tpa.reportDate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
 			<isNotEmpty prepend="AND" property="reportDateTo"> tpa.reportDate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
-	    </dynamic>  
+	    </dynamic>
 	</sql>
 	
 	<select id="queryHis" parameterClass="th.co.nttdata.tki.bean.TPending" resultMap="pending-map">
@@ -129,7 +131,10 @@
 			,tpa.ng 
 			,tpa.createBy 
 			,tpa.reportDate
-		<include refid="queryHisSql"/>           
+			,tpa.wip_rework
+			,tpa.remark
+			,tpa.ng_reason
+		<include refid="queryHisSql"/>
 		ORDER by reportDate DESC, tp.wip, p.partNo 
 	</select>
 	

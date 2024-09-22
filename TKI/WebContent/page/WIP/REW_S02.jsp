@@ -100,7 +100,7 @@ $(document).ready(function() {
 <c:if test="${fn:length(searchCriteria.adjustList) > 0 }">
 <table id="detail" width="100%" border="1" align="center" cellpadding="3" cellspacing="0" class="ui-widget ui-widget-content " >
   <tr>
-  	<td colspan="12">
+  	<td colspan="13">
 	  <div style="float:left" ><page:display item="${searchCriteria}"/></div>
 	  <div style="float:right"><page:number item="${searchCriteria}"/></div>
 	</td>
@@ -116,6 +116,7 @@ $(document).ready(function() {
    <th colspan="2" >Adjust Rework</th>
    <th rowspan="2" >Adjust By</th>
    <th rowspan="2" >Adjust Date</th>
+   <th rowspan="2" >Remark</th>
   </tr>
   <tr >
     <th >OK</th>
@@ -138,10 +139,11 @@ $(document).ready(function() {
         <td align="center" >
         	<fmt:formatDate value="${tReworkAdjust.reportDate}" pattern="dd/MM/yyyy"/>&nbsp;
         </td>
+        <td align="center" >${tReworkAdjust.reworkRemark}&nbsp;</td>
     </tr>
   </c:forEach>
   <tr>
-  	<td colspan="12">
+  	<td colspan="13">
 	  <div style="float:left" ><page:display item="${searchCriteria}"/></div>
 	  <div style="float:right"><page:number item="${searchCriteria}"/></div>
 	</td>

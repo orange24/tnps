@@ -14,7 +14,7 @@
 	var dailyWKForm;
 	var boxCustomer;
 	var boxPartNo;
-	var boxMcStopReason;
+	var boxLossTimeReason;
 	var boxReportDate;
 	var boxReportType;
 	var boxShift;
@@ -46,8 +46,8 @@
 		// <!-- Initial: Auto Completion. -->
 		var workOrderList = {
 			source: function( request, response ) {
-				var customerId = $(this).closest("tr").find("select#customerId");
-				var partId     = $(this).closest("tr").find("select#partId");
+				var customerId       = $(this).closest("tr").find("select#customerId");
+				var partId           = $(this).closest("tr").find("select#partId");
 	
 				getJSON("DAL_S04_workOrderNoList", {
 					         "wip": boxWIP.val()
@@ -76,15 +76,14 @@
 			},
 			minLength: 1
 		};
-	
+
 		// <!-- Initial: Set 'minDate'. -->
 		boxReportDate.datepicker( "option", "minDate", '${minReportDate}' );
 		boxReportDate.datepicker( "option", "maxDate", '0d' );
-	
+
 		dailyWKForm.submit(function() { return false; });
-	
+
 		btnSave.click(function(){
-	
 			// <!-- Providing the data. -->
 			var errors = [];
 			var index = 0;
@@ -94,6 +93,7 @@
 				var inputs = $("input", this);
 				var boxCustm = selects.eq(0);
 				var boxPrtNo = selects.eq(1);
+				var boxLossTimeReason = selects.eq(2);
 				var inpWKOrd = inputs.eq(0);
 				var inpWKQty = parseInt($(this).find("td:eq(5)").html() || 0);
 				var inpACQty = parseInt(inputs.eq(5).val() || 0);
@@ -102,11 +102,12 @@
 				var inpOKNum = parseInt(inputs.eq(2).val() || 0);
 				var inpTimeMin = parseInt(inputs.eq(6).val() || 0);
 				var inpRSSum = 0;
-				
+
 				// <!-- Assigning the Element Name. -->
 				boxCustm.attr("name", "dailyWKDetailList["+ index +"].customerId");
 				boxPrtNo.attr("name", "dailyWKDetailList["+ index +"].partId");
-	
+				boxLossTimeReason.attr("name", "dailyWKDetailList["+ index +"].lossTimeReasonId");
+
 				inpWKOrd.attr("name", "dailyWKDetailList["+ index +"].workOrderNo");
 				inputs.eq(1).attr("name", "dailyWKDetailList["+ index +"].lotNo");
 				inputs.eq(2).attr("name", "dailyWKDetailList["+ index +"].ok");
@@ -115,19 +116,21 @@
 				inputs.eq(5).attr("name", "dailyWKDetailList["+ index +"].qty");
 				inputs.eq(6).attr("name", "dailyWKDetailList["+ index +"].timeUsed");
 				inputs.eq(7).attr("name", "dailyWKDetailList["+ index +"].manPower");
-				inputs.eq(8).attr("name", "dailyWKDetailList["+ index +"].staff");
-				for( var column = 9; column < inputs.length; column++ ) {
+				inputs.eq(8).attr("name", "dailyWKDetailList["+ index +"].lossTime");
+				//inputs.eq(9).attr("name", "dailyWKDetailList["+ index +"].lossTimeReasonId");
+				inputs.eq(9).attr("name", "dailyWKDetailList["+ index +"].staff");
+				for( var column = 10; column < inputs.length; column++ ) {
 					// <!-- Finding the 'reasonId'. -->
-					var reasonId = reasonHeaders.eq(column-9).attr("id");
+					var reasonId = reasonHeaders.eq(column-10).attr("id");
 					inpRSSum += parseInt(inputs.eq(column).attr("name", "dailyWKDetailList["+ index +"].ngReasonMap["+ reasonId +"]").val() || 0);
 				}
-	
+
 				// <!-- Validation: if incomplete. -->
 				if( !inpWKOrd.val() )
 					errors.push({"code": "err.cmm.002", "arguments": [(index+1), "Work Order No."]});
-				if( boxCustm.attr("selectedIndex") === 0 )
+				if( boxCustm.val() == '-2147483648')
 					errors.push({"code": "err.cmm.002", "arguments": [(index+1),"Customer"]});
-				if( boxPrtNo.attr("selectedIndex") === 0 )
+				if( boxPrtNo.val() == '-2147483648' )
 					errors.push({"code": "err.cmm.002", "arguments": [(index+1),"Partno/Partname"]});
 				if( isNaN(inpACQty) )
 					errors.push({"code": "err.dal.002"});
@@ -139,16 +142,16 @@
 				//	errors.push({"code": "err.dal.006", "arguments": [(index+1)]});
 				if( inpNGNum != inpRSSum )
 					errors.push({"code": "err.dal.007", "arguments": [(index+1)]});
-	
+
 				index++;
 			});
-	
+
 			if( errors.length > 0 ) {
 				message.setErrors(errors);
 				return false;
 			}
 			message.clear();
-	
+
 			// <!-- Seding the data. -->
 			var params = dailyWKForm.serialize() +'&'+ $.param({
 			           "wip": boxWIP.val(),
@@ -160,32 +163,33 @@
 			postJSON("DAL_S04_check", params, function( response ){
 				if( response.errors && response.errors.length > 0 ) {
 					message.setErrors(response.errors);
+					enableSaveBtn();
 					return;
 				}
-	
+
 				if( !confirm("<spring:message code='cfm.cmm.001'/>") )
 					return;
-	
+
 				postJSON("DAL_S04_save", params, function( result ){
 					$("input, select, textarea").attr("disabled", true);
-	
+
 					if( result.errors && result.errors.length > 0 ) {
 						message.setErrors(result.errors);
+						enableSaveBtn();
 						return;
 					}
-					enableSaveBtn();
 					message.setInfos ( result.infos  );
 				});
 			});
 			return false;
 		});
-	
+
 		boxWIP.change(function(){
 			ngReasons = {};
 			var initial = function( result ){
 				var mainHeaderRow   = $("tbody > tr:eq(0) > th", tblDetailPart);
 				var reasonHeaderRow = $("tbody > tr:eq(1)", tblDetailPart);
-	
+
 				// <!-- Clear to Init. -->
 				if( mainHeaderRow.length == 12 )
 					mainHeaderRow.eq(10).remove();
@@ -198,12 +202,12 @@
 				if( !result || result.length < 1 ) {
 					return;
 				}
-	
+
 				// <!-- Start Processing. -->
 				/*for( var i = 0; i < result.length ; i++ ) {
 					ngReasons[result[i].reasonCode] = result[i].reasonId;
 				}*/
-	
+
 				// <!-- Start Insert Column into Table. -->
 				$("<th>NG Reason Qty <span class='textred'>*</span></th>").attr("colspan", result.length+1).insertBefore( mainHeaderRow.last() );
 				reasonHeaderRow.append( $("<th>Total</th>") );
@@ -215,10 +219,10 @@
 					reasonHeaderRow.append( $("<th></th>").attr("id", result[i].reasonId).attr("title", result[i].reasonName).html( result[i].reasonCode ) );
 				}
 			};
-	
+
 			getJSON("getReasonNGList", { "wip": $(this).val() }, initial);
 		});
-	
+
 		btnAddRow.click(function(){
 			var mainHeaderRow = $("tbody > tr:eq(0) > th", tblDetailPart);
 			var cntColumn = 0;
@@ -226,13 +230,13 @@
 			mainHeaderRow.each(function(){
 				cntColumn += $(this).attr("colspan");
 			});
-	
+
 			// <!-- Initial Event. -->
 			var wrkOdr   = $("<input size='12' maxlength='11' />").autocomplete(workOrderList);
 			var custom   = boxCustomer.clone(true);
 			var partNo   = boxPartNo.clone(true);
-			var mcStopReason   = boxMcStopReason.clone(true);
-	
+			var lossTimeReason   = boxLossTimeReason.clone(true);
+
 			// <!-- Generating Row Template. -->
 			rowTemplt.append( $("<td align='center'></td>").html( $("tbody > tr", tblDetailPart).length - 1 ) );
 			rowTemplt.append( $("<td align='center'></td>").append( wrkOdr ) );
@@ -247,12 +251,12 @@
 			rowTemplt.append( $("<td align='center'></td>").html( "<input size='4'  maxlength='10' />" ).keypress(IntegerFilter) );
 			rowTemplt.append( $("<td align='center'></td>").html( "<input size='4'  maxlength='10' />" ).keypress(IntegerFilter) );
 			rowTemplt.append( $("<td align='center'></td>").html( "<input size='12' maxlength='50'/>" ) );
+			rowTemplt.append( $("<td align='left'></td>").append( lossTimeReason ) );
 			rowTemplt.append( $("<td align='center'></td>").html( "<input size='12' maxlength='50'/>" ) );
-			rowTemplt.append( $("<td align='left'></td>").append( mcStopReason ) );
-			if (cntColumn > 14) {
+			if (cntColumn > 16) {
 				rowTemplt.append( $("<td align='center'></td>").attr('id','total').html('&nbsp;') );
 			}
-			for( var i = 0; i < cntColumn - 15; i++ ) {
+			for( var i = 0; i < cntColumn - 17; i++ ) {
 				rowTemplt.append( 
 					$("<td align='center'></td>")
 					.html(
@@ -270,10 +274,10 @@
 			}
 			rowTemplt.append( $("<td align='center'></td>").html( "<a href='javascript:void(0);' onclick='deleteRow(this)'><img src='image/icon/delete.gif'/></a>" ) );
 			setQtyCalculation( rowTemplt );
-	
+
 			$("tbody", tblDetailPart).append(rowTemplt);
 		});
-	
+
 		btnDisplay.click(function(){
 			var errors = [];
 			if( boxWIP.attr("selectedIndex") === 0 )
@@ -325,9 +329,17 @@
 					});
 					btnAddRow.click();
 				});
+
+				getJSON("getLossTimeReasonList",{},function(result){
+					console.log("getLossTimeReasonList", result);
+					boxLossTimeReason.empty();
+					$.each(result,function(val, text){
+						boxLossTimeReason.append( $("<option></option>").val(val).html(text) );
+					});
+				});
 			}
 		}
-		
+
 		$("select[id=customerId]").add(boxCustomer).change(function(){
 			var partNo = $(this).parent().parent().find("#partId");
 			var params = { "customerId": "", "wip": "", "reportType": boxReportType.val() };
@@ -338,7 +350,7 @@
 				$.each(result,function(val, text){
 					partNo.append( $("<option></option>").val(val).html(text) );
 				});
-	
+
 				var partId = partNo.data("partId");
 				if (partId) {
 					partNo.val(partId).removeData("partId");
@@ -432,7 +444,7 @@
 	// <!-- Initial Processing. -->
 	comboBox.setCustomer(boxCustomer = $("<select id='customerId'></select>"));
 	comboBox.setPartNo(boxPartNo   = $("<select id='partId'></select>"));
-	comboBox.setMcStopReason(boxMcStopReason   = $("<select id='lossTimeReason'></select>"));
+	comboBox.setLossTimeReason(boxLossTimeReason   = $("<select id='lossTimeReasonId'></select>"));
 </script>
 <style type="text/css">
 <!--
@@ -566,12 +578,12 @@
 						<td align="center"><input size="4"  maxlength="10" value="<fmt:formatNumber pattern="#,##0" value="${detail.manPower}"/>"/></td>
 						<td align="center"><input size="4"  maxlength="10" value="<fmt:formatNumber pattern="#,##0" value="${detail.lossTime}"/>"/></td>
 						<td align="center">
-							<select id='lossTimeReason'>
+							<select id='lossTimeReasonId'>
 								<c:forEach var="custom" items="${stopReasonMap}">
-									<c:if test="${custom.key == detail.mcStopReasonId}">
+									<c:if test="${custom.key == detail.lossTimeReasonId}">
 										<option value="${custom.key}" selected="selected">${custom.value}</option>
 									</c:if>
-									<c:if test="${custom.key != detail.mcStopReasonId}">
+									<c:if test="${custom.key != detail.lossTimeReasonId}">
 										<option value="${custom.key}">${custom.value}</option>
 									</c:if>
 								</c:forEach>

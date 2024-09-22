@@ -140,43 +140,46 @@ public class DAL_R02ExcelView extends AbstractExcelView {
 				int totalNg = dayDetail.getNg()+nightDetail.getNg();
 				int totalPd = dayDetail.getPd()+nightDetail.getPd();
 				int totalQty = dayDetail.getOk()+dayDetail.getNg()+dayDetail.getPd()+nightDetail.getOk()+nightDetail.getNg()+nightDetail.getPd();
-				createCell(workbook, sndRow,  0, r02c00Style);
-				createCell(workbook, sndRow,  1, r02c01Style);
-				createCell(workbook, sndRow,  2, r02c02Style);
-				createCell(workbook, sndRow,  3, r02c03Style);
-				createCell(workbook, sndRow,  4, r02c04Style);
-				createCell(workbook, sndRow,  5, r02c05Style).setValue("Night");
-				createCell(workbook, sndRow,  6, r02c06Style).setValue(mcwk.getMachineNo() +" : "+ mcwk.getMachineName());
-				createCell(workbook, sndRow,  7, r02c07Style).setValue(nightDetail.getOk());
-				createCell(workbook, sndRow,  8, r02c08Style).setValue(nightDetail.getNg());
-				createCell(workbook, sndRow,  9, r02c09Style).setValue(nightDetail.getPd());
-				createCell(workbook, sndRow, 10, r02c10Style).setValue(nightDetail.getQty());
-				createCell(workbook, sndRow, 11, r02c11Style).setValue(nightDetail.getTimeUsed());
-				createCell(workbook, sndRow, 12, r02c12Style).setValue(nightDetail.getManPower());
+				int row = 0;
+				createCell(workbook, sndRow, row++, r02c00Style);
+				createCell(workbook, sndRow, row++, r02c01Style);
+				createCell(workbook, sndRow, row++, r02c02Style);
+				createCell(workbook, sndRow, row++, r02c03Style);
+				createCell(workbook, sndRow, row++, r02c04Style);
+				createCell(workbook, sndRow, row++, r02c05Style).setValue("Night");
+				// createCell(workbook, sndRow,  6, r02c06Style).setValue(mcwk.getMachineNo() +" : "+ mcwk.getMachineName());
+				createCell(workbook, sndRow, row++, r02c07Style).setValue(nightDetail.getOk());
+				createCell(workbook, sndRow, row++, r02c08Style).setValue(nightDetail.getNg());
+				createCell(workbook, sndRow, row++, r02c09Style).setValue(nightDetail.getPd());
+				createCell(workbook, sndRow, row++, r02c10Style).setValue(nightDetail.getQty());
+				createCell(workbook, sndRow, row++, r02c11Style).setValue(nightDetail.getTimeUsed());
+				createCell(workbook, sndRow, row++, r02c12Style).setValue(nightDetail.getManPower());
+				createCell(workbook, sndRow, row++, r02c12Style).setValue(nightDetail.getManPower());
+				createCell(workbook, sndRow, row++, r02c12Style).setValue(nightDetail.getManPower());
 				if (totalOk==0) {
-					sheet.getRow(rowNumber-2).getCell(13).setCellValue("");
+					sheet.getRow(rowNumber-2).getCell(row).setCellValue("");
 				}else{
-					sheet.getRow(rowNumber-2).getCell(13).setCellValue(totalOk/divid);
+					sheet.getRow(rowNumber-2).getCell(row).setCellValue(totalOk/divid);
 				}
-				createCell(workbook, sndRow, 13, r02c13StyleDup);
+				createCell(workbook, sndRow, row++, r02c13StyleDup);
 				if (totalNg==0) {
-					sheet.getRow(rowNumber-2).getCell(14).setCellValue("");
+					sheet.getRow(rowNumber-2).getCell(row).setCellValue("");
 				}else{
-					sheet.getRow(rowNumber-2).getCell(14).setCellValue(totalNg/divid);
+					sheet.getRow(rowNumber-2).getCell(row).setCellValue(totalNg/divid);
 				}
-				createCell(workbook, sndRow, 14, r02c14StyleDup);
+				createCell(workbook, sndRow, row++, r02c14StyleDup);
 				if (totalPd==0) {
-					sheet.getRow(rowNumber-2).getCell(15).setCellValue("");
+					sheet.getRow(rowNumber-2).getCell(row).setCellValue("");
 				}else{
-					sheet.getRow(rowNumber-2).getCell(15).setCellValue(totalPd/divid);
+					sheet.getRow(rowNumber-2).getCell(row).setCellValue(totalPd/divid);
 				}
-				createCell(workbook, sndRow, 15, r02c15StyleDup);
+				createCell(workbook, sndRow, row++, r02c15StyleDup);
 				if (totalQty==0) {
-					sheet.getRow(rowNumber-2).getCell(16).setCellValue("");
+					sheet.getRow(rowNumber-2).getCell(row).setCellValue("");
 				}else{
-					sheet.getRow(rowNumber-2).getCell(16).setCellValue(totalQty/divid);
+					sheet.getRow(rowNumber-2).getCell(row).setCellValue(totalQty/divid);
 				}
-				createCell(workbook, sndRow, 16, r02c16StyleDup);
+				createCell(workbook, sndRow, row++, r02c16StyleDup);
 				
 				colNumber = 17;
 				if (reasonList.size() > 0) {

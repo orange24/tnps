@@ -41,7 +41,6 @@ public class DAL_S04Controller extends AbstractBaseController {
 
 	@RequestMapping("/DAL_S04")
 	public ModelAndView init() {
-		System.out.println("reason = " + commonController.getReasonMCStopList());
 		return new ModelAndView(PATH_URI)
 				.addObject("dailyWK", new TDailyWK())
 				.addObject(
@@ -50,7 +49,7 @@ public class DAL_S04Controller extends AbstractBaseController {
 								.setReportCategory(new String[] { "wip" })))
 				.addObject("wipMap", commonController.getWIPSel(2))
 				.addObject("customerMap", commonController.getCustomerSel())
-				.addObject("stopReasonMap", commonController.getReasonMCStopList())
+				.addObject("stopReasonMap", commonController.getLossTimeReasonList())
 				.addObject("partMap", commonController.getPartNameNo(null, null, null))
 				.addObject("minReportDate", settings.getProperty("DAL.reportDate.minDate", "-40d"));
 	}
@@ -66,8 +65,7 @@ public class DAL_S04Controller extends AbstractBaseController {
 							TDailyWK.getWip(), TDailyWK.getReportType()));
 		}
 
-		List<MReason> lstMReason = commonController.getReasonNGList(TDailyWK
-				.getWip());
+		List<MReason> lstMReason = commonController.getReasonNGList(TDailyWK.getWip());
 
 		for (TDailyWKDetail dailyWKDetail : TDailyWK.getDailyWKDetailList()) {
 			Map<Integer, Integer> ngReasonMap = new LinkedHashMap<Integer, Integer>();
@@ -97,7 +95,7 @@ public class DAL_S04Controller extends AbstractBaseController {
 								.setReportCategory(new String[] { "wip" })))
 				.addObject("wipMap", commonController.getWIPSel(2))
 				.addObject("customerMap", commonController.getCustomerSel())
-				.addObject("stopReasonMap", commonController.getReasonMCStopList())
+				.addObject("stopReasonMap", commonController.getLossTimeReasonList())
 				.addObject("reasonNGList", commonController.getReasonNGList(TDailyWK.getWip()))
 				.addObject("minDate", calendar.getTime());
 	}

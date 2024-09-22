@@ -208,17 +208,13 @@
 			AND d.deliveryplanid = (
 				SELECT TOP 1 p.deliveryplanid
 				FROM t_deliveryplan p
+				INNER JOIN t_deliveryplan_date d on d.fgid = #fgId# AND p.deliveryplanid = d.deliveryplanid
 				WHERE customerId = #customerId#
 				AND yearmonth <![CDATA[ < ]]> (
 						CAST(CONVERT(INT, DATEPART(year, #reportDateFr#)) AS VARCHAR(4))
 						+
 						RIGHT('0' + (CONVERT(VARCHAR(2), LTRIM(STR(DATEPART(month,  #reportDateFr#))))), 2)
 					)
-				AND EXISTS (
-					SELECT 1
-					FROM dbo.t_deliveryplan_date d
-					WHERE d.fgid = #fgId# AND p.deliveryplanid = d.deliveryplanid
-				)
 				ORDER BY yearmonth DESC, revision DESC
 			)
 		ORDER BY d.deliveryDate DESC

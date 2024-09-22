@@ -18,8 +18,9 @@ public class TDailyWKDetail {
 	private Integer pd;
 	private Integer qty;
 	private Integer workOrderQty;
+	private Integer lossTimeReasonId;
 	private Integer lossTime;
-	private Integer mcStopReasonId;
+	private String lossTimeReasonName;
 	private String customerCode;
 	private String datailRef;// idRef of DAL_R03
 	private String lotNo;
@@ -507,12 +508,12 @@ public class TDailyWKDetail {
 		this.currency = currency;
 	}
 
-	public Integer getTimestop() {
-		return lossTime;
+	public Integer getLossTimeReasonId() {
+		return lossTimeReasonId;
 	}
 
-	public void setTimestop(Integer timestop) {
-		this.lossTime = timestop;
+	public void setLossTimeReasonId(Integer lossTimeReasonId) {
+		this.lossTimeReasonId = lossTimeReasonId;
 	}
 
 	public Map<Integer, Integer> getStopReason() {
@@ -523,12 +524,20 @@ public class TDailyWKDetail {
 		this.stopReason = stopReason;
 	}
 
-	public void setMcStopReasonId(Integer mcStopReasonId) {
-		this.mcStopReasonId = mcStopReasonId;
+	public Integer getLossTime() {
+		return lossTime;
 	}
 
-	public Integer getMcStopReasonId() {
-		return mcStopReasonId;
+	public void setLossTime(Integer lossTime) {
+		this.lossTime = lossTime;
+	}
+
+	public String getLossTimeReasonName() {
+		return lossTimeReasonName;
+	}
+
+	public void setLossTimeReasonName(String lossTimeReasonName) {
+		this.lossTimeReasonName = lossTimeReasonName;
 	}
 
 }

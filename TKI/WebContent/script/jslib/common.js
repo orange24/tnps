@@ -162,6 +162,19 @@
 			});
 		};
 
+	    this.setLossTimeReason = function( selectElement, wip, customerId ) {
+			if( !selectElement || !selectElement.exists() )
+				return;
+
+			var params = {};
+			getJSON("getLossTimeReasonList",params,function(result){
+				selectElement.empty();
+				$.each(result,function(val, text){
+					selectElement.append( $("<option></option>").val(val).html(text) );
+				});
+			});
+		};
+
 	    this.setPartNameNo = function( selectElement ) {
 			if( !selectElement || !selectElement.exists() )
 				return;
