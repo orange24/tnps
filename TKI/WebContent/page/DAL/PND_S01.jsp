@@ -191,17 +191,20 @@
 			checkInput();
 			var dailyPDForm = $("form#dailyPDForm");
 			if (message.isNoError() && confirm(message.getMessage("cfm.cmm.001"))) {
-			  	var details = new Object();
-			  	$("[id=tblDetailPart] [id=mainRow]").each(function(idx){
-				    var sumAdjust = 0;
-					
-				    $(this).find("#ok,#ng").each(function(){
-						var name = "adjustList[" + idx + "]."+ $(this).attr("name");
-					 	$(this).attr("name", name);
-					 	if(!isNaN(parseInt($(this).val(),0)))
+				var details = new Object();
+				$("[id=tblDetailPart] [id=mainRow]").each(function(idx){
+					var sumAdjust = 0;
+
+					$(this).find("#ok,#ng").each(function(){
+						var name = $(this).attr("name");
+						if (name.indexOf('adjustList') == -1) {
+							name = "adjustList[" + idx + "]."+ $(this).attr("name");
+							$(this).attr("name", name);
+						}
+						if(!isNaN(parseInt($(this).val(),0)))
 							sumAdjust = parseInt(sumAdjust,0) + parseInt($(this).val(),0);
-				 	});
-					
+					});
+
 					$(this).find("[id=tdout_sublist]").each(function(){
 						$(this).find("[id=tbl_sublist]").find("#tr_sublist").each(function(inneridx){
 							$(this).find("input,select").each(function(){
@@ -212,14 +215,29 @@
 						    })
 						})
 					});
-					
+
 					$(this).find("[name=pdAdjustQty]").val(sumAdjust);
 					var pdAdjustQtyName = "adjustList[" + idx + "]."+ "pdAdjustQty";
 					$(this).find("[name=pdAdjustQty]").attr("name", pdAdjustQtyName);
-						
+
 					var pdId = "adjustList[" + idx + "]."+ "pdId";
 					$(this).find("[name=pdId]").attr("name", pdId);
-				
+
+					$(this).find("input[name=remark]").each(function(){
+						var name = $(this).attr("name");
+						if (name.indexOf('adjustList') == -1) {
+							name = "adjustList[" + idx + "]."+ name;
+							$(this).attr("name", name);
+						}
+					});
+					$(this).find("select[name=wip]").each(function(){
+						var name = "wipRework";
+						if (name.indexOf('adjustList') == -1) {
+							name = "adjustList[" + idx + "]."+ name;
+							$(this).attr("name", name);
+						}
+					});
+
 				}); 
 				postJSON("PND_S01_save", dailyPDForm.serialize(), function(result){
 					if (result.infos.length > 0) {
@@ -332,7 +350,7 @@
 						<td align="center" class="border_all">
 							<select id="ng_reason" name="ng_reason">
 								<option value="">-- Select Reason --</option>
-							  	<c:forEach var="item" items="${searchCriteria.resonList}">
+							  	<c:forEach var="item" items="${searchCriteria.reasonList}">
 									<option value="${item.reasonId}">${item.reasonId}:${item.reasonName}</option>
 								</c:forEach>
 							</select>
@@ -344,7 +362,7 @@
 							<table id="tbl_sublist">
 						    	<tr id="tr_sublist">
 									<td>
-										<select id="wip">
+										<select id="wip" name="wip">
 											<option value="">-- Select WIP --</option>
 										  	<c:forEach var="item" items="${searchCriteria.wipList}">
 												<option value="${item.wip}">${item.wip}:${item.wipName}</option>

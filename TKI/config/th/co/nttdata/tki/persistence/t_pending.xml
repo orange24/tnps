@@ -50,7 +50,7 @@
 		UPDATE t_pending SET pdAdjust = ISNULL(pdAdjust,0) + #pdAdjustQty# WHERE pdId = #pdId#;
 
 		INSERT INTO t_pending_adjust(pdid, reportdate, ok, ng, createby, updateby, ng_reason, wip_rework, remark) 
-		VALUES (#pdId#, CONVERT(DATE,GETDATE()), #ok#, #ng#, #createBy#, #createBy#, #ngReason#, #wipRework#, #adjustRemark#);
+		VALUES (#pdId#, CONVERT(DATE,GETDATE()), #ok#, #ng#, #createBy#, #createBy#, #ngReason#, #wipRework#, #remark#);
 		<selectKey resultClass="int" >
 			SELECT @@IDENTITY AS pdAdjustId
 		</selectKey>

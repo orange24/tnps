@@ -15,7 +15,7 @@ public class REW_S01LogicImpl implements REW_S01Logic {
 
 	@Autowired
 	TReworkAdjustDao TReworkAdjustDao;
-	
+
 	@Override
 	public TReworkAdjust search(TReworkAdjust TReworkAdjust) {
 		return TReworkAdjustDao.query(TReworkAdjust);
@@ -23,19 +23,21 @@ public class REW_S01LogicImpl implements REW_S01Logic {
 
 	@Override
 	public void save(TReworkAdjust TReworkAdjust) {
-		
+
 		List<TReworkAdjust> adjList = new ArrayList<TReworkAdjust>();
-		
+
 		for (TReworkAdjust reworkAdj : TReworkAdjust.getAdjustList()) {
 			if (reworkAdj.getOk() != null || reworkAdj.getNg() != null || reworkAdj.getStatus() != null) {
-				if(reworkAdj.getOk() == null)reworkAdj.setOk(0);
-				if(reworkAdj.getNg() == null)reworkAdj.setNg(0);
+				if (reworkAdj.getOk() == null)
+					reworkAdj.setOk(0);
+				if (reworkAdj.getNg() == null)
+					reworkAdj.setNg(0);
 				adjList.add(reworkAdj);
 			}
 		}
-		
+
 		TReworkAdjust.setAdjustList(adjList);
-		
+
 		TReworkAdjustDao.insert(TReworkAdjust);
 	}
 

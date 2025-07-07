@@ -14,29 +14,27 @@ import th.co.nttdata.tki.controller.cmm.CommonController;
 public class REW_S02Controller extends AbstractBaseController {
 
 	private static final String PATH_URI = "WIP/REW_S02";
-	
+
 	@Autowired
 	CommonController commonController;
-	
+
 	@Autowired
 	REW_S02Logic rewS02Logic;
-	
+
 	@RequestMapping("/REW_S02.html")
-	public ModelAndView init(){
-		return new ModelAndView(PATH_URI)
-		.addObject("searchCriteria", new TReworkAdjust())
-		.addObject("wipMap", commonController.getWIPAll())
-		.addObject("customerMap", commonController.getCustomerAll());
+	public ModelAndView init() {
+		return new ModelAndView(PATH_URI).addObject("searchCriteria", new TReworkAdjust())
+				.addObject("wipMap", commonController.getWIPAll())
+				.addObject("customerMap", commonController.getCustomerAll());
 	}
-	
+
 	@RequestMapping("/REW_S02_search.html")
-	public ModelAndView search(TReworkAdjust TReworkAdjust){
-		
+	public ModelAndView search(TReworkAdjust TReworkAdjust) {
+
 		TReworkAdjust = rewS02Logic.search(TReworkAdjust);
-		
-		return new ModelAndView(PATH_URI)
-		.addObject("searchCriteria", TReworkAdjust)
-		.addObject("wipMap", commonController.getWIPAll())
-		.addObject("customerMap", commonController.getCustomerAll());
+
+		return new ModelAndView(PATH_URI).addObject("searchCriteria", TReworkAdjust)
+				.addObject("wipMap", commonController.getWIPAll())
+				.addObject("customerMap", commonController.getCustomerAll());
 	}
 }

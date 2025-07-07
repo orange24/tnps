@@ -254,7 +254,7 @@ $(document).ready(function() {
 	    	id="adjustList[${status.count-1}].ng" tabindex="15" size="2" class="adjNG" maxlength="10" />
 	    	<input type="hidden" name="adjustList[${status.count-1}].pdReworkId" value="${tReworkAdjust.pdReworkId}" />
 	    </td>
-	    <td align="left"> <input type="text" name="reworkRemark" size="30"/> </td>
+	    <td align="left"> <input type="text" name="adjustList[${status.count-1}].reworkRemark" size="30"/> </td>
 	    <%--<td align="center" >
 	    	 <input type="checkbox" id="chkBoxClosed[${status.count-1}]" class="boxClosed" name="adjustList[${status.count-1}].status" value="1" />  
 	    </td>--%>

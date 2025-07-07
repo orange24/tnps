@@ -37,4 +37,15 @@ public class TPendingRework extends AbstractBaseBean {
 	public void setReworkQty(Integer reworkQty) {
 		this.reworkQty = reworkQty;
 	}
+
+	public String toString() {
+		String result = "{";
+		result += "pdReworkId = " + pdReworkId + ",";
+		result += "pdAdjustId = " + pdAdjustId + ",";
+		result += "wip = " + wip + ",";
+		result += "wipName = " + wipName + ",";
+		result += "reworkQty = " + reworkQty;
+		result += "}";
+		return result;
+	}
 }

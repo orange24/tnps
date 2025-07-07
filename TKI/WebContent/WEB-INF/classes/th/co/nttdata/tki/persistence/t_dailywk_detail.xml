@@ -21,6 +21,8 @@
 			,d.staff
 			,d.workOrderNo
 			,ISNULL(w.workOrderQty,0) as workOrderQty
+			,losstime
+			,losstime_reason_id as lossTimeReasonId 
 		FROM t_dailywk_detail d
 			LEFT OUTER JOIN (SELECT workOrderNo, partId, SUM(workOrderQty) AS workOrderQty FROM m_workorder GROUP BY workOrderNo, partId) w ON w.partId = d.partId AND w.workOrderNo = d.workOrderNo
 		<dynamic prepend="WHERE">
@@ -30,7 +32,8 @@
 	</select>
 
 	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TDailyWKDetail">
-		INSERT INTO t_dailywk_detail(manpower, timeused, customerid, dailywkid, dailywkdetailid, ng, ok, partid, pd, qty, lotno, staff, workorderno) VALUES(#manPower#, #timeUsed#, #customerId#, #dailyWKId#, #dailyWKDetailId#, #ng#, #ok#, #partId#, #pd#, #qty#, #lotNo#, #staff#, #workOrderNo#);
+		INSERT INTO t_dailywk_detail(manpower, timeused, customerid, dailywkid, dailywkdetailid, ng, ok, partid, pd, qty, lotno, staff, workorderno, losstime, losstime_reason_id) 
+		VALUES(#manPower#, #timeUsed#, #customerId#, #dailyWKId#, #dailyWKDetailId#, #ng#, #ok#, #partId#, #pd#, #qty#, #lotNo#, #staff#, #workOrderNo#, #lossTime#, #lossTimeReasonId#);
 	</insert>
 
 	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.TDailyWK">

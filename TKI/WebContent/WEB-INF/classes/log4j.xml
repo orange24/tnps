@@ -11,7 +11,7 @@
     </appender>
 	<appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
 		<errorHandler class="org.apache.log4j.helpers.OnlyOnceErrorHandler" />
-		<param name="File" value="D:/logs/TKI.log" />
+		<param name="File" value="D:/logs/TKI_UAT.log" />
 		<param name="Append" value="true" />
 		<param name="DatePattern" value="'.'yyyyMMdd" />
 
@@ -37,6 +37,14 @@
 	<logger name="java.sql.ResultSet">
 		<level value="ERROR" />
 		<appender-ref ref="FILE"/>
+	</logger>
+	<logger name="log4j.logger.java.sql.PreparedStatement">
+		<level value="DEBUG"/>
+		<appender-ref ref="CONSOLE"/>
+	</logger>
+	<logger name="log4j.logger.com.ibatis">
+		<level value="DEBUG"/>
+		<appender-ref ref="CONSOLE"/>
 	</logger>
 
     <!-- End iBatis -->

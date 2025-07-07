@@ -11,8 +11,8 @@
     <property environment="env"/>
     <property name="ECLIPSE_HOME" value="D:/eclipse-galileo"/>
     <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.6"/>
-    <property name="source" value="1.6"/>
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
 
     <path id="Web App Libraries.libraryclasspath">
         <pathelement location="ext-lib/servlet-api.jar"/>

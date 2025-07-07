@@ -19,7 +19,9 @@ public class TPendingDaoImpl extends AbstractBaseDao implements TPendingDao {
 	public int insert(TPending pending) {
 		for (TPendingAdjust pendingAdjust : pending.getAdjustList()) {
 			if (pendingAdjust.getPdAdjustQty() > 0) {
-				pendingAdjust.setPdAdjustId((Integer)super.insert("t_pending.insert", pendingAdjust));
+				String resultId = String.valueOf(super.insert("t_pending.insert", pendingAdjust));
+				int id = Integer.parseInt(resultId);
+				pendingAdjust.setPdAdjustId((id));
 				super.update("t_pending.insertRework", pendingAdjust);
 			}
 		}
@@ -44,7 +46,7 @@ public class TPendingDaoImpl extends AbstractBaseDao implements TPendingDao {
 	private TPending query(TPending pending, String suffix) {
 		pending.setAdjustList((List<TPendingAdjust>) queryForList("t_pending.query"+suffix, pending, 
 				getSkipResult(pending), pending.getPageCount()));
-		calPageTotal("t_pending.count"+suffix, pending);		
+		calPageTotal("t_pending.count"+suffix, pending);
 		return pending;
 	}
 

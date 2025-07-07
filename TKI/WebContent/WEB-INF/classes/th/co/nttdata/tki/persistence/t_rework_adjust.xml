@@ -77,7 +77,7 @@
 			WHERE pdReworkId = #adjustList[].pdReworkId#;
 			
 			INSERT INTO t_rework_adjust(pdReworkId, reportdate, ok, ng, createby, updateby, remark) 
-			VALUES (#adjustList[].pdReworkId#, CONVERT(DATE,GETDATE()), #adjustList[].ok#, #adjustList[].ng#, #createBy#, #updateBy#, #reworkRemark#);
+			VALUES (#adjustList[].pdReworkId#, CONVERT(DATE,GETDATE()), #adjustList[].ok#, #adjustList[].ng#, #createBy#, #updateBy#, #adjustList[].reworkRemark#);
 		</iterate>
 	</insert>
 	

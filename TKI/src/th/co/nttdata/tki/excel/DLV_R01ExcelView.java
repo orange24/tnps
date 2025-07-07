@@ -128,7 +128,7 @@ public class DLV_R01ExcelView extends AbstractExcelView {
 		}
 		// row3 and row4
 		minColumn = (d + 4) - 12;
-		for (int h = minColumn+1; h < maxColumn; h = h + 3) {
+		for (int h = minColumn+3+1; h < maxColumn; h = h + 3) {
 			createCell(workbook, row3, h, leftStyle);
 			createCell(workbook, row3, h + 1, leftStyle);
 			createCell(workbook, row3, h + 2, leftStyle);

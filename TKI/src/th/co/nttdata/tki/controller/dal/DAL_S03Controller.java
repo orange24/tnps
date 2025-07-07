@@ -85,7 +85,7 @@ public class DAL_S03Controller extends AbstractBaseController {
 			.addObject("reportTypeList", masterDao.selectReportTypeList(new MReportType().setReportCategory(new String[]{"wip"})))
 			.addObject("minDate", calendar.getTime());
 	}
-	
+
 	@RequestMapping(value="/DAL_S03_export", method=RequestMethod.POST)
 	public ModelAndView export( TDailyWK TDailyWK ) {
 		TDailyWK.setMaxRecord(MAXRECORD);

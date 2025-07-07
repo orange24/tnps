@@ -112,11 +112,16 @@
 			,ISNULL(SUM(d.qty),0) as qty
 			,ISNULL(SUM(d.timeused),0) as timeUsed
 			,ISNULL(SUM(d.manpower),0) as manPower
+			,ISNULL(SUM(d.losstime),0) as lossTime
+			, d.losstime_reason_id as lossTimeReasonId 
+		 	,r.reasonname as lossTimeReasonName
+		 	,d.staff
 			,CASE wk.shift WHEN 'D' THEN 'Day' WHEN 'N' THEN 'Night' ELSE '' END AS shiftName
 		FROM t_dailywk_detail d
 		INNER JOIN t_dailywk wk ON wk.dailywkid = d.dailywkid
 		INNER JOIN m_customer c ON d.customerid = c.customerid
 		INNER JOIN m_part p ON d.partid = p.partid
+		LEFT JOIN m_reason r on r.reasonid = d.losstime_reason_id
 		<dynamic prepend="WHERE">
 			<isNotEmpty prepend="AND" property="reportDateFr"> wk.reportdate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
 			<isNotEmpty prepend="AND" property="reportDateTo"> wk.reportdate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
@@ -128,7 +133,7 @@
 				wk.shift IN <iterate property="shifts" open="(" close=")" conjunction=",">#shifts[]#</iterate>
 			</isNotEmpty>
 		</dynamic>
-		GROUP BY wk.reportdate, d.customerid, c.customercode, wk.wip, d.partid, p.partno, p.partname, wk.shift
+		GROUP BY wk.reportdate, d.customerid, c.customercode, wk.wip, d.partid, p.partno, p.partname, wk.shift, d.losstime_reason_id, r.reasonname, d.staff
 		ORDER BY wk.reportdate, c.customercode, wk.wip, p.partno, p.partname, wk.shift
 	</select>
 	

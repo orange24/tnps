@@ -37,7 +37,6 @@ public class DAL_S03LogicImpl extends AbstractBaseLogic implements DAL_S03Logic 
 	
 	@Override
 	public TDailyWK exportDAL_R03( TDailyWK TDailyWK ) {
-		
 		return dailyWKDao.selectDAL_R03(TDailyWK);
 	}
 	

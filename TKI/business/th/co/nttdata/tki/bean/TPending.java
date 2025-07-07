@@ -20,6 +20,26 @@ public class TPending extends AbstractBaseBean {
 	private List<TPendingAdjust> adjustList;
 	private List<MWip> wipList;
 	private List<MReason> reasonList;
+	
+	public String toString() {
+		String result = "";
+		result += "reportDate = " + reportDate + ", ";
+		result += "reportDateFr = " + reportDateFr + ", ";
+		result += "reportDateTo = " + reportDateTo + ", ";
+		result += "customerId = " + customerId + ", ";
+		result += "maxRecord = " + maxRecord + ", ";
+		result += "wip = " + wip + ", ";
+		result += "wipName = " + wipName + ", ";
+		result += "partNo = " + partNo + ", ";
+		result += "partName = " + partName + ", ";
+		result += "workorderNo = " + workorderNo + ", ";
+		result += "wipRework = " + wipRework + ", ";
+		result += "remark = " + remark + ", ";
+		result += "adjustList = " + adjustList + ", ";
+		result += "wipList = " + wipList + ", ";
+		result += "reasonList = " + reasonList + ", ";
+		return result;
+	}
 
 	public void setReportDate(Date reportDate) {
 		this.reportDate = reportDate;
@@ -55,6 +75,16 @@ public class TPending extends AbstractBaseBean {
 		return wip;
 	}
 	public void setWip(String wip) {
+		String[] wips = wip.split(",");
+		boolean chkEmpty = true;
+		for (String w : wips) {
+			if ("".equals(w) == false) {
+				chkEmpty = false;
+				wip = w;
+				break;
+			}
+		}
+		if (chkEmpty) wip = "";
 		this.wip = wip;
 	}
 	public void setWipName(String wipName) {
@@ -98,5 +128,17 @@ public class TPending extends AbstractBaseBean {
 	}
 	public void setReasonList(List<MReason> reasonList) {
 		this.reasonList = reasonList;
+	}
+	public String getWipRework() {
+		return wipRework;
+	}
+	public void setWipRework(String wipRework) {
+		this.wipRework = wipRework;
+	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 }

@@ -147,14 +147,12 @@ public class DAL_R02ExcelView extends AbstractExcelView {
 				createCell(workbook, sndRow, row++, r02c03Style);
 				createCell(workbook, sndRow, row++, r02c04Style);
 				createCell(workbook, sndRow, row++, r02c05Style).setValue("Night");
-				// createCell(workbook, sndRow,  6, r02c06Style).setValue(mcwk.getMachineNo() +" : "+ mcwk.getMachineName());
+				createCell(workbook, sndRow, row++, r02c06Style).setValue(mcwk.getMachineNo() +" : "+ mcwk.getMachineName());
 				createCell(workbook, sndRow, row++, r02c07Style).setValue(nightDetail.getOk());
 				createCell(workbook, sndRow, row++, r02c08Style).setValue(nightDetail.getNg());
 				createCell(workbook, sndRow, row++, r02c09Style).setValue(nightDetail.getPd());
 				createCell(workbook, sndRow, row++, r02c10Style).setValue(nightDetail.getQty());
 				createCell(workbook, sndRow, row++, r02c11Style).setValue(nightDetail.getTimeUsed());
-				createCell(workbook, sndRow, row++, r02c12Style).setValue(nightDetail.getManPower());
-				createCell(workbook, sndRow, row++, r02c12Style).setValue(nightDetail.getManPower());
 				createCell(workbook, sndRow, row++, r02c12Style).setValue(nightDetail.getManPower());
 				if (totalOk==0) {
 					sheet.getRow(rowNumber-2).getCell(row).setCellValue("");
