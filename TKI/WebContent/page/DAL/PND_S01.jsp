@@ -237,6 +237,13 @@
 							$(this).attr("name", name);
 						}
 					});
+					$(this).find("select[name=ng_reason]").each(function(){
+						var name = "ngReason";
+						if (name.indexOf('adjustList') == -1) {
+							name = "adjustList[" + idx + "]."+ name;
+							$(this).attr("name", name);
+						}
+					});
 
 				}); 
 				postJSON("PND_S01_save", dailyPDForm.serialize(), function(result){
