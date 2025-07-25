@@ -2,6 +2,7 @@ package th.co.nttdata.tki.excel;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -38,7 +39,8 @@ public class MRDC_R17ExcelView extends AbstractExcelView{
 		fontHd.setFontName("Calibri");
 		fontHd.setFontHeightInPoints((short)11);
 		fontHd.setBoldweight(Font.BOLDWEIGHT_BOLD);
-		
+
+		DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 		Style fstHDRStyle 	= createStyle(workbook, HSSFCellStyle.ALIGN_CENTER, HSSFCellStyle.VERTICAL_CENTER).setFont(FONT_HEADR).setTopBorder().setRightBorder().setBgColor().setFont(fontHd).setWrapText();
 		Style sndHDRStyle 	= createStyle(workbook, HSSFCellStyle.ALIGN_CENTER, HSSFCellStyle.VERTICAL_CENTER).setFont(FONT_HEADR).setTopBorder().setBottomBorder().setRightBorder().setBgColor().setFont(fontHd).setWrapText();
 		Style txtHeadStyle 	= createStyle(workbook, HSSFCellStyle.ALIGN_RIGHT, HSSFCellStyle.VERTICAL_CENTER).setWrapText().setFont(fontHd);
@@ -158,6 +160,9 @@ public class MRDC_R17ExcelView extends AbstractExcelView{
 			createCell(workbook, dtRow, 11, numberStyle).setValue(detail.getCavQty(),true);
 			createCell(workbook, dtRow, 12, numberStyle).setValue(detail.getNg(),true);
 			colNum = 13;
+
+			int hourMCStop = 0;
+			int minMCStop  = 0;
 			if((reasonList != null) && (reasonList.size() > 0)){
 				countRs = 0;
 				for(int i=0; i<reasonList.size(); i++){
@@ -176,6 +181,9 @@ public class MRDC_R17ExcelView extends AbstractExcelView{
 							min  = rs.getnMCStopTime() != null?Integer.parseInt(rs.getnMCStopTime().substring(3,5)):0;
 							// sec  = rs.getnMCStopTime() != null?Integer.parseInt(rs.getnMCStopTime().substring(6)):0;
 							// msec = 0;
+
+							hourMCStop += hour;
+							minMCStop  += min;
 						}else{
 							hour = 0;
 							min  = 0;
@@ -217,12 +225,20 @@ public class MRDC_R17ExcelView extends AbstractExcelView{
 				//ssList.set(countRs, ssList.get(countRs)+sec);
 				//msList.set(countRs, msList.get(countRs)+msec);
 			}
-			
-			createCell(workbook, dtRow, colNum+2, txtCentStyle).setValue(detail.getnMachineStopTime());
+
+			int mcStopTimeHour1 = (minMCStop / 60);
+			int mcStopTimeMin1 = (minMCStop % 60);
+			hourMCStop += mcStopTimeHour1;
+			minMCStop = mcStopTimeMin1;
+			String hourMCStopStr = (hourMCStop < 10)? "0" + hourMCStop : hourMCStop + "";
+			String minMCStopStr = (minMCStop < 10)? "0" + minMCStop : minMCStop + "";
+			createCell(workbook, dtRow, colNum+2, txtCentStyle).setValue(hourMCStopStr + ":" + minMCStopStr + ":00");
 			//sum MachineStopTime
-			hour = (detail.getnMachineStopTime() != null?Integer.parseInt(detail.getnMachineStopTime().substring(0,2)):0);
-			min  = (detail.getnMachineStopTime() != null?Integer.parseInt(detail.getnMachineStopTime().substring(3,5)):0);
+			// hour = (detail.getnMachineStopTime() != null?Integer.parseInt(detail.getnMachineStopTime().substring(0,2)):0);
+			// min  = (detail.getnMachineStopTime() != null?Integer.parseInt(detail.getnMachineStopTime().substring(3,5)):0);
 			//sec  = (detail.getnMachineStopTime() != null?Integer.parseInt(detail.getnMachineStopTime().substring(6)):0);
+			hour = hourMCStop;
+			min = minMCStop;
 			
 			if(hhList.size() <= countRs+1 || hhList.get(countRs+1) == null){
 				hhList.add(hour);

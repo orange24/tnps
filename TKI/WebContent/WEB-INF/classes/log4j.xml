@@ -11,7 +11,7 @@
     </appender>
 	<appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
 		<errorHandler class="org.apache.log4j.helpers.OnlyOnceErrorHandler" />
-		<param name="File" value="D:/logs/TKI_UAT.log" />
+		<param name="File" value="D:/logs/TKI.log" />
 		<param name="Append" value="true" />
 		<param name="DatePattern" value="'.'yyyyMMdd" />
 
