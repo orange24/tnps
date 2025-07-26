@@ -37,7 +37,7 @@
 	
 	function calActQty(){
 		tbResult.each(function(){
-			var pending = parseInt($(this).find("td:eq(7)").html() || 0);
+			var pending = parseInt($(this).find("td:eq(8)").html() || 0);
 			var ok  = $(this).find("input:eq(3)");
 			var ng  = $(this).find("input:eq(4)");			
 			var reworkQty =  $(this).find("[id=reworkQty]");
