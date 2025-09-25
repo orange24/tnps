@@ -88,7 +88,7 @@ public class DAL_S02Controller extends AbstractBaseController {
 		
 		// <!-- Assigning: Yesterday. -->
 		Calendar calendar = new GregorianCalendar(Locale.US);
-		calendar.add( Calendar.DAY_OF_YEAR, -1 );
+		calendar.add( Calendar.DAY_OF_YEAR, -30 );
 		calendar = DateUtils.truncate(calendar, Calendar.DATE);
 
 		return new ModelAndView(PATH_URI)
