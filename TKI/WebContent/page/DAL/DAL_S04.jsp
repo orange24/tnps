@@ -153,14 +153,21 @@
 			message.clear();
 
 			// <!-- Seding the data. -->
-			var params = dailyWKForm.serialize() +'&'+ $.param({
+			/* var params = $.param({
 			           "wip": boxWIP.val(),
 				"reportDate": boxReportDate.val(),
 				"reportType": boxReportType.val(),
 				     "shift": boxShift.filter(":checked").val()
-			});
+			}) + '&' + dailyWKForm.serialize();
+			 */
+			var formDataArray = dailyWKForm.serializeArray();
+			formDataArray.push({ name: "wip", value: boxWIP.val() });
+			formDataArray.push({ name: "reportDate", value: boxReportDate.val() });
+			formDataArray.push({ name: "reportType", value: boxReportType.val() });
+			formDataArray.push({ name: "shift", value: boxShift.filter(":checked").val() });
+
 			disableSaveBtn();
-			postJSON("DAL_S04_check", params, function( response ){
+			postJSON("DAL_S04_check", formDataArray, function( response ){
 				if( response.errors && response.errors.length > 0 ) {
 					message.setErrors(response.errors);
 					enableSaveBtn();
@@ -170,7 +177,7 @@
 				if( !confirm("<spring:message code='cfm.cmm.001'/>") )
 					return;
 
-				postJSON("DAL_S04_save", params, function( result ){
+				postJSON("DAL_S04_save", formDataArray, function( result ){
 					$("input, select, textarea").attr("disabled", true);
 
 					if( result.errors && result.errors.length > 0 ) {
