@@ -210,10 +210,14 @@
 	</select>
 	
 	<select id="selectMRDC_R10NGReason" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKNGReason">
-		SELECT 	CAST(ng.nId AS VARCHAR)+':'+ CAST(ng.nReasonid AS VARCHAR)+':'+ng.workorderno  AS idRef,
-				ISNULL(ng.nNGQtyperReason,0) AS ng 
-		FROM 	V_11_DailyDeliveryInspection_NG ng 
-		LEFT JOIN V_11_DailyDeliveryInspection v ON v.nId = ng.nId  and v.sCareerSheetNo = ng.workorderno
+		SELECT ng.nid, 	CAST(ng.nId AS VARCHAR)+':'+ CAST(ng.nReasonid AS VARCHAR)+':'+ng.workorderno+':'+ CAST(ng.ngqty AS VARCHAR) AS idRef,
+				min(ISNULL(ng.nNGQtyperReason,0)) AS ng 
+		FROM 	(
+			select sType, nId, nReasonId, workorderno , sum(nNGQtyperReason) as nNGQtyperReason, ngqty
+			from V_11_DailyDeliveryInspection_NG
+			group by sType, nId, nReasonId, workorderno, ngqty
+		) ng 
+		inner JOIN V_11_DailyDeliveryInspection v ON v.nId = ng.nId  and v.sCareerSheetNo = ng.workorderno and ng.sType = v.sType and ng.ngqty = v.nNGQty
 		<!-- WHERE 	ng.reasontype = 1 -->
 		<dynamic prepend="WHERE">
 	  		<isNotEmpty prepend="AND" property="workOrderNo"> v.sCareerSheetNo LIKE '%'+ #workOrderNo# +'%' </isNotEmpty>
@@ -224,8 +228,10 @@
 			<isNotEmpty prepend="AND" property="partNo"> sPartNo LIKE #partNo# +'%' </isNotEmpty>
 		  	<isNotEmpty prepend="AND" property="partName"> sPartName LIKE #partName# +'%' </isNotEmpty>
 	  	</dynamic>
+		group by ng.sType, ng.nId, nReasonId, workorderno, v.nSortingQty, ng.ngqty
+		order by ng.nId, ng.ngqty, ng.nReasonid, ng.workorderno
 	</select>
-	
+
 	<select id="selectMRDC_R12" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKDetail">
 			SELECT DISTINCT TOP $maxRecord$ 
 				 partid AS partId

@@ -129,13 +129,20 @@ public class MRDC_R10ExcelView extends AbstractExcelView{
 				sumOk += daily.getOk();
 				sumNg += daily.getNg();
 				colNum = 7;
+
 				if(reasonList.size() > 0){
 					for(int i=0; i<reasonList.size(); i++){
 						mReason = reasonList.get(i);
-						key = daily.getDatailRef()+":"+mReason.getReasonId()+":"+daily.getWorkOrderNo();
+						key = daily.getDatailRef()+":"+mReason.getReasonId()+":"+daily.getWorkOrderNo()+":"+daily.getNg();
 						reason = reasonMap.get(key);
+						// System.out.println("key = " + key);
+						if (reason != null) {
+							// System.out.println("reason.getIdRef() = " + reason.getIdRef());
+						}
 						totalNg = 0;
 						if(reason != null && key.equals(reason.getIdRef())){
+							// System.out.println("dtRow = " + dtRow.getRowNum() + ", colNum = " + colNum);
+							// System.out.println("match ng = " + reason.getNg() + "\n");
 							totalNg += nullToZero(reason.getNg());
 						}
 						createCell(workbook, dtRow, colNum, numberStyle).setValue(totalNg);
