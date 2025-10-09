@@ -133,7 +133,7 @@ public class MRDC_R10ExcelView extends AbstractExcelView{
 				if(reasonList.size() > 0){
 					for(int i=0; i<reasonList.size(); i++){
 						mReason = reasonList.get(i);
-						key = daily.getDatailRef()+":"+mReason.getReasonId()+":"+daily.getWorkOrderNo()+":"+daily.getNg();
+						key = daily.getDatailRef()+":"+mReason.getReasonId()+":"+daily.getWorkOrderNo()+":"+daily.getNg()+":"+daily.getOk();
 						reason = reasonMap.get(key);
 						// System.out.println("key = " + key);
 						if (reason != null) {
