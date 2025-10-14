@@ -63,7 +63,7 @@
 				SELECT
 					 d.fgid
 					,d.deliverydate
-					,d.deliveryqtytotal AS deliveryqty
+					,case when d.custReqQty is null then null else d.deliveryqtytotal end AS deliveryqty
 					,d.balanceorderqty AS balanceqty
 					,d.forcastqty
 				FROM t_deliveryplan_date AS d
