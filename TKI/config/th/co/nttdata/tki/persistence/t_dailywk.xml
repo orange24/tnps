@@ -210,7 +210,7 @@
 	</select>
 	
 	<select id="selectMRDC_R10NGReason" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKNGReason">
-		SELECT ng.nid, 	CAST(ng.nId AS VARCHAR)+':'+ CAST(ng.nReasonid AS VARCHAR)+':'+ng.workorderno+':'+ CAST(ng.ngqty AS VARCHAR)+':'+ CAST(ng.okqty AS VARCHAR) AS idRef,
+		SELECT ng.nid, 	CAST(ng.nId AS VARCHAR)+':'+ CAST(ng.nReasonid AS VARCHAR)+':'+ng.workorderno+':'+ CAST(isnull(ng.ngqty, 0) AS VARCHAR)+':'+ CAST(isnull(ng.okqty, 0) AS VARCHAR) AS idRef,
 				min(ISNULL(ng.nNGQtyperReason,0)) AS ng 
 		FROM 	(
 			select sType, nId, nReasonId, workorderno , sum(nNGQtyperReason) as nNGQtyperReason, ngqty, okqty

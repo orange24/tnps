@@ -69,7 +69,25 @@ public class WIP_S03LogicImpl extends AbstractBaseLogic implements WIP_S03Logic 
 		TWipStockAdjust = validateDataImport(TWipStockAdjust);
 		if (null == TWipStockAdjust.getErrors() || 0 == TWipStockAdjust.getErrors().size()) {
 			if (null != TWipStockAdjust.getAdjustList() && 0 < TWipStockAdjust.getAdjustList().size()) {
-				wipStockAdjust.adjustWipStock(TWipStockAdjust);
+				List<TWipStockAdjust> allList =  TWipStockAdjust.getAdjustList();
+				int fromIndex = 0;
+				int toIndex = 0;
+				int increaseSize = 100;
+				int sizeAll = allList.size();
+				// System.out.println("sizeAll = " + sizeAll);
+				while (toIndex < sizeAll) {
+					fromIndex = toIndex;
+					toIndex = fromIndex + increaseSize;
+					if (toIndex > sizeAll) toIndex = sizeAll;
+					// System.out.println("\nfromIndex = " + fromIndex);
+					// System.out.println("toIndex = " + toIndex);
+
+					List newList = allList.subList(fromIndex, toIndex);
+					// System.out.println("newList = " + newList.size());
+
+					TWipStockAdjust.setAdjustList(newList);
+					wipStockAdjust.adjustWipStock(TWipStockAdjust);
+				}
 				TWipStockAdjust.setAdjustList(null);
 			} else {
 				TWipStockAdjust.getErrors().add(new Message("err.cmm.003", new String[] {}));
