@@ -26,6 +26,7 @@ public class TDeliveryPlanDate {
 	private Integer tkiCommitQty;
 	private String reason;
 	private List<TDeliveryPlanTime> timeList;
+	private TDeliveryPlanForcast forcast;
 	
 	// MRDC_S14
 	private Double price;
@@ -661,5 +662,11 @@ public class TDeliveryPlanDate {
 	}
 	public void setStock(Integer stock) {
 		this.stock = stock;
+	}
+	public TDeliveryPlanForcast getForcast() {
+		return forcast;
+	}
+	public void setForcast(TDeliveryPlanForcast forcast) {
+		this.forcast = forcast;
 	}
 }

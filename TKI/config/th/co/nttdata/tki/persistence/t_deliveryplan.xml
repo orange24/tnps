@@ -95,11 +95,11 @@
 				LEFT JOIN t_deliveryplan_date_0 o ON o.deliveryPlanId = #deliveryPlanId# AND o.fgid = #fgId# 
 				LEFT JOIN
 					(<!-- select calendar (lastday of month -1) -->
-					SELECT pd.fgid, max(pd.deliverydate) as calendarDate
-					FROM   t_deliveryplan_date pd
-					INNER JOIN t_deliveryplan p on pd.deliveryplanid = p.deliveryplanid
-					WHERE  p.customerid = #customerId#  and p.yearmonth = CONVERT(varchar(6),DATEADD(dd,-1,CAST((CAST(#year# AS VARCHAR(4)) + RIGHT('0'+ CAST(#month#+1 AS VARCHAR), 2) +'01') AS DATE)),112)
-					GROUP BY pd.fgid
+						SELECT pd.fgid, max(pd.deliverydate) as calendarDate
+						FROM   t_deliveryplan_date pd
+						INNER JOIN t_deliveryplan p on pd.deliveryplanid = p.deliveryplanid
+						WHERE  p.customerid = #customerId#  and p.yearmonth = CONVERT(varchar(6),DATEADD(dd,-1,CAST((CAST(#year# AS VARCHAR(4)) + RIGHT('0'+ CAST(#month#+1 AS VARCHAR), 2) +'01') AS DATE)),112)
+						GROUP BY pd.fgid
 					) c
 					ON c.fgid = d.fgid
 			WHERE d.fgid = #fgId#  
@@ -116,9 +116,9 @@
           				FROM t_deliveryplan_date_0 o
 						WHERE o.deliveryPlanId = #deliveryPlanId# AND o.fgid = #fgId# 
 				)
-				
+
 			UNION ALL  <!--case no plainid in lastmonth need to union from date0-->
-			
+
 			SELECT TOP 1 d.detailPlanId,
                o.deliveryPlanId,
                o.fgId,
@@ -178,7 +178,7 @@
 						SELECT TOP 1 p.deliveryplanid
 						FROM t_deliveryplan p 
 						WHERE customerId = #customerId#  
-						AND yearmonth  <![CDATA[ < ]]>  CAST(#year# AS VARCHAR(4)) + RIGHT('0'+ CAST(#month#+1 AS VARCHAR), 2)		
+						AND yearmonth  <![CDATA[ < ]]>  CAST(#year# AS VARCHAR(4)) + RIGHT('0'+ CAST(#month#+1 AS VARCHAR), 2)
 						ORDER BY yearmonth DESC, revision DESC
 					) 
 					AND d.deliverydate = c.calendarDate
@@ -225,6 +225,22 @@
 			    c.calendarDate  <![CDATA[ >= ]]>  CAST(#year# AS VARCHAR(4)) + RIGHT('0'+ CAST(#month#+1 AS VARCHAR), 2) +'01'
 			AND c.calendarDate  <![CDATA[ <= ]]>  DATEADD(dd,-1,DATEADD(month, 1, CAST((CAST(#year# AS VARCHAR(4)) + RIGHT('0'+ CAST(#month#+1 AS VARCHAR), 2) +'01') AS DATE)))
 		ORDER BY deliveryDate
+	</select>
+
+	<select id="selectForcast" parameterClass="th.co.nttdata.tki.bean.TDeliveryPlan" resultClass="th.co.nttdata.tki.bean.TDeliveryPlanForcast">
+		SELECT
+			 d.forcastId
+			,d.deliveryPlanId
+			,d.fgId
+			,d.yearmonth
+			,d.forcast_N1 as N1
+			,d.forcast_N2 as N2
+			,d.forcast_N3 as N3
+		FROM t_deliveryplan_forcast d
+		WHERE
+			d.deliveryPlanId = #deliveryPlanId# 
+			AND d.fgId = #fgId# 
+			AND yearmonth  =  CAST(#year# AS VARCHAR(4)) + RIGHT('0'+ CAST(#month#+1 AS VARCHAR), 2)
 	</select>
 	
 	<select id="selectInsertFlag" parameterClass="th.co.nttdata.tki.bean.TDeliveryPlan" resultClass="java.lang.String">
@@ -312,7 +328,6 @@
 				,productionqty      = #productionQty#
 				,reason             = #reason#
 				,tkicommitqty       = #tkiCommitQty#
-				
 			WHEN NOT MATCHED THEN
 				INSERT (balancedeliveryqty,balanceorderqty,custreqqty,deliverydate,deliveryqtyback,deliveryqtynormal,deliveryqtytotal,deliveryplanid,fgid,forcastqty,productionqty,reason,tkicommitqty)
 				VALUES (
@@ -345,6 +360,28 @@
 				,#timeList[].customerLine#
 			)
 		</iterate>
+	</statement>
+
+	<statement id="insertForcast" parameterClass="th.co.nttdata.tki.bean.TDeliveryPlanForcast" resultClass="integer">
+			MERGE INTO t_deliveryplan_forcast p
+			USING ( SELECT #deliveryPlanId# AS deliveryPlanId, #yearmonth# AS yearmonth, #fgId# AS fgId ) t
+			ON (p.deliveryPlanId = t.deliveryPlanId AND p.yearmonth = t.yearmonth AND p.fgId = t.fgId)
+			WHEN MATCHED THEN
+				UPDATE SET
+				forcast_n1 = #n1#
+				,forcast_n2 = #n2#
+				,forcast_n3 = #n3#
+			WHEN NOT MATCHED THEN
+				INSERT (deliveryplanid,fgid,yearmonth,forcast_n1,forcast_n2,forcast_n3)
+				VALUES (
+					#deliveryPlanId#
+					,#fgId#
+					,#yearmonth#
+					,#n1#
+					,#n2#
+					,#n3#
+				)
+			OUTPUT INSERTED.forcastid;
 	</statement>
 	
 	<insert id="copyDate" parameterClass="th.co.nttdata.tki.bean.TDeliveryPlan">
@@ -427,7 +464,6 @@
 				,d.fgout
 				,f.fgName
 				,f.fgNo
-
 		FROM
 			(
 			 SELECT DISTINCT p.deliveryPlanId, d.fgId, p.customerId,p.lastupdate,p.updateby
@@ -474,7 +510,6 @@
 				,d.fgout
 				,f.fgName
 				,f.fgNo
-
 		FROM 
 			(
 			 SELECT DISTINCT p.deliveryPlanId, d.fgId, p.customerId,p.lastupdate,p.updateby
@@ -484,8 +519,7 @@
 				AND p.yearmonth = CAST(#year# AS VARCHAR(4)) + RIGHT('0'+ CAST(#month#+1 AS VARCHAR), 2)
 				AND p.revision = #revision#
 			) fg
-			
-			 
+
 		LEFT JOIN
 			(
 			SELECT pd.fgid, max(pd.deliverydate) as calendarDate
@@ -514,9 +548,9 @@
 						AND p.revision = #revision#
 				) tbl on tbl.deliveryplanid = o.deliveryplanid AND tbl.fgid = o.fgid  AND tbl.fgid = f.fgId
 		)
-		
+
 		UNION ALL  
-			
+
 			SELECT 
                o.fgId,
                tbl2.deliverydate,
@@ -556,7 +590,7 @@
 		
 		ORDER BY fgId,calendarDate
 	</select>
-	
+
 	<select id="selectDLV_R02" parameterClass="th.co.nttdata.tki.bean.TDeliveryPlan" resultClass="th.co.nttdata.tki.bean.TDeliveryPlan">
 		SELECT 
 			 c.customerCode
@@ -1030,20 +1064,20 @@
 			,nNGCost AS ngCost
 			,nNGYieldRatio AS ngYieldRatio
 		FROM V_16_ProductCostList
-	  		<dynamic prepend="WHERE">
-	  			<isNotEmpty prepend="AND" property="customerId"> sCustomerId = #customerId# </isNotEmpty>
-	  			<isNotEmpty prepend="AND" property="partNo"> sPartNo LIKE #partNo# +'%' </isNotEmpty>
-	  			<isNotEmpty prepend="AND" property="partName"> sPartname LIKE #partName# +'%' </isNotEmpty>
-	  		</dynamic>
-	  	ORDER BY sCustomerCode, sPartNo, nWIPSeq 
+			<dynamic prepend="WHERE">
+				<isNotEmpty prepend="AND" property="customerId"> sCustomerId = #customerId# </isNotEmpty>
+				<isNotEmpty prepend="AND" property="partNo"> sPartNo LIKE #partNo# +'%' </isNotEmpty>
+				<isNotEmpty prepend="AND" property="partName"> sPartname LIKE #partName# +'%' </isNotEmpty>
+			</dynamic>
+		ORDER BY sCustomerCode, sPartNo, nWIPSeq 
 	</select>
-	
+
 	<select id="countMRDC_R15" resultClass="Integer">
 		SELECT 
 			COUNT(*)
 		FROM V_16_ProductCostList
 	</select>
-	
+
 	<resultMap id="resultMRDC_R20" class="th.co.nttdata.tki.bean.TDeliveryPlanDate">
 		<result property="customerId" column="custid"/>
 		<result property="customerName" column="custname"/>
@@ -1104,18 +1138,18 @@
 		
 		Order by f.fgName,f.fgNo
 	</select>
-	
+
 	<select id="queryWipInPart" parameterClass="th.co.nttdata.tki.bean.TDeliveryPlan" resultClass="th.co.nttdata.tki.bean.TDeliveryPlan">
 		SELECT pw.wip,w.wipName
 		FROM v_cust_fg_part v INNER JOIN m_part_wip pw ON v.partid = pw.partid
 		INNER JOIN m_wip w on pw.wip = w.wip
 		<dynamic prepend="WHERE">
-  			<isNotEmpty prepend="AND" property="customerId"> v.customerid = #customerId# </isNotEmpty>
-  			<isNotEmpty prepend="AND" property="partId"> pw.partid = #partId# </isNotEmpty>
-	  	</dynamic>
+			<isNotEmpty prepend="AND" property="customerId"> v.customerid = #customerId# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partId"> pw.partid = #partId# </isNotEmpty>
+		</dynamic>
 		ORDER BY pw.wiporder
 	</select>
-	
+
 	<statement id="insertBalanceOrder" parameterClass="th.co.nttdata.tki.bean.TDeliveryPlanDate" resultClass="integer">
 		MERGE INTO t_deliveryplan_date_0 p
 			USING ( 
@@ -1142,6 +1176,5 @@
 		WHERE  p.customerid = #customerId#  and p.yearmonth = CAST(#year# AS VARCHAR(4)) + RIGHT('0'+ CAST(#month#+1 AS VARCHAR), 2)
 		      GROUP BY pd.fgid,m.fgno,m.fgname
 		ORDER BY pd.fgid,m.fgno,m.fgname
-
 	</select>
 </sqlMap>

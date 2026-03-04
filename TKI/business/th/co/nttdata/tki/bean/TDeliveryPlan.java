@@ -25,6 +25,7 @@ public class TDeliveryPlan extends AbstractBaseBean {
 	private Integer countDate;
 	private List<TDeliveryPlanDate> dateList;
 	private List<TDeliveryPlan> planList;
+	private TDeliveryPlanForcast forcast;
 	
 	// use export DLV_R02
 	private Date deliveryDate;
@@ -567,5 +568,11 @@ public class TDeliveryPlan extends AbstractBaseBean {
 	}
 	public void setCustomerLine(String customerLine) {
 		this.customerLine = customerLine;
+	}
+	public TDeliveryPlanForcast getForcast() {
+		return forcast;
+	}
+	public void setForcast(TDeliveryPlanForcast forcast) {
+		this.forcast = forcast;
 	}
 }

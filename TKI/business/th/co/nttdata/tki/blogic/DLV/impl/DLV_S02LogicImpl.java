@@ -10,6 +10,7 @@ import th.co.nttdata.tki.bean.MPart;
 import th.co.nttdata.tki.bean.Message;
 import th.co.nttdata.tki.bean.TDeliveryPlan;
 import th.co.nttdata.tki.bean.TDeliveryPlanDate;
+import th.co.nttdata.tki.bean.TDeliveryPlanForcast;
 import th.co.nttdata.tki.blogic.AbstractBaseLogic;
 import th.co.nttdata.tki.blogic.DLV.DLV_S02Logic;
 import th.co.nttdata.tki.dao.TDeliveryPlanDao;
@@ -24,10 +25,13 @@ public class DLV_S02LogicImpl extends AbstractBaseLogic implements DLV_S02Logic 
 	public TDeliveryPlan search(TDeliveryPlan TDeliveryPlan) {
 		TDeliveryPlan = tDeliveryPlanDao.getDateList(TDeliveryPlan);
 		if (TDeliveryPlan.getDeliveryPlanId() != null) {
-			TDeliveryPlan.setInsertFlag(tDeliveryPlanDao
-					.selectInsertFlag(TDeliveryPlan));
-			TDeliveryPlan.setCountDate(tDeliveryPlanDao
-					.countDate(TDeliveryPlan));
+			TDeliveryPlan.setInsertFlag(tDeliveryPlanDao.selectInsertFlag(TDeliveryPlan));
+			TDeliveryPlan.setCountDate(tDeliveryPlanDao.countDate(TDeliveryPlan));
+			TDeliveryPlan.setForcast(tDeliveryPlanDao.getForcast(TDeliveryPlan));
+
+			TDeliveryPlanForcast forcast = TDeliveryPlan.getForcast();
+			// System.out.println("search n1 = " + forcast.getN1() + ", n2 = " + forcast.getN2() + ", n3 = " + forcast.getN3());
+			// System.out.println("search forcast.yearmonth = " + forcast.getYearmonth());
 		}
 
 		return TDeliveryPlan;
@@ -38,6 +42,15 @@ public class DLV_S02LogicImpl extends AbstractBaseLogic implements DLV_S02Logic 
 		boolean isHavePlanDate = false;
 		Integer deliveryPlanId = tDeliveryPlanDao.insertPlan(TDeliveryPlan);
 		TDeliveryPlan.setDeliveryPlanId(deliveryPlanId);
+		TDeliveryPlanForcast forcast = TDeliveryPlan.getForcast();
+		forcast.setDeliveryPlanId(deliveryPlanId);
+		forcast.setFgId(TDeliveryPlan.getFgId());
+		forcast.setYearmonth(TDeliveryPlan.getYearmonth());
+		if (TDeliveryPlan.getYearmonth() == null && TDeliveryPlan.getMonth() != null && TDeliveryPlan.getYear() != null) forcast.setYearmonth(TDeliveryPlan.getYear() + "" + (TDeliveryPlan.getMonth()<10? "0":"") + (TDeliveryPlan.getMonth() + 1));
+		// System.out.println("Save n1 = " + forcast.getN1() + ", n2 = " + forcast.getN2() + ", n3 = " + forcast.getN3());
+		// System.out.println("Save yearmonth = " + TDeliveryPlan.getYearmonth() + ", year = " + TDeliveryPlan.getYear() + ", month = " + TDeliveryPlan.getMonth());
+		// System.out.println("Save forcast.yearmonth = " + forcast.getYearmonth());
+
 		// <!-- Insert: t_deliveryplan_date -->
 		for (TDeliveryPlanDate TDeliveryPlanDate : TDeliveryPlan.getDateList()) {
 			// <!-- Filtering: insert t_deliveryplan_date -->
@@ -58,6 +71,7 @@ public class DLV_S02LogicImpl extends AbstractBaseLogic implements DLV_S02Logic 
 			tDeliveryPlanDao.insertDate(TDeliveryPlanDate);
 			tDeliveryPlanDao.insertTime(TDeliveryPlanDate);
 		}
+		if (forcast.getN1() != null) tDeliveryPlanDao.insertForcast(forcast);
 		// <!-- Insert: t_deliveryplan_date on date 1 -->
 		if (!isHavePlanDate) {
 			List<TDeliveryPlanDate> listDate = TDeliveryPlan.getDateList();
@@ -69,8 +83,7 @@ public class DLV_S02LogicImpl extends AbstractBaseLogic implements DLV_S02Logic 
 			}
 		}
 
-		TDeliveryPlan.getInfos().add(
-				new Message("inf.cmm.002", new String[] {}));
+		TDeliveryPlan.getInfos().add(new Message("inf.cmm.002", new String[] {}));
 		return TDeliveryPlan;
 	}
 
@@ -83,15 +96,13 @@ public class DLV_S02LogicImpl extends AbstractBaseLogic implements DLV_S02Logic 
 	@Override
 	public void deleteByFg(TDeliveryPlan TDeliveryPlan) {
 		tDeliveryPlanDao.deleteByFg(TDeliveryPlan);
-		TDeliveryPlan.getInfos().add(
-				new Message("inf.cmm.003", new String[] {}));
+		TDeliveryPlan.getInfos().add(new Message("inf.cmm.003", new String[] {}));
 	}
 
 	@Override
 	public TDeliveryPlan countDate(TDeliveryPlan TDeliveryPlan) {
 		if (TDeliveryPlan.getDeliveryPlanId() != null) {
-			TDeliveryPlan.setCountDate(tDeliveryPlanDao
-					.countDate(TDeliveryPlan));
+			TDeliveryPlan.setCountDate(tDeliveryPlanDao.countDate(TDeliveryPlan));
 		}
 
 		return TDeliveryPlan;
@@ -100,8 +111,7 @@ public class DLV_S02LogicImpl extends AbstractBaseLogic implements DLV_S02Logic 
 	@Override
 	public TDeliveryPlan insertFlag(TDeliveryPlan TDeliveryPlan) {
 		if (TDeliveryPlan.getDeliveryPlanId() != null) {
-			TDeliveryPlan.setInsertFlag(tDeliveryPlanDao
-					.selectInsertFlag(TDeliveryPlan));
+			TDeliveryPlan.setInsertFlag(tDeliveryPlanDao.selectInsertFlag(TDeliveryPlan));
 		}
 
 		return TDeliveryPlan;
@@ -115,8 +125,7 @@ public class DLV_S02LogicImpl extends AbstractBaseLogic implements DLV_S02Logic 
 
 	@Override
 	public TDeliveryPlan deliveryPlanReport(TDeliveryPlan tDeliveryPlan) {
-		List<TDeliveryPlan> fgList = tDeliveryPlanDao
-				.getAllFgByCustomer(tDeliveryPlan);
+		List<TDeliveryPlan> fgList = tDeliveryPlanDao.getAllFgByCustomer(tDeliveryPlan);
 		List<TDeliveryPlanDate> dateList = new ArrayList<TDeliveryPlanDate>();
 
 		for (TDeliveryPlan tmp : fgList) {
@@ -127,6 +136,7 @@ public class DLV_S02LogicImpl extends AbstractBaseLogic implements DLV_S02Logic 
 				tmpDate.setFgId(tmp.getFgId());
 				tmpDate.setFgNo(tmp.getFgNo());
 				tmpDate.setFgName(tmp.getFgName());
+				tmpDate.setForcast(plan.getForcast());
 				newDateList.add(tmpDate);
 			}
 			dateList.addAll(newDateList);

@@ -5,10 +5,13 @@ import java.util.List;
 import th.co.nttdata.tki.bean.MPart;
 import th.co.nttdata.tki.bean.TDeliveryPlan;
 import th.co.nttdata.tki.bean.TDeliveryPlanDate;
+import th.co.nttdata.tki.bean.TDeliveryPlanForcast;
 
 public interface TDeliveryPlanDao {
 
 	public TDeliveryPlan getDateList(TDeliveryPlan TDeliveryPlan);
+	
+	public TDeliveryPlanForcast getForcast(TDeliveryPlan TDeliveryPlan);
 
 	public TDeliveryPlan getPlanList(TDeliveryPlan TDeliveryPlan);
 
@@ -25,6 +28,8 @@ public interface TDeliveryPlanDao {
 	public Integer insertPlan(TDeliveryPlan TDeliveryPlan);
 
 	public Integer insertTime(TDeliveryPlanDate TDeliveryPlanDate);
+
+	public Integer insertForcast(TDeliveryPlanForcast TDeliveryPlanForcast);
 
 	public String selectInsertFlag(TDeliveryPlan TDeliveryPlan);
 

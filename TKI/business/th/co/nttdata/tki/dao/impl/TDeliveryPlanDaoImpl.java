@@ -11,6 +11,7 @@ import th.co.nttdata.tki.bean.MPart;
 import th.co.nttdata.tki.bean.MWip;
 import th.co.nttdata.tki.bean.TDeliveryPlan;
 import th.co.nttdata.tki.bean.TDeliveryPlanDate;
+import th.co.nttdata.tki.bean.TDeliveryPlanForcast;
 import th.co.nttdata.tki.dao.AbstractBaseDao;
 import th.co.nttdata.tki.dao.TDeliveryPlanDao;
 
@@ -24,6 +25,14 @@ public class TDeliveryPlanDaoImpl extends AbstractBaseDao implements TDeliveryPl
 		TDeliveryPlan.setDateList(dateList);
 
 		return TDeliveryPlan;
+	}
+
+	@Override
+	public TDeliveryPlanForcast getForcast( TDeliveryPlan TDeliveryPlan ) {
+		TDeliveryPlanForcast forcast = (TDeliveryPlanForcast) queryForObject("t_deliveryplan.selectForcast", TDeliveryPlan);
+		if (forcast == null) forcast = new TDeliveryPlanForcast();
+
+		return forcast;
 	}
 
 	@Override
@@ -300,5 +309,11 @@ public class TDeliveryPlanDaoImpl extends AbstractBaseDao implements TDeliveryPl
 	public List<TDeliveryPlan> getAllFgByCustomer(TDeliveryPlan tDeliveryPlan) {
 		List<TDeliveryPlan> list = (List<TDeliveryPlan>) queryForList("t_deliveryplan.selectFgByCustomerAndDate", tDeliveryPlan);
 		return list;
+	}
+
+	@Override
+	public Integer insertForcast(TDeliveryPlanForcast TDeliveryPlanForcast) {
+		Integer forcastId = (Integer) queryForObject("t_deliveryplan.insertForcast", TDeliveryPlanForcast);
+		return forcastId;
 	}
 }

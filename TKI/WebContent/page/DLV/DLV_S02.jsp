@@ -30,15 +30,17 @@
 	var year = "${deliveryPlan.year}";
 	var plan = {};
 	var dateList = {};
+	var forcast = {};
 	var time0 = {};// check default time
 	var backOrder = "";
 	var balanceOrder = "";
-	
+
 	//value Balance Order & Delivery Plan(Back) for display column "0"
 	<c:if test="${not empty plan}">
 		plan = ${plan};
 		dateList = plan["dateList"];
-		
+		forcast = plan.forcast;
+
 			for(var index=1, max = dateList.length; index < max; index++){
 				time0 = dateList[index]["timeList"];
 				if(time0.length > 0){break;}
@@ -110,7 +112,7 @@
 		boxFg          = $("select#boxFg");
 		customerId     = ${deliveryPlan.customerId};
 		dlvS02Form     = $("#dlvS02Form");
-			
+
 		//  converse monthMap is object of javascript 
 		var m = "${monthMap}".replace("{",'').replace("}",'').split(",");
 		var monthMap = {};
@@ -293,6 +295,13 @@
 				});
 			});
 			sumTotalTime("","","init");
+
+			var forcastN1 = forcast.n1;
+			var forcastN2 = forcast.n2;
+			var forcastN3 = forcast.n3;
+			$('input[name=n1]').val(forcastN1);
+			$('input[name=n2]').val(forcastN2);
+			$('input[name=n3]').val(forcastN3);
 		}
 		
 		// use search and save
@@ -344,6 +353,9 @@
 			if(fgArr[1] != boxFg.val()){deliv[4] = "fgId=";	}
 			dlvS02Form.attr("action", "DLV_S02_search.html?"+params.join("&"));
 			/* dlvS02Form.submit(); */
+
+			$("#preparing-file-modal-page").show();
+			$("#preparing-file-modal-page-img").show();
 			document.getElementById("dlvS02Form").submit();
 		});
 				
@@ -355,16 +367,16 @@
 			checkReason(errors);
 			//checkTime(errors);
 			checkSumTimeOfDate(errors);
-					
+
 			if( errors.length > 0 ) {
 				message.setErrors(errors);
 				return false;
 			}
 			message.clear();
-						
+
 			if( !confirm("<spring:message code='cfm.cmm.001'/>") )
 				return;
- 
+
 			//  Data Binding. 
 			var table = $("table:eq(2)");
 			var param = [];
@@ -418,14 +430,22 @@
 				});
 			});
 
+			param.push("forcast.n1="+ $('input[name=n1]').val());
+			param.push("forcast.n2="+ $('input[name=n2]').val());
+			param.push("forcast.n3="+ $('input[name=n3]').val());
+
+			$("#preparing-file-modal-page").show();
+			$("#preparing-file-modal-page-img").show();
 			//  SUBMIT: 
 			postJSON("DLV_S02_save", deliv.join("&") +"&"+ param.join("&"), function( result ){
+				$("#preparing-file-modal-page").hide();
+				$("#preparing-file-modal-page-img").hide();
 				if( result.errors && result.errors.length > 0 ) {
 					message.setErrors(result.errors);
 					return;
 				}
 
-				message.setInfos ( result.infos  );
+				message.setInfos ( result.infos );
 
 				deliv[0] = "customerId="+ result.customerId;
 				deliv[1] = "deliveryPlanId="+ result.deliveryPlanId;
@@ -438,19 +458,19 @@
 								[
 									deliv[0],
 									deliv[1],
-					             	deliv[2],
-					             	deliv[3],
+									deliv[2],
+									deliv[3],
 									deliv[4]
 								];
 				postJSON("DLV_S02_checkButtonDelete", paramDelete.join("&"), function( resultD ){
 					btnDelete.css("display", (resultD.insertFlag == 'Y' && resultD.countDate > 0)? "" : "none");
 				});
-				
+
 				var paramsFg = 
 							[
 								deliv[0],
-				             	deliv[2],
-				             	deliv[3],
+								deliv[2],
+								deliv[3],
 							];
 				postJSON("DLV_S02_boxFgNameNo", paramFg.join("&"), function(result) {
 					resultFg = result;
@@ -464,22 +484,24 @@
 			boxFg.val("${deliveryPlan.fgId}");//
 			var fgTxt = boxFg.find("option:selected").text();//
 			var fgName = fgTxt.split(":");
-		
+
 			if( !confirm("<spring:message code='cfm.dlv.003'/>".replace(/\{0\}/g, fgName[0])) )
 				return;
 			
 			var params = [
-			              "deliveryPlanId=${deliveryPlan.deliveryPlanId}",
-						  "fgId=${deliveryPlan.fgId}"
-			              ];
+						"deliveryPlanId=${deliveryPlan.deliveryPlanId}",
+						"fgId=${deliveryPlan.fgId}"
+						];
 			dlvS02Form.attr("action","DLV_S02_deleteByFg.html?"+params.join("&"));
 			/* dlvS02Form.submit(); */
+			$("#preparing-file-modal-page").show();
+			$("#preparing-file-modal-page-img").show();
 			document.getElementById("dlvS02Form").submit();
 		});
 
 		btnDelete.css("display", "${deliveryPlan.insertFlag == 'Y' && deliveryPlan.countDate > 0}" == "true" ? "" : "none");
 	});
-	
+
 	function changeBalanceOrder(){
 		var txtBalanceOrder = parseInt($('#txtBalanceOrder').val(),10) || 0;
 		var color = "";
@@ -1119,56 +1141,62 @@
 			<tr height="60">
 				<th width="150" align="center">FG Name</th>
 				<th width="150" align="center">FG No</th>
-				<th width="100" align="center">&nbsp;</th>
+				<th width="100" align="center">Forecast to Next Month</th>
+				<th width="100" align="center">N+1</th>
+				<th width="100" align="center">N+2</th>
+				<th width="100" align="center">N+3</th>
 			</tr>
 			<tr height="30">
 				<td rowspan="11" align="center"><strong>FG Name value</strong></td>
 				<td rowspan="11" align="center"><strong>FG No value</strong></td>
-				<td align="center"><strong> Forecast</strong></td>
+				<td align="center" style="padding: 0 5px;"><strong> Forecast</strong></td>
+				<td align="center"><input type="text" name="n1" style="width: 30px;"></td>
+				<td align="center"><input type="text" name="n2" style="width: 30px;"></td>
+				<td align="center"><input type="text" name="n3" style="width: 30px;"></td>
 			</tr>
 			<tr height="30" bgcolor="white">
-				<td align="center"><strong>Cust. Req.</strong></td>
+				<td align="center" colspan="4"><strong>Cust. Req.</strong></td>
 			</tr>
 			<tr height="30">
-				<td align="center"><strong>Commit</strong></td>
+				<td align="center" colspan="4"><strong>Commit</strong></td>
 			</tr>
 			<tr height="30" bgcolor="white">
-				<td align="center"><strong>Production Plan</strong></td>
+				<td align="center" colspan="4"><strong>Production Plan</strong></td>
 			</tr>
 			<tr height="30">
-				<td align="center" nowrap="nowrap"><strong>DeliveryPlan(Normal)</strong></td>
+				<td align="center" nowrap="nowrap" colspan="4"><strong>DeliveryPlan(Normal)</strong></td>
 			</tr>
 			<tr height="30" bgcolor="white">
-				<td align="center" nowrap="nowrap"><strong>DeliveryPlan(Back)</strong></td>
+				<td align="center" nowrap="nowrap" colspan="4"><strong>DeliveryPlan(Back)</strong></td>
 			</tr>
 			<tr height="30">
-				<td align="center" nowrap="nowrap"><strong>DeliveryPlan(Total)</strong></td>
+				<td align="center" nowrap="nowrap" colspan="4"><strong>DeliveryPlan(Total)</strong></td>
 			</tr>
 			<tr height="30" bgcolor="white">
-				<td align="center"><strong>Actual Delivery</strong></td>
+				<td align="center" colspan="4"><strong>Actual Delivery</strong></td>
 			</tr>
 			<tr height="30">
-				<td align="center"><strong>BalanceDelivery</strong></td>
+				<td align="center" colspan="4"><strong>BalanceDelivery</strong></td>
 			</tr>
 			<tr height="30" bgcolor="white">
-				<td align="center"><strong>Balance Order</strong></td>
+				<td align="center" colspan="4"><strong>Balance Order</strong></td>
 			</tr>
 			<tr height="34">
-				<td align="center"><strong>Reason</strong></td>
+				<td align="center" colspan="4"><strong>Reason</strong></td>
 			</tr>
-			<tr height="30"><td colspan="3">&nbsp;</td></tr>
-			<tr height="30"><td colspan="3">Manage DeliveryTime for customer</td></tr>
+			<tr height="30"><td colspan="7">&nbsp;</td></tr>
+			<tr height="30"><td colspan="7">Manage DeliveryTime for customer</td></tr>
 			<tr height="60">
 				<th align="center">&nbsp;</th>
-				<th align="center">Time<br/>HH : MM</th>
-				<th align="center">Line</th>	
+				<th align="center" colspan="2">Time<br/>HH : MM</th>
+				<th align="center" colspan="3">Line</th>	
 			</tr>
 			<tr id="selectTimeList">
 				<td align="center">
 				<img src="image/icon/delete.gif" width="16" height="16" onclick="deleteRow(this)" 
 				<c:if test="${deliveryPlan.insertFlag == 'N' || deliveryPlan.insertFlag == 'null' }">style="display:none;"</c:if> />
 				</td>
-				<td align="center">
+				<td align="center" colspan="2">
 					<select id="timeHr">
 						<option value="0">0</option>
 						<option value="1">1</option>
@@ -1258,7 +1286,7 @@
 						<option value="59">59</option>
 					</select>
 				</td>
-				<td align="center">
+				<td align="center" colspan="3">
 					<select name="customerLine" id="customerLine" title="Customer Line">
 						<option value="">--Please Select--</option>
 						<c:forTokens items="${customerLine}" delims=";" var="name">
@@ -1270,13 +1298,13 @@
 				</td>
 			</tr>
 			<tr id="btnRow">
-				<td colspan="3">
+				<td colspan="7">
 					<input name="btnAddNewTime" type="button" id="btnAddNewTime" value="Add New Time" 
 					<c:if test="${deliveryPlan.insertFlag == 'N' || deliveryPlan.insertFlag == 'null' }">style="display:none;"</c:if> />
 				</td>
 			</tr>
 			<tr>
-				<td colspan="3">
+				<td colspan="7">
 					<input name="btnSave" type="button" id="btnSave" value="Save"
 					<c:if test="${deliveryPlan.insertFlag == 'N' || deliveryPlan.insertFlag == 'null' }">style="display:none;"</c:if> />
 					<security:authorize ifAnyGranted="DLV_S02_DELETE">
