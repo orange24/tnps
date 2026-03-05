@@ -1137,7 +1137,7 @@
 		<strong>Manage Delivery Plan</strong>
 		<br/>
 		<!-- 2 first column -->
-		<table id="tbl1Detail" width="350" border="1" align="center" cellpadding="0" cellspacing="0" class="ui-widget ui-widget-content" style="position:absolute">
+		<table id="tbl1Detail" width="350" border="1" align="center" cellpadding="0" cellspacing="0" class="ui-widget ui-widget-content" style="float: left;">
 			<tr height="60">
 				<th width="150" align="center">FG Name</th>
 				<th width="150" align="center">FG No</th>
@@ -1314,7 +1314,7 @@
 				</td>
 			</tr>
 		</table>
-			<div style="margin-left:350px;display:block;overflow-x:scroll;overflow-y:hidden">
+			<div style="display:block;overflow-x:scroll;overflow-y:hidden">
 				<table id="tbl2Detail" width="100%" border="1" align="center" cellpadding="0" cellspacing="0" class="ui-widget ui-widget-content">
 					<tr height="30">
 						<th align="center">&nbsp;</th>
