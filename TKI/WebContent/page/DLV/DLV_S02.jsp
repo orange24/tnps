@@ -296,9 +296,14 @@
 			});
 			sumTotalTime("","","init");
 
-			var forcastN1 = forcast.n1;
-			var forcastN2 = forcast.n2;
-			var forcastN3 = forcast.n3;
+			var forcastN1 = "";
+			var forcastN2 = "";
+			var forcastN3 = "";
+			if (typeof forcast !== 'undefined' && forcast != null) {
+				forcastN1 = forcast.n1;
+				forcastN2 = forcast.n2;
+				forcastN3 = forcast.n3;
+			}
 			$('input[name=n1]').val(forcastN1);
 			$('input[name=n2]').val(forcastN2);
 			$('input[name=n3]').val(forcastN3);
