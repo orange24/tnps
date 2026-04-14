@@ -59,8 +59,10 @@
 	<!-- creates a java.util.Properties instance with values loaded from the supplied location -->
 	<util:properties id="settings" location="classpath:settings.properties"/>
 
-	<!-- Thread -->
-	<task:annotation-driven />
+	<!-- Scheduler: รองรับ @Scheduled และ @Async -->
+	<task:scheduler  id="taskScheduler"  pool-size="1"/>
+	<task:executor   id="taskExecutor"   pool-size="5"/>
+	<task:annotation-driven scheduler="taskScheduler" executor="taskExecutor"/>
 
 	<bean id="multipartResolver"
   			class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
