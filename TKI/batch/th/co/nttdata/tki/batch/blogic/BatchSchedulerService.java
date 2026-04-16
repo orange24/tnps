@@ -28,8 +28,8 @@ public class BatchSchedulerService {
      * WipStockBatchJob รับ startDate = วันนี้ → process ถึงวันนี้ (1 วัน)
      * ถ้าต้องการ run ย้อนหลัง ให้เรียก runManual(startDate) แทน
      */
-    // @Scheduled(cron = "0 0 23 * * *")
-    @Scheduled(fixedRate = 5000)
+    //@Scheduled(fixedRate = 5000)
+    @Scheduled(cron = "0 0 23 * * *")
     public void runScheduled() {
         log.info("[Scheduler] WIP Stock batch triggered at 23:00");
         runInternal(new Date());
@@ -48,6 +48,6 @@ public class BatchSchedulerService {
 //    	System.out.println("งานทำงานตอน: " + LocalDateTime.now());
         // ใช้ Timer daemon thread เพื่อไม่ block scheduler thread ของ Spring
         Timer timer = new Timer("wip-stock-batch", true);
-        timer.schedule(new WipStockBatchJob(dataSource, startDate), 0L);
+        timer.schedule(new WipStockBatchJob(dataSource, startDate, "SYSTEM"), 0L);
     }
 }

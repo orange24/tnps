@@ -35,9 +35,9 @@
 		
 		selectBatch.change(function(){
 			postJSON("BAT_S01_Batch", { "batchId": selectBatch.val() }, function( result ){	
-				if(result.finishDate){					
+				if(result.finishDate){
 					var date        = new Date(result.finishDate);
-					var dateMonth   = date.getMonth() + 1;							
+					var dateMonth   = date.getMonth() + 1;
 					var month		= ((dateMonth+'').length === 1 ? "0" : "") + (dateMonth);
 					var day			= ((date.getDate()+'').length === 1 ? "0" : "")+ date.getDate();
 					var hour		= ((date.getHours()+'').length === 1 ? "0" : "")+ date.getHours();
@@ -48,7 +48,7 @@
 				}else{
 					finishDateTime.html("");
 				}
-				var batchStatus = result.batchStatus;				
+				var batchStatus = result.batchStatus;
 				if(batchStatus === 0){
 					status.html("<strong class='textgreen'>Success</strong>");
 					btnRun.attr("disabled",false);

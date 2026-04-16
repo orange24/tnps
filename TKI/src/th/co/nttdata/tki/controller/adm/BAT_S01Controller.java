@@ -29,7 +29,7 @@ public class BAT_S01Controller extends AbstractBaseController {
 	public ModelAndView init() {
 		List<Batch> batchList = bat_S01Logic.getBatchList();
 		Batch batch = bat_S01Logic.getBatch(batchList.get(0));
-		
+
         return new ModelAndView(PATH_URI)
         	.addObject("batch",batch)
         	.addObject("bacthMap",getBatchlist());
@@ -56,12 +56,26 @@ public class BAT_S01Controller extends AbstractBaseController {
 		Date executeDate = batch.getExecuteDate();
 		batch = getBatch(batch);
 		batch.setExecuteDate(executeDate);
-		bat_S01Logic.batchRun(batch);
-		batch.setBatchStatus(1);
-		bat_S01Logic.updateBatchControl(batch);
+
+		// ป้องกัน run ซ้ำ: ถ้า status=1 แปลว่า batch กำลัง run อยู่
+		if (batch.getBatchStatus() != null && batch.getBatchStatus() == 1) {
+			return new ModelAndView(PATH_URI)
+				.addObject("batch", batch)
+				.addObject("bacthMap", getBatchlist());
+		}
+
+		// WIP_B02, DAL_B01, MLD_B01 ใช้ TimerTask job ซึ่งจัดการ status ของตัวเองใน DB
+		// ไม่ set status=1 ก่อน เพื่อไม่ให้ Job เห็น 1 แล้ว abort
+		if (!"WIP_B02".equals(batch.getBatchCode())
+				&& !"DAL_B01".equals(batch.getBatchCode())
+				&& !"MLD_B01".equals(batch.getBatchCode())) {
+			batch.setBatchStatus(1);
+			bat_S01Logic.updateBatchControl(batch);
+		}
+
 		bat_S01Logic.batchRun(batch);
 		batch = getBatch(batch);
-		
+
         return new ModelAndView(PATH_URI)
         	.addObject("batch", batch)
         	.addObject("bacthMap",getBatchlist());

@@ -1,6 +1,10 @@
 package th.co.nttdata.tki.blogic.adm.impl;
 
 import java.util.List;
+import java.util.Properties;
+import java.util.Timer;
+
+import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -9,6 +13,11 @@ import org.springframework.stereotype.Service;
 
 import th.co.nttdata.batch.BatchLogic;
 import th.co.nttdata.batch.BatchRunner;
+import th.co.nttdata.tki.batch.blogic.BatchSchedulerService;
+import th.co.nttdata.tki.batch.blogic.DailySummaryBatchJob;
+import th.co.nttdata.tki.batch.blogic.MoldShotBatchJob;
+import th.co.nttdata.tki.batch.blogic.WipDeadlineBatchJob;
+import th.co.nttdata.tki.batch.blogic.WipStockBatchJob;
 import th.co.nttdata.tki.bean.Batch;
 import th.co.nttdata.tki.blogic.AbstractBaseLogic;
 import th.co.nttdata.tki.blogic.adm.BAT_S01Logic;
@@ -29,6 +38,10 @@ public class BAT_S01LogicImpl extends AbstractBaseLogic implements BAT_S01Logic 
 	public List<Batch> getBatchList() {
 		return batchDao.getBatchList(null);
 	}
+
+	@Autowired
+	@Qualifier("dataSource")
+	private DataSource dataSource;
 
 	@Autowired
 	@Qualifier("Leadtime")
@@ -87,7 +100,10 @@ public class BAT_S01LogicImpl extends AbstractBaseLogic implements BAT_S01Logic 
 	@Autowired
 	@Qualifier("RES_ADJ")
 	private BatchLogic RES_ADJ;
-	
+
+	@Autowired
+	@Qualifier("settings")
+	private Properties settings;
 
 	@Async
 	public void batchRun(Batch batch) {
@@ -99,13 +115,18 @@ public class BAT_S01LogicImpl extends AbstractBaseLogic implements BAT_S01Logic 
 			} else if ("LOT_B01".equals(batch.getBatchCode())) {
 				BatchRunner.execute(LOT_B01, batch.getUpdateBy(), batch.getExecuteDate());
 			} else if ("MLD_B01".equals(batch.getBatchCode())) {
-				BatchRunner.execute(MoldShot, batch.getUpdateBy(), batch.getExecuteDate());
+				Timer timer = new Timer("mld-shot-batch", true);
+				timer.schedule(new MoldShotBatchJob(dataSource, batch.getExecuteDate(), batch.getUpdateBy()), 0L);
 			} else if ("DAL_B01".equals(batch.getBatchCode())) {
-				BatchRunner.execute(DaillySummary, batch.getUpdateBy(), batch.getExecuteDate());
+				Timer timer = new Timer("dal-summary-batch", true);
+				timer.schedule(new DailySummaryBatchJob(dataSource, batch.getExecuteDate(), batch.getUpdateBy()), 0L);
 			} else if ("WIP_B01".equals(batch.getBatchCode())) {
-				BatchRunner.execute(WIPStock, batch.getUpdateBy(), batch.getExecuteDate());
+				// BatchRunner.execute(WIPStock, batch.getUpdateBy(), batch.getExecuteDate());
+				Timer timer = new Timer("wip-stock-batch", true);
+				timer.schedule(new WipStockBatchJob(dataSource, batch.getExecuteDate(), batch.getUpdateBy()), 0L);
 			} else if ("WIP_B02".equals(batch.getBatchCode())) {
-				BatchRunner.execute(Deadline, batch.getUpdateBy(), batch.getExecuteDate());
+				Timer timer = new Timer("wip-deadline-batch", true);
+				timer.schedule(new WipDeadlineBatchJob(dataSource, batch.getExecuteDate(), batch.getUpdateBy(), settings), 0L);
 			} else if ("TPC_B01".equals(batch.getBatchCode())) {
 				BatchRunner.execute(TPC_B01, batch.getUpdateBy(), batch.getExecuteDate());
 			} else if ("TPC_B02".equals(batch.getBatchCode())) {

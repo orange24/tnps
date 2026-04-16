@@ -56,14 +56,16 @@ public class WipStockBatchJob extends TimerTask {
 
     private final DataSource dataSource;
     private final Date       startDate;  // วันแรกที่ต้องการ recalculate
+    private final String excutedBy;
 
     /**
      * @param dataSource Spring bean "dataSource" (main TKI DB)
      * @param startDate  วันแรกที่ต้องการ recalculate — จะ run ต่อเนื่องถึงวันนี้
      */
-    public WipStockBatchJob(DataSource dataSource, Date startDate) {
+    public WipStockBatchJob(DataSource dataSource, Date startDate, String excutedBy) {
         this.dataSource = dataSource;
         this.startDate  = stripTime(startDate);
+        this.excutedBy  = excutedBy;
     }
 
     // =========================================================================
@@ -79,12 +81,14 @@ public class WipStockBatchJob extends TimerTask {
         ExecutorService  exec = Executors.newFixedThreadPool(THREAD_COUNT);
 
         // ── Batch Control: ป้องกัน run ซ้ำ ───────────────────────────────────
+        // status 0 = ไม่มีการ run / status 1 = กำลัง run อยู่ → abort
         if (dao.isBatchRunning(BATCH_CODE)) {
-            log.warn("[WIP_B01] Batch '" + BATCH_CODE + "' กำลัง run อยู่ — abort เพื่อป้องกันซ้ำ");
+            log.warn("[WIP_B01] Batch '" + BATCH_CODE + "' status=1 กำลัง run อยู่ — abort เพื่อป้องกันซ้ำ");
+            exec.shutdown();
             return;
         }
-        dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, 1, "SYSTEM"); // status 1 = RUNNING
-        log.info("[WIP_B01] Batch Control set RUNNING");
+        dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, 1, this.excutedBy); // status 1 = RUNNING
+        log.info("[WIP_B01] Batch Control set RUNNING (status=1)");
 
         boolean success = false;
         try {
@@ -95,7 +99,7 @@ public class WipStockBatchJob extends TimerTask {
             List<Integer> allPartIds = dao.getAllPartIds();
             if (allPartIds.isEmpty()) {
                 log.warn("[WIP_B01] m_part ไม่มีข้อมูล — abort");
-                return;
+                return; // finally จะ set status=2 (FAILED) ให้อัตโนมัติ
             }
 
             // partId → TreeMap<wipOrder, wip>  (เฉพาะ iscalc=1, เรียง wipOrder)
@@ -145,8 +149,9 @@ public class WipStockBatchJob extends TimerTask {
         } finally {
             exec.shutdown();
             // อัพเดต status ทุกกรณี — แม้ throw exception ก็ต้อง clear RUNNING
+            // status: 0=SUCCESS, 1=RUNNING, 2=FAILED
             int finalStatus = success ? 0 : 2;
-            dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, "SYSTEM");
+            dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, this.excutedBy);
             log.info("[WIP_B01] Batch Control set " + (success ? "SUCCESS (0)" : "FAILED (2)"));
         }
     }
