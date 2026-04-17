@@ -64,9 +64,10 @@ public class BAT_S01Controller extends AbstractBaseController {
 				.addObject("bacthMap", getBatchlist());
 		}
 
-		// WIP_B02, DAL_B01, MLD_B01 ใช้ TimerTask job ซึ่งจัดการ status ของตัวเองใน DB
-		// ไม่ set status=1 ก่อน เพื่อไม่ให้ Job เห็น 1 แล้ว abort
-		if (!"WIP_B02".equals(batch.getBatchCode())
+		// TimerTask jobs จัดการ status ของตัวเองใน DB — ไม่ set status=1 ก่อน
+		if (!"FNG_B01".equals(batch.getBatchCode())
+				&& !"LDT_B01".equals(batch.getBatchCode())
+				&& !"WIP_B02".equals(batch.getBatchCode())
 				&& !"DAL_B01".equals(batch.getBatchCode())
 				&& !"MLD_B01".equals(batch.getBatchCode())) {
 			batch.setBatchStatus(1);

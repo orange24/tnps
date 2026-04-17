@@ -18,8 +18,6 @@ import java.util.TreeMap;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
-
 /**
  * DAO สำหรับ WipStockBatchJob
  *
@@ -34,15 +32,12 @@ import org.apache.log4j.Logger;
  *
  * Java 7 compatible: ไม่ใช้ lambda, stream, computeIfAbsent, merge
  */
-public class WipStockBatchDao {
+public class WipStockBatchDao extends AbstractBatchDao {
 
-    private static final Logger log   = Logger.getLogger(WipStockBatchDao.class);
-    private static final int    CHUNK = 500;
-
-    private final DataSource dataSource;
+    private static final int CHUNK = 500;
 
     public WipStockBatchDao(DataSource dataSource) {
-        this.dataSource = dataSource;
+        super(dataSource);
     }
 
     // =========================================================================
@@ -366,69 +361,6 @@ public class WipStockBatchDao {
             } catch (SQLException e) { throw new RuntimeException("getAdjustKeySet failed", e); }
         }
         return result;
-    }
-
-    // =========================================================================
-    //  Batch Control methods  (m_batch_control)
-    // =========================================================================
-
-    public boolean isBatchRunning(String batchCode) {
-        String sql = "SELECT batchstatus FROM m_batch_control WHERE batchcode = ?";
-        try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, batchCode);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt("batchstatus") == 1;
-            }
-        } catch (SQLException e) {
-            log.warn("isBatchRunning check failed — assuming not running: " + e.getMessage());
-        }
-        return false;
-    }
-
-    /**
-     * UPSERT สถานะลง m_batch_control
-     * status: 0=SUCCESS, 1=RUNNING, 2=FAILED
-     * ใช้ MERGE เพื่อ INSERT ถ้าไม่มี row, UPDATE ถ้ามีแล้ว
-     * (UPDATE อย่างเดียวจะ silent 0-rows-affected ถ้ายังไม่เคยมี row ของ batchcode นี้)
-     */
-    public void upsertBatchControl(String batchCode, String batchName, int status, String runBy) {
-        String sql =
-            "MERGE m_batch_control AS t "
-          + "USING (VALUES (?)) AS s(batchcode) ON t.batchcode = s.batchcode "
-          + "WHEN MATCHED THEN "
-          + "  UPDATE SET batchstatus = ?, batchname = ?, runby = ?, "
-          + "             startdate  = CASE WHEN ? = 1 THEN GETDATE() ELSE t.startdate END, "
-          + "             finishdate = CASE WHEN ? <> 1 THEN GETDATE() ELSE t.finishdate END "
-          + "WHEN NOT MATCHED THEN "
-          + "  INSERT (batchcode, batchname, batchstatus, runby, startdate, finishdate) "
-          + "  VALUES (?, ?, ?, ?, "
-          + "          CASE WHEN ? = 1 THEN GETDATE() ELSE NULL END, "
-          + "          CASE WHEN ? <> 1 THEN GETDATE() ELSE NULL END);";
-        try (Connection c = dataSource.getConnection()) {
-            c.setAutoCommit(false);
-            try (PreparedStatement ps = c.prepareStatement(sql)) {
-                ps.setString(1, batchCode);   // USING source
-                ps.setInt   (2, status);      // UPDATE batchstatus
-                ps.setString(3, batchName);   // UPDATE batchname
-                ps.setString(4, runBy);       // UPDATE runby
-                ps.setInt   (5, status);      // CASE startdate
-                ps.setInt   (6, status);      // CASE finishdate
-                ps.setString(7, batchCode);   // INSERT batchcode
-                ps.setString(8, batchName);   // INSERT batchname
-                ps.setInt   (9, status);      // INSERT batchstatus
-                ps.setString(10, runBy);      // INSERT runby
-                ps.setInt   (11, status);     // INSERT CASE startdate
-                ps.setInt   (12, status);     // INSERT CASE finishdate
-                ps.executeUpdate();
-                c.commit();
-            } catch (SQLException e) {
-                c.rollback();
-                throw e;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("upsertBatchControl failed (status=" + status + ")", e);
-        }
     }
 
     // =========================================================================

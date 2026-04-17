@@ -13,8 +13,9 @@ import org.springframework.stereotype.Service;
 
 import th.co.nttdata.batch.BatchLogic;
 import th.co.nttdata.batch.BatchRunner;
-import th.co.nttdata.tki.batch.blogic.BatchSchedulerService;
 import th.co.nttdata.tki.batch.blogic.DailySummaryBatchJob;
+import th.co.nttdata.tki.batch.blogic.FGStockBatchJob;
+import th.co.nttdata.tki.batch.blogic.LeadtimeBatchJob;
 import th.co.nttdata.tki.batch.blogic.MoldShotBatchJob;
 import th.co.nttdata.tki.batch.blogic.WipDeadlineBatchJob;
 import th.co.nttdata.tki.batch.blogic.WipStockBatchJob;
@@ -109,9 +110,11 @@ public class BAT_S01LogicImpl extends AbstractBaseLogic implements BAT_S01Logic 
 	public void batchRun(Batch batch) {
 		try {
 			if ("FNG_B01".equals(batch.getBatchCode())) {
-				BatchRunner.execute(FGStock, batch.getUpdateBy(), batch.getExecuteDate());
+				Timer timer = new Timer("fng-stock-batch", true);
+				timer.schedule(new FGStockBatchJob(dataSource, batch.getExecuteDate(), batch.getUpdateBy()), 0L);
 			} else if ("LDT_B01".equals(batch.getBatchCode())) {
-				BatchRunner.execute(Leadtime, batch.getUpdateBy(), batch.getExecuteDate());
+				Timer timer = new Timer("ldt-leadtime-batch", true);
+				timer.schedule(new LeadtimeBatchJob(dataSource, batch.getUpdateBy()), 0L);
 			} else if ("LOT_B01".equals(batch.getBatchCode())) {
 				BatchRunner.execute(LOT_B01, batch.getUpdateBy(), batch.getExecuteDate());
 			} else if ("MLD_B01".equals(batch.getBatchCode())) {
@@ -121,7 +124,6 @@ public class BAT_S01LogicImpl extends AbstractBaseLogic implements BAT_S01Logic 
 				Timer timer = new Timer("dal-summary-batch", true);
 				timer.schedule(new DailySummaryBatchJob(dataSource, batch.getExecuteDate(), batch.getUpdateBy()), 0L);
 			} else if ("WIP_B01".equals(batch.getBatchCode())) {
-				// BatchRunner.execute(WIPStock, batch.getUpdateBy(), batch.getExecuteDate());
 				Timer timer = new Timer("wip-stock-batch", true);
 				timer.schedule(new WipStockBatchJob(dataSource, batch.getExecuteDate(), batch.getUpdateBy()), 0L);
 			} else if ("WIP_B02".equals(batch.getBatchCode())) {

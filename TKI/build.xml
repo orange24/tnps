@@ -275,22 +275,13 @@
     </target>
     <target depends="clean" name="cleanall"/>
     <target name="build-subprojects"/>
-    <target depends="init" name="build-project">
+	<target depends="init" name="build-project">
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac encoding="UTF-8" debug="true" debuglevel="${debuglevel}" destdir="WebContent/WEB-INF/classes" source="${source}" target="${target}" includeantruntime="false">
-            <src path="business"/>
-            <classpath refid="TKI.classpath"/>
-        </javac>
-        <javac encoding="UTF-8" debug="true" debuglevel="${debuglevel}" destdir="WebContent/WEB-INF/classes" source="${source}" target="${target}" includeantruntime="false">
-            <src path="config"/>
-            <classpath refid="TKI.classpath"/>
-        </javac>
-        <javac encoding="UTF-8" debug="true" debuglevel="${debuglevel}" destdir="WebContent/WEB-INF/classes" source="${source}" target="${target}" includeantruntime="false">
-            <src path="src"/>
-            <classpath refid="TKI.classpath"/>
-        </javac>
-        <javac encoding="UTF-8" debug="true" debuglevel="${debuglevel}" destdir="WebContent/WEB-INF/classes" source="${source}" target="${target}" includeantruntime="false">
             <src path="batch"/>
+            <src path="business"/>
+            <src path="config"/>
+            <src path="src"/>
             <classpath refid="TKI.classpath"/>
         </javac>
     </target>
