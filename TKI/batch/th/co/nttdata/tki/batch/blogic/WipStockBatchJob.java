@@ -309,10 +309,9 @@ public class WipStockBatchJob extends TimerTask {
                 String      nextWip = nextEntry.getValue();
                 WipDateKey  nextKey = new WipDateKey(ws.reportDate, nextWip, ws.partId);
                 WipStockDto nextWs  = wipStockMap.get(nextKey);
-                AdjAgg nextPd = pdAdjMap.getOrDefault(nextKey, AdjAgg.ZERO);
-                AdjAgg nextRw = rwAdjMap.getOrDefault(nextKey, AdjAgg.ZERO);
-                nextWipQty = (nextWs != null ? nextWs.qty : 0)
-                           - nvl(nextPd.qty) - nvl(nextRw.qty);
+                nextWipQty = nextWs != null
+                           ? nextWs.ok + nextWs.ng + nextWs.pd
+                           : 0;
 
             } else if (wipOrder == maxOrder) {
                 // Case 2: WIP stage สุดท้าย → consume เข้า FG stock

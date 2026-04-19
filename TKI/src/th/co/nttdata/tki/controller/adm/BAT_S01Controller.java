@@ -67,6 +67,7 @@ public class BAT_S01Controller extends AbstractBaseController {
 		// TimerTask jobs จัดการ status ของตัวเองใน DB — ไม่ set status=1 ก่อน
 		if (!"FNG_B01".equals(batch.getBatchCode())
 				&& !"LDT_B01".equals(batch.getBatchCode())
+				&& !"WIP_B01".equals(batch.getBatchCode())
 				&& !"WIP_B02".equals(batch.getBatchCode())
 				&& !"DAL_B01".equals(batch.getBatchCode())
 				&& !"MLD_B01".equals(batch.getBatchCode())) {
