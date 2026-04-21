@@ -62,7 +62,8 @@ public class LeadtimeBatchJob extends TimerTask {
         log.info("[LDT_B01] Started (by=" + executedBy + ")");
 
         ExecutorService exec = Executors.newFixedThreadPool(THREAD_COUNT);
-        boolean success = false;
+        String  errorMsg = null;
+        boolean success  = false;
         try {
 
             // ── [1/3] Query leadtime list ────────────────────────────────────
@@ -91,13 +92,15 @@ public class LeadtimeBatchJob extends TimerTask {
             }
 
         } catch (Exception e) {
-            log.error("[LDT_B01] Failed after " + elapsed(startMs) + " ms: " + e.getMessage(), e);
+            errorMsg = e.getMessage();
+            log.error("[LDT_B01] Failed after " + elapsed(startMs) + " ms: " + errorMsg, e);
         } finally {
             exec.shutdown();
         }
 
         int finalStatus = success ? 0 : 2;
-        dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, executedBy);
+        dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, executedBy,
+                               success ? null : errorMsg);
         if (success) {
             log.info("[LDT_B01] Batch Control set SUCCESS (0) — total " + elapsed(startMs) + " ms");
         } else {

@@ -80,7 +80,8 @@ public class WipDeadlineBatchJob extends TimerTask {
         dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, 1, executedBy);
         log.info("[WIP_B02] Batch Control set RUNNING (status=1)");
 
-        boolean success = false;
+        String  errorMsg  = null;
+        boolean success   = false;
         long batchStart = System.currentTimeMillis();
         try {
             // ── Step 1: เตรียม table ──────────────────────────────────────────
@@ -96,7 +97,8 @@ public class WipDeadlineBatchJob extends TimerTask {
             log.info("[WIP_B02] [2/5] queryDeliveryPlan done — parts=" + dlvList.size()
                     + " (" + elapsed(t2) + " ms)");
             if (dlvList.isEmpty()) {
-                log.warn("[WIP_B02] ไม่มี delivery plan — abort");
+                errorMsg = "ไม่มี delivery plan";
+                log.warn("[WIP_B02] " + errorMsg + " — abort");
                 return;
             }
 
@@ -129,12 +131,14 @@ public class WipDeadlineBatchJob extends TimerTask {
             log.info("[WIP_B02] ===== DONE — total elapsed=" + elapsed(batchStart) + " ms =====");
 
         } catch (Exception e) {
-            log.error("[WIP_B02] Failed after " + elapsed(batchStart) + " ms: " + e.getMessage(), e);
+            errorMsg = e.getMessage();
+            log.error("[WIP_B02] Failed after " + elapsed(batchStart) + " ms: " + errorMsg, e);
             throw new RuntimeException("[WIP_B02] Batch failed", e);
         } finally {
             exec.shutdown();
             int finalStatus = success ? 0 : 2;
-            dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, executedBy);
+            dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, executedBy,
+                                   success ? null : errorMsg);
             log.info("[WIP_B02] Batch Control set " + (success ? "SUCCESS (0)" : "FAILED (2)"));
         }
     }

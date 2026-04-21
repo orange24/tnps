@@ -19,7 +19,7 @@
 	var selectBatch ;
 	var finishDateTime;
 	var runBy;
-	var status;
+	var statusEl;
 	var btnRun;
 	
 	$(document).ready(function(){
@@ -28,7 +28,7 @@
 		selectBatch 	= $("select#selectBatch");
 		finishDateTime 	= $("#finishDateTime");
 		runBy			= $("#runBy");
-		status			= $("#status");
+		statusEl		= $("#status");
 		btnRun			= $("#btnRun");	
 		
 		getBatchStatus();
@@ -50,16 +50,16 @@
 				}
 				var batchStatus = result.batchStatus;
 				if(batchStatus === 0){
-					status.html("<strong class='textgreen'>Success</strong>");
+					statusEl.html("<strong class='textgreen'>Success</strong>");
 					btnRun.attr("disabled",false);
 				}else if(batchStatus === 1){
-					status.html("<strong class='textblue'>Running...</strong>");
+					statusEl.html("<strong class='textblue'>Running...</strong>");
 					btnRun.attr("disabled",true);
 				}else if(batchStatus === 2){
-					status.html("<strong class='textred'>Fail</strong>");
+					statusEl.html("<strong class='textred'>Fail</strong>");
 					btnRun.attr("disabled",false);
 				}else if(batchStatus === 3){
-					status.html("<strong class='textorange'>Success with error.</strong>");
+					statusEl.html("<strong class='textorange'>Success with error.</strong>");
 					btnRun.attr("disabled",false);
 				}
 				var resultRunBy = result.runBy;
@@ -91,16 +91,16 @@
 					var sec			= ((date.getSeconds()+'').length === 1 ? "0" : "")+ date.getSeconds();
 					var finishDate  = day +"/"+ month +"/"+ date.getFullYear() +" "+ hour +":"+ min +":"+ sec;				
 					if(batchStatus === 0){
-						status.html("<strong class='textgreen'>Success</strong>");
+						statusEl.html("<strong class='textgreen'>Success</strong>");
 						btnRun.attr("disabled",false);
 					}else if(batchStatus === 1){
-						status.html("<strong class='textblue'>Running...</strong>");
+						statusEl.html("<strong class='textblue'>Running...</strong>");
 						btnRun.attr("disabled",true);
 					}else if(batchStatus === 2){
-						status.html("<strong class='textred'>Fail</strong>");
+						statusEl.html("<strong class='textred'>Fail</strong>");
 						btnRun.attr("disabled",false);
 					}else if(batchStatus === 3){
-						status.html("<strong class='textorange'>Success with error.</strong>");
+						statusEl.html("<strong class='textorange'>Success with error.</strong>");
 						btnRun.attr("disabled",false);
 					}				
 					finishDateTime.html(finishDate);
@@ -132,16 +132,16 @@
 					
 					if (data.batchId == selectBatch.val()) {
 						if (data.batchStatus === 0) {
-							status.html("<strong class='textgreen'>Success</strong>");
+							statusEl.html("<strong class='textgreen'>Success</strong>");
 							btnRun.attr("disabled", false);
 						} else if (data.batchStatus === 1) {
-							status.html("<strong class='textblue'>Running...</strong>");
+							statusEl.html("<strong class='textblue'>Running...</strong>");
 							btnRun.attr("disabled", true);
 						} else if (data.batchStatus === 2) {
-							status.html("<strong class='textred'>Fail</strong>");
+							statusEl.html("<strong class='textred'>Fail</strong>");
 							btnRun.attr("disabled", false);
 						} else if (data.batchStatus === 3) {
-							status.html("<strong class='textorange'>Success with error.</strong>");
+							statusEl.html("<strong class='textorange'>Success with error.</strong>");
 							btnRun.attr("disabled", false);
 						}
 					}

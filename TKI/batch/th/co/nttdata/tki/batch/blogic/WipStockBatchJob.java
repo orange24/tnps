@@ -90,69 +90,70 @@ public class WipStockBatchJob extends TimerTask {
         dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, 1, this.excutedBy); // status 1 = RUNNING
         log.info("[WIP_B01] Batch Control set RUNNING (status=1)");
 
-        boolean success = false;
+        String  errorMsg = null;
+        boolean success  = false;
         try {
-            // ─────────────────────────────────────────────────────────────────
-            // Static data: fetch ครั้งเดียว ใช้ร่วมกันทุกวัน
-            // (m_part, m_part_wip, m_fg_part ไม่เปลี่ยนระหว่าง run)
-            // ─────────────────────────────────────────────────────────────────
+            // ── [1] Static data ───────────────────────────────────────────────
+            dao.insertBatchLog(BATCH_CODE, "getAllPartIds", 1, today, "start");
             List<Integer> allPartIds = dao.getAllPartIds();
+            dao.insertBatchLog(BATCH_CODE, "getAllPartIds", 0, today, "parts=" + allPartIds.size());
+
             if (allPartIds.isEmpty()) {
-                log.warn("[WIP_B01] m_part ไม่มีข้อมูล — abort");
-                return; // finally จะ set status=2 (FAILED) ให้อัตโนมัติ
+                log.warn("[WIP_B01] m_part ไม่มีข้อมูล — skipped");
+                success = true;
+                return;
             }
 
-            // partId → TreeMap<wipOrder, wip>  (เฉพาะ iscalc=1, เรียง wipOrder)
+            dao.insertBatchLog(BATCH_CODE, "getCalcWipMap", 1, today, "start");
             Map<Integer, NavigableMap<Integer, String>> calcWipMap =
                     dao.getCalcOrderedWipMap(allPartIds);
+            dao.insertBatchLog(BATCH_CODE, "getCalcWipMap", 0, today, "done");
 
-            // partId → fgId  (TOP 1 per partid, isactive=1)
+            dao.insertBatchLog(BATCH_CODE, "getPartToFgMap", 1, today, "start");
             Map<Integer, Integer> partToFgMap = dao.getPartToFgMap(allPartIds);
-
-            // fgId → List<partId>  (ใช้หา assy part)
             Map<Integer, List<Integer>> fgToPartsMap =
                     dao.getFgToPartsMap(new HashSet<>(partToFgMap.values()));
+            dao.insertBatchLog(BATCH_CODE, "getPartToFgMap", 0, today, "done");
 
-            // (wip, partId) ที่เคยมีใน t_wip_stockadjust  (Source C ของ part base rows)
-            // ไม่ขึ้นกับวันที่ — fetch ครั้งเดียว
             Set<WipKey> adjKeySet = dao.getAdjustKeySet(allPartIds);
 
-            // ─────────────────────────────────────────────────────────────────
-            // prevStockMap สำหรับวันแรก — ดึงจาก DB (วันก่อน startDate)
-            // วันต่อๆ ไปจะใช้ค่าที่คำนวณได้จากวันก่อนหน้าใน memory
-            // ─────────────────────────────────────────────────────────────────
             Map<WipKey, Integer> prevStockMap =
                     dao.getPrevStockMap(allPartIds, addDays(startDate, -1));
+            dao.insertBatchLog(BATCH_CODE, "staticData", 0, today,
+                    "parts=" + allPartIds.size() + " adjKeys=" + adjKeySet.size());
 
-            // ─────────────────────────────────────────────────────────────────
-            // Loop วันที่: startDate → today  (ต้องเรียงตามลำดับ!)
-            // ─────────────────────────────────────────────────────────────────
+            // ── [2] Loop วันที่ ───────────────────────────────────────────────
             int totalDays = 0;
             Date current = startDate;
             while (!current.after(today)) {
-                log.info("[WIP_B01] Processing date=" + current
-                        + " (" + (totalDays + 1) + " day(s) from start)");
+                dao.insertBatchLog(BATCH_CODE, "processDate", 1, current,
+                        "date=" + current + " day=" + (totalDays + 1));
 
                 prevStockMap = processOneDate(current, dao, exec,
                         allPartIds, calcWipMap, partToFgMap, fgToPartsMap,
                         adjKeySet, prevStockMap);
                 totalDays++;
+
+                dao.insertBatchLog(BATCH_CODE, "processDate", 0, current,
+                        "date=" + current + " done");
                 current = addDays(current, 1);
             }
 
-            log.info("[WIP_B01] Done — processed " + totalDays + " date(s)");
+            dao.insertBatchLog(BATCH_CODE, "WIP_B01 complete", 0, today,
+                    "totalDays=" + totalDays);
             success = true;
 
         } catch (Exception e) {
-            log.error("[WIP_B01] Failed: " + e.getMessage(), e);
+            errorMsg = causeChain(e);
+            log.error("[WIP_B01] Failed: " + errorMsg, e);
+            dao.insertBatchLog(BATCH_CODE, "WIP_B01 ERROR", 2, today, errorMsg);
             throw new RuntimeException("[WIP_B01] Batch failed", e);
         } finally {
             exec.shutdown();
-            // อัพเดต status ทุกกรณี — แม้ throw exception ก็ต้อง clear RUNNING
-            // status: 0=SUCCESS, 1=RUNNING, 2=FAILED
             int finalStatus = success ? 0 : 2;
-            dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, this.excutedBy);
-            log.info("[WIP_B01] Batch Control set " + (success ? "SUCCESS (0)" : "FAILED (2)"));
+            dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, this.excutedBy,
+                                   success ? null : errorMsg);
+            log.warn("[WIP_B01] Batch Control set " + (success ? "SUCCESS (0)" : "FAILED (2)"));
         }
     }
 
@@ -239,9 +240,12 @@ public class WipStockBatchJob extends TimerTask {
         dao.insertBatchLog("WIP_B01", "WIP_B01 Count proc.", 0, reportDate,
                            String.valueOf(wipStocks.size()));
 
-        // ── Delete + Insert แบบ parallel ─────────────────────────────────────
+        // ── Delete: single transaction (ป้องกัน deadlock จาก parallel DELETE) ──
+        dao.deleteForDate(allPartIds, reportDate);
+
+        // ── Insert: parallel (new rows ไม่ชนกัน) ─────────────────────────────
         List<List<WipStockDto>> partitions = partitionByPartId(wipStocks, PARTITION_SIZE);
-        runParallelDeleteInsert(exec, partitions, dao, reportDate);
+        runParallelInsert(exec, partitions, dao);
 
         dao.insertBatchLog("WIP_B01", "WIP_B01 tracking", 0, reportDate,
                            "Finish insert WIP Stock");
@@ -383,17 +387,16 @@ public class WipStockBatchJob extends TimerTask {
         return null;
     }
 
-    private void runParallelDeleteInsert(ExecutorService exec,
+    private void runParallelInsert(ExecutorService exec,
             List<List<WipStockDto>> partitions,
-            final WipStockBatchDao dao,
-            final Date reportDate)
+            final WipStockBatchDao dao)
             throws InterruptedException, ExecutionException {
         List<Future<?>> futures = new ArrayList<Future<?>>(partitions.size());
         for (int i = 0; i < partitions.size(); i++) {
             final List<WipStockDto> part = partitions.get(i);
             futures.add(exec.submit(new Callable<Void>() {
                 public Void call() throws Exception {
-                    dao.deleteAndInsert(part, reportDate);
+                    dao.insertBatch(part);
                     return null;
                 }
             }));
@@ -416,6 +419,18 @@ public class WipStockBatchJob extends TimerTask {
             }));
         }
         for (Future<?> f : futures) f.get();
+    }
+
+    /** รวม message ของทุก cause ใน exception chain เพื่อให้เห็น root cause */
+    private static String causeChain(Throwable t) {
+        StringBuilder sb = new StringBuilder();
+        while (t != null) {
+            if (sb.length() > 0) sb.append(" → ");
+            sb.append(t.getClass().getSimpleName()).append(": ").append(t.getMessage());
+            t = t.getCause();
+        }
+        String msg = sb.toString();
+        return msg.length() > 500 ? msg.substring(0, 500) : msg;
     }
 
     private int nvl(Integer v) { return v != null ? v : 0; }

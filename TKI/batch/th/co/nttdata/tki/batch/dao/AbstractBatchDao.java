@@ -51,18 +51,31 @@ public abstract class AbstractBatchDao {
      * status: 0=SUCCESS  1=RUNNING  2=FAILED
      */
     public void upsertBatchControl(String batchCode, String batchName, int status, String runBy) {
+        upsertBatchControl(batchCode, batchName, status, runBy, null);
+    }
+
+    /**
+     * UPSERT m_batch_control พร้อม errorMsg — เก็บสาเหตุ fail ลง DB โดยตรง
+     * errorMsg ถูก truncate ที่ 500 ตัวอักษร
+     */
+    public void upsertBatchControl(String batchCode, String batchName, int status,
+                                   String runBy, String errorMsg) {
         String sql =
             "MERGE m_batch_control AS t "
           + "USING (VALUES (?)) AS s(batchcode) ON t.batchcode = s.batchcode "
           + "WHEN MATCHED THEN "
           + "  UPDATE SET batchstatus=?, runby=?, "
-          + "             startdate =CASE WHEN ?=1 THEN GETDATE() ELSE t.startdate  END, "
-          + "             finishdate=CASE WHEN ?<>1 THEN GETDATE() ELSE t.finishdate END "
+          + "             startdate   =CASE WHEN ?=1 THEN GETDATE() ELSE t.startdate  END, "
+          + "             finishdate  =CASE WHEN ?<>1 THEN GETDATE() ELSE t.finishdate END, "
+          + "             errormessage=? "
           + "WHEN NOT MATCHED THEN "
-          + "  INSERT (batchcode,batchname,batchstatus,runby,startdate,finishdate) "
+          + "  INSERT (batchcode,batchname,batchstatus,runby,startdate,finishdate,errormessage) "
           + "  VALUES (?,?,?,?, "
           + "          CASE WHEN ?=1  THEN GETDATE() ELSE NULL END, "
-          + "          CASE WHEN ?<>1 THEN GETDATE() ELSE NULL END);";
+          + "          CASE WHEN ?<>1 THEN GETDATE() ELSE NULL END, "
+          + "          ?);";
+        String msg = (errorMsg != null && errorMsg.length() > 500)
+                   ? errorMsg.substring(0, 500) : errorMsg;
         try (Connection c = dataSource.getConnection()) {
             c.setAutoCommit(false);
             try (PreparedStatement ps = c.prepareStatement(sql)) {
@@ -71,12 +84,14 @@ public abstract class AbstractBatchDao {
                 ps.setString(3,  runBy);
                 ps.setInt   (4,  status);
                 ps.setInt   (5,  status);
-                ps.setString(6,  batchCode);
-                ps.setString(7,  batchName);
-                ps.setInt   (8,  status);
-                ps.setString(9,  runBy);
-                ps.setInt   (10, status);
+                if (msg != null) ps.setString(6, msg); else ps.setNull(6, java.sql.Types.NVARCHAR);
+                ps.setString(7,  batchCode);
+                ps.setString(8,  batchName);
+                ps.setInt   (9,  status);
+                ps.setString(10, runBy);
                 ps.setInt   (11, status);
+                ps.setInt   (12, status);
+                if (msg != null) ps.setString(13, msg); else ps.setNull(13, java.sql.Types.NVARCHAR);
                 ps.executeUpdate();
                 c.commit();
             } catch (SQLException e) {

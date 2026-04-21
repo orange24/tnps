@@ -65,7 +65,8 @@ public class MoldShotBatchJob extends TimerTask {
         log.info("[MLD_B01] Started (executeDate=" + executeDate + ", by=" + executedBy + ")");
 
         ExecutorService exec = Executors.newFixedThreadPool(THREAD_COUNT);
-        boolean success = false;
+        String  errorMsg = null;
+        boolean success  = false;
         try {
 
             // ── [1/5] Query min dates ────────────────────────────────────────
@@ -115,13 +116,15 @@ public class MoldShotBatchJob extends TimerTask {
             success = true;
 
         } catch (Exception e) {
-            log.error("[MLD_B01] Failed after " + elapsed(startMs) + " ms: " + e.getMessage(), e);
+            errorMsg = e.getMessage();
+            log.error("[MLD_B01] Failed after " + elapsed(startMs) + " ms: " + errorMsg, e);
         } finally {
             exec.shutdown();
         }
 
         int finalStatus = success ? 0 : 2;
-        dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, executedBy);
+        dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, executedBy,
+                               success ? null : errorMsg);
         if (success) {
             log.info("[MLD_B01] Batch Control set SUCCESS (0) — total " + elapsed(startMs) + " ms");
         } else {

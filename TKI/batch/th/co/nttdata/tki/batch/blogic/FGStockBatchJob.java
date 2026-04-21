@@ -55,7 +55,8 @@ public class FGStockBatchJob extends TimerTask {
         dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, 1, executedBy);
         log.info("[FNG_B01] Started (executeDate=" + executeDate + ", by=" + executedBy + ")");
 
-        boolean success = false;
+        String  errorMsg = null;
+        boolean success  = false;
         try {
 
             // ── [1/4] Query dates ────────────────────────────────────────────
@@ -89,11 +90,13 @@ public class FGStockBatchJob extends TimerTask {
             success = true;
 
         } catch (Exception e) {
-            log.error("[FNG_B01] Failed after " + elapsed(startMs) + " ms: " + e.getMessage(), e);
+            errorMsg = e.getMessage();
+            log.error("[FNG_B01] Failed after " + elapsed(startMs) + " ms: " + errorMsg, e);
         }
 
         int finalStatus = success ? 0 : 2;
-        dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, executedBy);
+        dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, executedBy,
+                               success ? null : errorMsg);
         if (success) {
             log.info("[FNG_B01] [4/4] Batch Control set SUCCESS (0) — total " + elapsed(startMs) + " ms");
         } else {

@@ -55,7 +55,8 @@ public class DailySummaryBatchJob extends TimerTask {
         log.info("[DAL_B01] Started (executeDate=" + executeDate + ", by=" + executedBy + ")");
 
         ExecutorService exec = Executors.newFixedThreadPool(THREAD_COUNT);
-        boolean success = false;
+        String  errorMsg = null;
+        boolean success  = false;
         try {
             // ── [1/4] Query minDate ──────────────────────────────────────────
             long t = System.currentTimeMillis();
@@ -83,13 +84,15 @@ public class DailySummaryBatchJob extends TimerTask {
 
             success = true;
         } catch (Exception e) {
-            log.error("[DAL_B01] Failed after " + elapsed(startMs) + " ms: " + e.getMessage(), e);
+            errorMsg = e.getMessage();
+            log.error("[DAL_B01] Failed after " + elapsed(startMs) + " ms: " + errorMsg, e);
         } finally {
             exec.shutdown();
         }
 
         int finalStatus = success ? 0 : 2;
-        dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, executedBy);
+        dao.upsertBatchControl(BATCH_CODE, BATCH_NAME, finalStatus, executedBy,
+                               success ? null : errorMsg);
         if (success) {
             log.info("[DAL_B01] Batch Control set SUCCESS (0) — total " + elapsed(startMs) + " ms");
         } else {

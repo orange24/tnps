@@ -368,49 +368,22 @@ public class WipStockBatchDao extends AbstractBatchDao {
     // =========================================================================
 
     /**
-     * DELETE records ของ chunk แล้ว batch INSERT ใหม่
-     * แต่ละ chunk มี partId ไม่ซ้ำกัน (safe parallel DELETE)
+     * DELETE ทุก row ของ reportDate นั้น — ทำครั้งเดียว single transaction
+     * เพื่อป้องกัน deadlock จากการ DELETE parallel หลาย thread พร้อมกัน
      */
-    public void deleteAndInsert(List<WipStockDto> chunk, Date reportDate) {
-        if (chunk.isEmpty()) return;
-
-        Set<Integer> chunkPartIds = new HashSet<Integer>();
-        for (WipStockDto w : chunk) chunkPartIds.add(w.partId);
-        List<Integer> pidList = new ArrayList<Integer>(chunkPartIds);
+    public void deleteForDate(List<Integer> allPartIds, Date reportDate) {
         java.sql.Date sqlDate = toSqlDate(reportDate);
-
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                String delSql = "DELETE FROM t_wip_stock WITH (ROWLOCK) "
-                              + "WHERE reportdate = ? AND partid IN (" + ph(pidList.size()) + ")";
-                try (PreparedStatement ps = conn.prepareStatement(delSql)) {
-                    ps.setDate(1, sqlDate);
-                    setInts(ps, 2, pidList);
-                    ps.executeUpdate();
-                }
-
-                String insSql = "INSERT INTO t_wip_stock"
-                              + "(reportdate, wip, partid, ok, ng, pd, qty,"
-                              + " prevstock, adjuststock, nextwipqty, currentstock) "
-                              + "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-                try (PreparedStatement ps = conn.prepareStatement(insSql)) {
-                    for (WipStockDto w : chunk) {
-                        ps.setDate  (1,  toSqlDate(w.reportDate));
-                        ps.setString(2,  w.wip);
-                        ps.setInt   (3,  w.partId);
-                        ps.setInt   (4,  w.ok);
-                        ps.setInt   (5,  w.ng);
-                        ps.setInt   (6,  w.pd);
-                        ps.setInt   (7,  w.qty);
-                        ps.setInt   (8,  w.prevStock);
-                        if (w.adjustStock != null) ps.setInt (9, w.adjustStock);
-                        else                       ps.setNull(9, Types.INTEGER);
-                        ps.setInt   (10, w.nextWipQty);
-                        ps.setInt   (11, w.currentStock);
-                        ps.addBatch();
+                for (List<Integer> chunk : toChunks(allPartIds)) {
+                    String delSql = "DELETE FROM t_wip_stock "
+                                  + "WHERE reportdate = ? AND partid IN (" + ph(chunk.size()) + ")";
+                    try (PreparedStatement ps = conn.prepareStatement(delSql)) {
+                        ps.setDate(1, sqlDate);
+                        setInts(ps, 2, chunk);
+                        ps.executeUpdate();
                     }
-                    ps.executeBatch();
                 }
                 conn.commit();
             } catch (SQLException e) {
@@ -418,7 +391,46 @@ public class WipStockBatchDao extends AbstractBatchDao {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new RuntimeException("deleteAndInsert failed", e);
+            throw new RuntimeException("deleteForDate failed", e);
+        }
+    }
+
+    /**
+     * batch INSERT rows — ใช้หลัง deleteForDate เสร็จแล้ว
+     * parallel ได้เพราะ insert new rows ที่ยังไม่มีใน table (ไม่ lock ชนกัน)
+     */
+    public void insertBatch(List<WipStockDto> chunk) {
+        if (chunk.isEmpty()) return;
+        String insSql = "INSERT INTO t_wip_stock"
+                      + "(reportdate, wip, partid, ok, ng, pd, qty,"
+                      + " prevstock, adjuststock, nextwipqty, currentstock) "
+                      + "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(insSql)) {
+                for (WipStockDto w : chunk) {
+                    ps.setDate  (1,  toSqlDate(w.reportDate));
+                    ps.setString(2,  w.wip);
+                    ps.setInt   (3,  w.partId);
+                    ps.setInt   (4,  w.ok);
+                    ps.setInt   (5,  w.ng);
+                    ps.setInt   (6,  w.pd);
+                    ps.setInt   (7,  w.qty);
+                    ps.setInt   (8,  w.prevStock);
+                    if (w.adjustStock != null) ps.setInt (9, w.adjustStock);
+                    else                       ps.setNull(9, Types.INTEGER);
+                    ps.setInt   (10, w.nextWipQty);
+                    ps.setInt   (11, w.currentStock);
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("insertBatch failed", e);
         }
     }
 
