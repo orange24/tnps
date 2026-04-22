@@ -434,6 +434,36 @@ public class WipStockBatchDao extends AbstractBatchDao {
         }
     }
 
+    /**
+     * UPDATE nextwipqty + currentstock ทุก row ใน single connection/transaction
+     * ทำแบบ sequential เพื่อป้องกัน deadlock จาก parallel UPDATE บน index page เดียวกัน
+     */
+    public void batchUpdateAll(List<WipStockDto> all) {
+        if (all.isEmpty()) return;
+        String sql = "UPDATE t_wip_stock SET nextwipqty = ?, currentstock = ? "
+                   + "WHERE reportdate = ? AND wip = ? AND partid = ?";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                for (WipStockDto w : all) {
+                    ps.setInt   (1, w.nextWipQty);
+                    ps.setInt   (2, w.currentStock);
+                    ps.setDate  (3, toSqlDate(w.reportDate));
+                    ps.setString(4, w.wip);
+                    ps.setInt   (5, w.partId);
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw new RuntimeException("batchUpdateAll failed", e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("batchUpdateAll failed", e);
+        }
+    }
+
     /** batch UPDATE nextwipqty + currentstock — retry on deadlock (SQL Server error 1205) */
     public void batchUpdate(List<WipStockDto> chunk) {
         if (chunk.isEmpty()) return;

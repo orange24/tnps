@@ -11,12 +11,12 @@ SELECT DISTINCT  m.reportDate, m.customerid, m.customer, m.partid, m.partno, m.p
       ISNULL(ws.prevstock, 0) + dbo.GetWIPPrevPdQty(m.partid, m.wip, m.reportDate) AS totals,
       (SELECT COUNT(wiporder) AS tt FROM m_part_wip WHERE (partid = m.partid)) AS countProcess, 
 	ISNULL(CASE WHEN
-          (SELECT SUM(a.fgadjust_qty) AS adj FROM t_fg_stock_adjust AS a INNER JOIN v_cust_fg_part AS v ON a.fgid = v.fgid
-           WHERE (v.partid = m.partid) AND (a.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, CONVERT(DATETIME, m.reportDate, 102)), 102))) 
+          (SELECT TOP 1 a.fgadjust_qty AS adj FROM t_fg_stock_adjust AS a INNER JOIN v_cust_fg_part AS v ON a.fgid = v.fgid
+			WHERE v.partid = m. partid AND a.reportdate = DATEADD(DAY, -1, m.reportDate) ORDER BY a.lastupdate DESC) 
            IS NOT NULL 
       THEN
-          (SELECT SUM(a.fgadjust_qty) AS adj FROM t_fg_stock_adjust AS a INNER JOIN v_cust_fg_part AS v ON a.fgid = v.fgid
-           WHERE (v.partid = m.partid) AND (a.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, CONVERT(DATETIME, m.reportDate, 102)), 102)))
+          (SELECT TOP 1 a.fgadjust_qty AS adj FROM t_fg_stock_adjust AS a INNER JOIN v_cust_fg_part AS v ON a.fgid = v.fgid
+			WHERE v.partid = m. partid AND a.reportdate = DATEADD(DAY, -1, m.reportDate) ORDER BY a.lastupdate DESC)
       ELSE
           (SELECT top 1 ISNULL(t_fg_stock.fgbalance, 0) 
            FROM t_fg_stock INNER JOIN v_cust_fg_part ON t_fg_stock.customerid = v_cust_fg_part.customerid AND t_fg_stock.fgid = v_cust_fg_part.fgid
@@ -33,13 +33,12 @@ SELECT DISTINCT  m.reportDate, m.customerid, m.customer, m.partid, m.partno, m.p
             WHERE (twip.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, CONVERT(DATETIME, m.reportDate, 102)), 102)) AND (twip.partid = m.partid)), 0) 
       AS sumTotal, 
 	ISNULL((CASE WHEN
-          (SELECT SUM(a.fgadjust_qty) AS adj FROM t_fg_stock_adjust AS a INNER JOIN v_cust_fg_part AS v ON a.fgid = v.fgid
-            WHERE (v.partid = m.partid) AND (a.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, CONVERT(DATETIME, m.reportDate, 102)), 102))) 
+          (SELECT TOP 1 a.fgadjust_qty AS adj FROM t_fg_stock_adjust AS a INNER JOIN v_cust_fg_part AS v ON a.fgid = v.fgid
+			WHERE v.partid = m. partid AND a.reportdate = DATEADD(DAY, -1, m.reportDate) ORDER BY a.lastupdate DESC) 
             IS NOT NULL 
       THEN
-          (SELECT SUM(a.fgadjust_qty) AS adj
-            FROM t_fg_stock_adjust AS a INNER JOIN v_cust_fg_part AS v ON a.fgid = v.fgid
-            WHERE (v.partid = m.partid) AND (a.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, CONVERT(DATETIME, m.reportDate, 102)), 102))) 
+          (SELECT TOP 1 a.fgadjust_qty AS adj FROM t_fg_stock_adjust AS a INNER JOIN v_cust_fg_part AS v ON a.fgid = v.fgid
+			WHERE v.partid = m. partid AND a.reportdate = DATEADD(DAY, -1, m.reportDate) ORDER BY a.lastupdate DESC) 
       ELSE
           (SELECT top 1 ISNULL(t_fg_stock.fgbalance, 0) FROM t_fg_stock INNER JOIN v_cust_fg_part ON t_fg_stock.customerid = v_cust_fg_part.customerid AND t_fg_stock.fgid = v_cust_fg_part.fgid
             WHERE (t_fg_stock.customerid = m.customerid) AND (v_cust_fg_part.partid = m.partid) AND (t_fg_stock.reportdate = CONVERT(DATETIME, DATEADD(DAY, - 1, m.reportDate), 102))) 

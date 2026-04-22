@@ -50,7 +50,7 @@ public class WIP_S06Controller extends AbstractBaseController {
 		Calendar current = new GregorianCalendar(Locale.US);
 		//TWip.setMonth(current.get(Calendar.MONTH));
 		//TWip.setYear(current.get(Calendar.YEAR));
-                TWipCheckStock.setReportDateFr(current.getTime());              
+                TWipCheckStock.setReportDateFr(current.getTime());
                 TWipCheckStock.setReportDateTo(current.getTime());
 
 		return new ModelAndView(PATH_URI)

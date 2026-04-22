@@ -258,8 +258,8 @@ public class WipStockBatchJob extends TimerTask {
         calculateNextWipAndCurrentStock(wipStocks, wipStockMap, calcWipMap,
                 pdAdjMap, rwAdjMap, partToFgMap, fgToPartsMap, fgStockMap);
 
-        // ── Update แบบ parallel ───────────────────────────────────────────────
-        runParallelUpdate(exec, partitions, dao);
+        // ── Update: single transaction (ป้องกัน deadlock จาก parallel UPDATE) ──
+        dao.batchUpdateAll(wipStocks);
 
         dao.insertBatchLog("WIP_B01", "WIP_B01 tracking", 0, reportDate,
                            "Finish update WIP Stock");
@@ -397,23 +397,6 @@ public class WipStockBatchJob extends TimerTask {
             futures.add(exec.submit(new Callable<Void>() {
                 public Void call() throws Exception {
                     dao.insertBatch(part);
-                    return null;
-                }
-            }));
-        }
-        for (Future<?> f : futures) f.get();
-    }
-
-    private void runParallelUpdate(ExecutorService exec,
-            List<List<WipStockDto>> partitions,
-            final WipStockBatchDao dao)
-            throws InterruptedException, ExecutionException {
-        List<Future<?>> futures = new ArrayList<Future<?>>(partitions.size());
-        for (int i = 0; i < partitions.size(); i++) {
-            final List<WipStockDto> part = partitions.get(i);
-            futures.add(exec.submit(new Callable<Void>() {
-                public Void call() throws Exception {
-                    dao.batchUpdate(part);
                     return null;
                 }
             }));
