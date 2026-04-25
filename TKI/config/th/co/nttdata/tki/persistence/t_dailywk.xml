@@ -96,8 +96,10 @@
 	</delete>
 	
 	<select id="selectDAL_R03" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKDetail">
-		SELECT TOP $maxRecord$ 
+		SELECT TOP $maxRecord$
 			 CONVERT(VARCHAR(10),wk.reportDate,103) + ':' + wk.wip + ':' + CAST(d.customerId AS VARCHAR) + ':' + CAST(d.partId AS VARCHAR) as datailRef
+			,wk.dailywkid   AS dailyWKId
+			,d.dailywkdetailid AS dailyWKDetailId
 			,wk.reportDate
 			,d.customerId
 			,c.customerCode
@@ -113,15 +115,12 @@
 			,ISNULL(SUM(d.timeused),0) as timeUsed
 			,ISNULL(SUM(d.manpower),0) as manPower
 			,ISNULL(SUM(d.losstime),0) as lossTime
-			, d.losstime_reason_id as lossTimeReasonId 
-		 	,r.reasonname as lossTimeReasonName
 		 	,d.staff
 			,CASE wk.shift WHEN 'D' THEN 'Day' WHEN 'N' THEN 'Night' ELSE '' END AS shiftName
 		FROM t_dailywk_detail d
 		INNER JOIN t_dailywk wk ON wk.dailywkid = d.dailywkid
 		INNER JOIN m_customer c ON d.customerid = c.customerid
 		INNER JOIN m_part p ON d.partid = p.partid
-		LEFT JOIN m_reason r on r.reasonid = d.losstime_reason_id
 		<dynamic prepend="WHERE">
 			<isNotEmpty prepend="AND" property="reportDateFr"> wk.reportdate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
 			<isNotEmpty prepend="AND" property="reportDateTo"> wk.reportdate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
@@ -133,8 +132,34 @@
 				wk.shift IN <iterate property="shifts" open="(" close=")" conjunction=",">#shifts[]#</iterate>
 			</isNotEmpty>
 		</dynamic>
-		GROUP BY wk.reportdate, d.customerid, c.customercode, wk.wip, d.partid, p.partno, p.partname, wk.shift, d.losstime_reason_id, r.reasonname, d.staff
-		ORDER BY wk.reportdate, c.customercode, wk.wip, p.partno, p.partname, wk.shift
+		GROUP BY wk.dailywkid, d.dailywkdetailid, wk.reportdate, d.customerid, c.customercode, wk.wip, d.partid, p.partno, p.partname, wk.shift, d.staff
+		ORDER BY wk.reportdate, c.customercode, wk.wip, p.partno, p.partname, wk.shift, wk.dailywkid, d.dailywkdetailid
+	</select>
+
+	<select id="selectDAL_R03LossTime" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKLossTime">
+		SELECT
+			 lt.dailywkid      AS dailyWKId
+			,lt.dailywkdetailid AS dailyWKDetailId
+			,lt.losstime_reason_id AS lossTimeReasonId
+			,r.reasonname      AS lossTimeReasonName
+			,lt.losstime       AS lossTime
+		FROM t_dailywk_losstime lt
+		INNER JOIN t_dailywk_detail d ON d.dailywkid = lt.dailywkid AND d.dailywkdetailid = lt.dailywkdetailid
+		INNER JOIN t_dailywk wk ON wk.dailywkid = lt.dailywkid
+		INNER JOIN m_part p ON p.partid = d.partid
+		LEFT  JOIN m_reason r ON r.reasonid = lt.losstime_reason_id
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="reportDateFr"> wk.reportdate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="reportDateTo"> wk.reportdate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partName"> p.partname LIKE #partName# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="partNo"> p.partno LIKE #partNo# + '%' </isNotEmpty>
+			<isNotEmpty prepend="AND" property="wip"> wk.wip = #wip# </isNotEmpty>
+			<isGreaterThan prepend="AND" property="reportType" compareValue="0"> wk.reportType = #reportType# </isGreaterThan>
+			<isNotEmpty prepend="AND" property="shifts">
+				wk.shift IN <iterate property="shifts" open="(" close=")" conjunction=",">#shifts[]#</iterate>
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY lt.dailywkid, lt.dailywkdetailid, r.reasonname
 	</select>
 	
 	<select id="countDAL_R03" resultClass="Integer">

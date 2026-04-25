@@ -13,6 +13,7 @@ import th.co.nttdata.tki.bean.MWorkOrder;
 import th.co.nttdata.tki.bean.Message;
 import th.co.nttdata.tki.bean.TDailyWK;
 import th.co.nttdata.tki.bean.TDailyWKDetail;
+import th.co.nttdata.tki.bean.TDailyWKLossTime;
 import th.co.nttdata.tki.blogic.AbstractBaseLogic;
 import th.co.nttdata.tki.blogic.dal.DAL_S04Logic;
 import th.co.nttdata.tki.dao.MPartDao;
@@ -70,6 +71,19 @@ public class DAL_S04LogicImpl extends AbstractBaseLogic implements DAL_S04Logic 
 
 	@Override
 	public void save(TDailyWK TDailyWK) {
+		// รวม lossTime จาก lossTimeList ก่อน save
+		if (TDailyWK.getDailyWKDetailList() != null) {
+			for (TDailyWKDetail detail : TDailyWK.getDailyWKDetailList()) {
+				if (detail.getLossTimeList() != null && !detail.getLossTimeList().isEmpty()) {
+					int total = 0;
+					for (TDailyWKLossTime lt : detail.getLossTimeList()) {
+						if (lt.getLossTime() != null) total += lt.getLossTime();
+					}
+					detail.setLossTime(total);
+				}
+			}
+		}
+
 		// <!-- Check: if 'dailyWKId' is existing. -->
 		if (TDailyWK.getDailyWKId() == null)
 			dailyWKDao.insert(TDailyWK);

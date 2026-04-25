@@ -32,11 +32,12 @@
 	</select>
 
 	<insert id="insert" parameterClass="th.co.nttdata.tki.bean.TDailyWKDetail">
-		INSERT INTO t_dailywk_detail(manpower, timeused, customerid, dailywkid, dailywkdetailid, ng, ok, partid, pd, qty, lotno, staff, workorderno, losstime, losstime_reason_id) 
-		VALUES(#manPower#, #timeUsed#, #customerId#, #dailyWKId#, #dailyWKDetailId#, #ng#, #ok#, #partId#, #pd#, #qty#, #lotNo#, #staff#, #workOrderNo#, #lossTime#, #lossTimeReasonId#);
+		INSERT INTO t_dailywk_detail(manpower, timeused, customerid, dailywkid, dailywkdetailid, ng, ok, partid, pd, qty, lotno, staff, workorderno, losstime, losstime_reason_id)
+		VALUES(#manPower#, #timeUsed#, #customerId#, #dailyWKId#, #dailyWKDetailId#, #ng#, #ok#, #partId#, #pd#, #qty#, #lotNo#, #staff#, #workOrderNo#, #lossTime#, NULL);
 	</insert>
 
 	<delete id="delete" parameterClass="th.co.nttdata.tki.bean.TDailyWK">
+		DELETE FROM t_dailywk_losstime WHERE dailywkid = #dailyWKId#;
 		DELETE FROM t_dailywk_ngreason WHERE dailywkid = #dailyWKId# AND dailywkdetailid IN ( SELECT dailywkdetailid FROM t_dailywk_detail WHERE dailywkid = #dailyWKId# );
 		DELETE FROM t_dailywk_detail WHERE dailywkid = #dailyWKId#;
 	</delete>

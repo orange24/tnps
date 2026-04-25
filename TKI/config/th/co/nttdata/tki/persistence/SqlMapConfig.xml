@@ -45,6 +45,7 @@
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_dailywk.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_dailywk_detail.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_dailywk_ngreason.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_dailywk_losstime.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_fg_detail.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_fg_stock.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_fg_stock_adjust.xml" />

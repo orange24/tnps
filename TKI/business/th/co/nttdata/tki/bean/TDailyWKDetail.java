@@ -1,5 +1,6 @@
 package th.co.nttdata.tki.bean;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class TDailyWKDetail {
 	private String workOrderNo;
 	private String currency;
 	private List<TDailyWKNGReason> reasonList;
+	private List<TDailyWKLossTime> lossTimeList;
 	private Map<Integer, Integer> ngReasonMap;
 	private Map<Integer, Integer> stopReason;
 
@@ -465,6 +467,15 @@ public class TDailyWKDetail {
 
 	public void setReasonList(List<TDailyWKNGReason> reasonList) {
 		this.reasonList = reasonList;
+	}
+
+	public List<TDailyWKLossTime> getLossTimeList() {
+		if (lossTimeList == null) lossTimeList = new ArrayList<TDailyWKLossTime>();
+		return lossTimeList;
+	}
+
+	public void setLossTimeList(List<TDailyWKLossTime> lossTimeList) {
+		this.lossTimeList = lossTimeList;
 	}
 
 	public String getnOperationTime() {

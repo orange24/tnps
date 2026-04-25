@@ -212,59 +212,37 @@ public class WipStockBatchDao extends AbstractBatchDao {
 
     /**
      * Rework adjust: (reportDate, pr.wip, p.partid) → AdjAgg
-     * ต่อยอดจาก pdAdjIdToPartId ของ fetchPendingAdjData
+     *
+     * Query จาก t_rework_adjust.reportdate โดยตรง (วันที่ user กรอก rework)
+     * แทนที่จะ chain จาก t_pending_adjust.reportdate ซึ่งเป็นวัน pending เดิม
+     * — แก้ bug: rework ที่ user กรอกวัน D2 สำหรับ pending วัน D1 ไม่แสดงใน WIP_S02 วัน D2
+     *
+     * Key = (reportDate, pr.wip [target wip ที่ rework ไปถึง], p.partid)
      */
-    public Map<WipDateKey, AdjAgg> buildReworkAdjMap(Map<Integer, Integer> pdAdjIdToPartId,
-                                                      Date reportDate) {
+    public Map<WipDateKey, AdjAgg> buildReworkAdjMap(List<Integer> partIds, Date reportDate) {
         Map<WipDateKey, AdjAgg> result = new HashMap<WipDateKey, AdjAgg>();
-        if (pdAdjIdToPartId.isEmpty()) return result;
+        if (partIds.isEmpty()) return result;
+        java.sql.Date sqlDate = toSqlDate(reportDate);
 
-        List<Integer> pdAdjIds = new ArrayList<Integer>(pdAdjIdToPartId.keySet());
-        java.sql.Date sqlDate  = toSqlDate(reportDate);
-
-        // Step 1: t_pending_rework → pdreworkid → (pdadjustid, pr.wip)
-        Map<Integer, Integer> reworkIdToAdjId = new HashMap<Integer, Integer>();
-        Map<Integer, String>  reworkIdToWip   = new HashMap<Integer, String>();
-
-        for (List<Integer> chunk : toChunks(pdAdjIds)) {
-            String sql = "SELECT pdreworkid, pdadjustid, wip FROM t_pending_rework "
-                       + "WHERE pdadjustid IN (" + ph(chunk.size()) + ")";
+        for (List<Integer> chunk : toChunks(partIds)) {
+            String sql = "SELECT tra.ok, tra.ng, pr.wip, p.partid "
+                       + "FROM t_rework_adjust tra "
+                       + "INNER JOIN t_pending_rework pr  ON tra.pdreworkid = pr.pdreworkid "
+                       + "INNER JOIN t_pending_adjust  pa ON pr.pdadjustid  = pa.pdadjustid "
+                       + "INNER JOIN t_pending          p  ON pa.pdid        = p.pdid "
+                       + "WHERE tra.reportdate = ? AND p.partid IN (" + ph(chunk.size()) + ")";
             try (Connection c = dataSource.getConnection();
                  PreparedStatement ps = c.prepareStatement(sql)) {
-                setInts(ps, 1, chunk);
+                ps.setDate(1, sqlDate);
+                setInts(ps, 2, chunk);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        reworkIdToAdjId.put(rs.getInt("pdreworkid"), rs.getInt("pdadjustid"));
-                        reworkIdToWip.put(rs.getInt("pdreworkid"), rs.getString("wip"));
-                    }
-                }
-            } catch (SQLException e) { throw new RuntimeException("buildReworkAdjMap step1 failed", e); }
-        }
+                        int    ok     = rs.getInt("ok");
+                        int    ng     = rs.getInt("ng");
+                        String wip    = rs.getString("wip");
+                        int    partId = rs.getInt("partid");
 
-        if (reworkIdToAdjId.isEmpty()) return result;
-
-        // Step 2: t_rework_adjust → aggregate
-        List<Integer> pdreworkIds = new ArrayList<Integer>(reworkIdToAdjId.keySet());
-        for (List<Integer> chunk : toChunks(pdreworkIds)) {
-            String sql = "SELECT pdreworkid, ok, ng FROM t_rework_adjust "
-                       + "WHERE pdreworkid IN (" + ph(chunk.size()) + ")";
-            try (Connection c = dataSource.getConnection();
-                 PreparedStatement ps = c.prepareStatement(sql)) {
-                setInts(ps, 1, chunk);
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        int pdreworkid = rs.getInt("pdreworkid");
-                        int ok         = rs.getInt("ok");
-                        int ng         = rs.getInt("ng");
-
-                        Integer adjId  = reworkIdToAdjId.get(pdreworkid);
-                        String  prWip  = reworkIdToWip.get(pdreworkid);
-                        if (adjId == null || prWip == null) continue;
-
-                        Integer partId = pdAdjIdToPartId.get(adjId);
-                        if (partId == null) continue;
-
-                        WipDateKey key    = new WipDateKey(sqlDate, prWip, partId);
+                        WipDateKey key      = new WipDateKey(sqlDate, wip, partId);
                         AdjAgg     existing = result.get(key);
                         if (existing == null) {
                             result.put(key, new AdjAgg(ok, ng, ok + ng));
@@ -273,7 +251,7 @@ public class WipStockBatchDao extends AbstractBatchDao {
                         }
                     }
                 }
-            } catch (SQLException e) { throw new RuntimeException("buildReworkAdjMap step2 failed", e); }
+            } catch (SQLException e) { throw new RuntimeException("buildReworkAdjMap failed", e); }
         }
         return result;
     }

@@ -190,8 +190,10 @@ public class WipStockBatchJob extends TimerTask {
         PendingAdjResult pendingResult =
                 dao.fetchPendingAdjData(allPartIds, reportDate);
         Map<WipDateKey, AdjAgg> pdAdjMap = pendingResult.pdAdjMap;
+        // buildReworkAdjMap: query จาก t_rework_adjust.reportdate โดยตรง (วันที่ user กรอก rework)
+        // แทนการ chain จาก pdAdjustId ซึ่งกรองด้วยวัน pending เดิม → rework ข้ามวันหายได้
         Map<WipDateKey, AdjAgg> rwAdjMap =
-                dao.buildReworkAdjMap(pendingResult.pdAdjustIdToPartId, reportDate);
+                dao.buildReworkAdjMap(allPartIds, reportDate);
 
         // fgStockMap ขึ้นกับวัน (fg stock ผลิตได้ในวันนั้น)
         Map<Integer, Integer> fgStockMap =

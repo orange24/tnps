@@ -1,6 +1,7 @@
 package th.co.nttdata.tki.batch.blogic;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -59,10 +60,15 @@ public class BatchSchedulerService {
 
         if (batchCodes.isEmpty()) return;
 
-        log.info("[Scheduler] time=" + currentTime + " — found " + batchCodes.size() + " batch(es)");
+        // D-1: ประมวลผลข้อมูลของเมื่อวาน
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -1);
+        Date executeDate = cal.getTime();
+
+        log.info("[Scheduler] time=" + currentTime + " — found " + batchCodes.size() + " batch(es), executeDate=" + new SimpleDateFormat("yyyy-MM-dd").format(executeDate));
         for (String batchCode : batchCodes) {
             try {
-                runBatch(batchCode, new Date(), "SYSTEM");
+                runBatch(batchCode, executeDate, "SYSTEM");
             } catch (Exception e) {
                 log.error("[Scheduler] Failed to start batchCode=" + batchCode + ": " + e.getMessage(), e);
             }

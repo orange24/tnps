@@ -28,10 +28,23 @@
 	var tblDetailPart;
 	var ngReasons = {};
 	var dailyWKdailyWKDetailList;
+	var currentLossTimeRow = null; // row ที่กำลัง edit loss time
 
 	$(document).ready(function(){
 		dailyWKForm     = $("form#dailyWKForm");
 		boxReportDate   = $("input#reportDate");
+
+		// ── init Loss Time popup dialog ─────────────────────────────────
+		$("#lossTimeDialog").dialog({
+			autoOpen  : false,
+			modal     : true,
+			width     : 480,
+			title     : "Loss Time Reasons",
+			buttons   : {
+				"OK"     : function() { saveLossTimeDialog(); },
+				"Cancel" : function() { $(this).dialog("close"); }
+			}
+		});
 		boxReportType   = $("select[name=reportType]");
 		boxShift        = $("input[name=shift]");
 		boxWIP          = $("select#boxWIP");
@@ -87,13 +100,13 @@
 			// <!-- Providing the data. -->
 			var errors = [];
 			var index = 0;
+			var lossTimeData = []; // เก็บ losstime items ไว้ก่อน (formDataArray ยังไม่ถูก declare)
 			var reasonHeaders = $("tbody > tr:eq(1) > th:gt(4)", tblDetailPart);
 			$("tbody > tr:gt(1)", tblDetailPart).each(function(){
 				var selects = $("select", this);
-				var inputs = $("input", this);
+				var inputs = $("input:not([type=hidden])", this);
 				var boxCustm = selects.eq(0);
 				var boxPrtNo = selects.eq(1);
-				var boxLossTimeReason = selects.eq(2);
 				var inpWKOrd = inputs.eq(0);
 				var inpWKQty = parseInt($(this).find("td:eq(5)").html() || 0);
 				var inpACQty = parseInt(inputs.eq(5).val() || 0);
@@ -106,7 +119,6 @@
 				// <!-- Assigning the Element Name. -->
 				boxCustm.attr("name", "dailyWKDetailList["+ index +"].customerId");
 				boxPrtNo.attr("name", "dailyWKDetailList["+ index +"].partId");
-				boxLossTimeReason.attr("name", "dailyWKDetailList["+ index +"].lossTimeReasonId");
 
 				inpWKOrd.attr("name", "dailyWKDetailList["+ index +"].workOrderNo");
 				inputs.eq(1).attr("name", "dailyWKDetailList["+ index +"].lotNo");
@@ -117,8 +129,19 @@
 				inputs.eq(6).attr("name", "dailyWKDetailList["+ index +"].timeUsed");
 				inputs.eq(7).attr("name", "dailyWKDetailList["+ index +"].manPower");
 				inputs.eq(8).attr("name", "dailyWKDetailList["+ index +"].lossTime");
-				//inputs.eq(9).attr("name", "dailyWKDetailList["+ index +"].lossTimeReasonId");
 				inputs.eq(9).attr("name", "dailyWKDetailList["+ index +"].staff");
+
+				// เก็บ lossTimeList items ไว้ใน temp array ก่อน (merge เข้า formDataArray ทีหลัง)
+				var ltIndex = 0;
+				$(this).find(".lossTimeItem").each(function() {
+					var rid  = $(this).find(".ltReasonId").val();
+					var time = $(this).find(".ltTime").val();
+					if (rid && time) {
+						lossTimeData.push({ name: "dailyWKDetailList["+ index +"].lossTimeList["+ ltIndex +"].lossTimeReasonId", value: rid });
+						lossTimeData.push({ name: "dailyWKDetailList["+ index +"].lossTimeList["+ ltIndex +"].lossTime",         value: time });
+						ltIndex++;
+					}
+				});
 				for( var column = 10; column < inputs.length; column++ ) {
 					// <!-- Finding the 'reasonId'. -->
 					var reasonId = reasonHeaders.eq(column-10).attr("id");
@@ -165,6 +188,10 @@
 			formDataArray.push({ name: "reportDate", value: boxReportDate.val() });
 			formDataArray.push({ name: "reportType", value: boxReportType.val() });
 			formDataArray.push({ name: "shift", value: boxShift.filter(":checked").val() });
+			// merge lossTimeList items ที่เก็บไว้ก่อนหน้า
+			for (var li = 0; li < lossTimeData.length; li++) {
+				formDataArray.push(lossTimeData[li]);
+			}
 
 			disableSaveBtn();
 			postJSON("DAL_S04_check", formDataArray, function( response ){
@@ -239,10 +266,9 @@
 			});
 
 			// <!-- Initial Event. -->
-			var wrkOdr   = $("<input size='12' maxlength='11' />").autocomplete(workOrderList);
-			var custom   = boxCustomer.clone(true);
-			var partNo   = boxPartNo.clone(true);
-			var lossTimeReason   = boxLossTimeReason.clone(true);
+			var wrkOdr = $("<input size='12' maxlength='11' />").autocomplete(workOrderList);
+			var custom = boxCustomer.clone(true);
+			var partNo = boxPartNo.clone(true);
 
 			// <!-- Generating Row Template. -->
 			rowTemplt.append( $("<td align='center'></td>").html( $("tbody > tr", tblDetailPart).length - 1 ) );
@@ -257,8 +283,14 @@
 			rowTemplt.append( $("<td align='center'></td>").html( "<input size='4'  readonly='readonly' tabindex=-1 />" ) );
 			rowTemplt.append( $("<td align='center'></td>").html( "<input size='4'  maxlength='10' />" ).keypress(IntegerFilter) );
 			rowTemplt.append( $("<td align='center'></td>").html( "<input size='4'  maxlength='10' />" ).keypress(IntegerFilter) );
-			rowTemplt.append( $("<td align='center'></td>").html( "<input size='12' maxlength='50'/>" ) );
-			rowTemplt.append( $("<td align='left'></td>").append( lossTimeReason ) );
+			rowTemplt.append( $("<td align='center'></td>").html( "<input size='4' readonly='readonly' tabindex='-1' />" ) );
+			rowTemplt.append(
+				$("<td align='center'></td>")
+					.append( $("<button type='button'>Edit</button>").click(function(){ openLossTimeDialog(this); }) )
+					.append( $("<br/>") )
+					.append( $("<span class='lossTimeSummary' style='font-size:11px;color:#555;'></span>") )
+					.append( $("<span class='lossTimeItemContainer'></span>") )
+			);
 			rowTemplt.append( $("<td align='center'></td>").html( "<input size='12' maxlength='50'/>" ) );
 			if (cntColumn > 16) {
 				rowTemplt.append( $("<td align='center'></td>").attr('id','total').html('&nbsp;') );
@@ -439,7 +471,7 @@
 	}
 	
 	function deleteRow(obj){
-		$(obj).closest("tr").remove(); 
+		$(obj).closest("tr").remove();
 		var tblDetailPart= $("#tblDetailPart");
 		var index = 1;
 		tblDetailPart.find("tr:gt(1)").each(function(){
@@ -447,7 +479,96 @@
 			td.html(index++);
 		});
 	}
-	
+
+	/* ── Loss Time Popup ──────────────────────────────────────────────── */
+
+	function openLossTimeDialog(btn) {
+		currentLossTimeRow = $(btn).closest("tr");
+		var tbody = $("#lossTimePopupTable tbody");
+		tbody.empty();
+
+		// โหลด items ที่มีอยู่แล้วใน row (จาก hidden inputs)
+		var items = [];
+		currentLossTimeRow.find(".lossTimeItem").each(function() {
+			items.push({
+				reasonId : $(this).find(".ltReasonId").val(),
+				time     : $(this).find(".ltTime").val()
+			});
+		});
+
+		if (items.length === 0) {
+			addLossTimePopupRow();
+		} else {
+			$.each(items, function(i, item) {
+				addLossTimePopupRow(item.reasonId, item.time);
+			});
+		}
+		$("#lossTimeDialog").dialog("open");
+	}
+
+	function addLossTimePopupRow(reasonId, time) {
+		var reasonSel = boxLossTimeReason.clone(true).removeAttr("id");
+		if (reasonId) reasonSel.val(reasonId);
+
+		var timeInp = $("<input type='text' size='6' maxlength='6' />")
+			.keypress(IntegerFilter)
+			.val(time || "");
+
+		var delBtn = $("<a href='javascript:void(0);'>")
+			.html("<img src='image/icon/delete.gif' width='16' height='16'/>")
+			.click(function() { $(this).closest("tr").remove(); });
+
+		var tr = $("<tr>")
+			.append($("<td>").append(reasonSel))
+			.append($("<td align='center'>").append(timeInp))
+			.append($("<td align='center'>").append(delBtn));
+		$("#lossTimePopupTable tbody").append(tr);
+	}
+
+	function saveLossTimeDialog() {
+		var items = [];
+		var total = 0;
+		var valid = true;
+
+		$("#lossTimePopupTable tbody tr").each(function() {
+			var reasonId = $(this).find("select").val();
+			var time     = parseInt($(this).find("input").val() || 0, 10);
+			if (!reasonId || reasonId == "" || isNaN(time) || time < 0) {
+				valid = false; return false;
+			}
+			items.push({ reasonId: reasonId, time: time });
+			total += time;
+		});
+
+		if (!valid) { alert("กรุณากรอกเหตุผลและ Loss Time ให้ครบทุกแถว"); return; }
+
+		// อัพเดต hidden inputs ใน row
+		currentLossTimeRow.find(".lossTimeItemContainer").empty();
+		$.each(items, function(j, item) {
+			var container = $("<span class='lossTimeItem'>")
+				.append($("<input type='hidden' class='ltReasonId'>").val(item.reasonId))
+				.append($("<input type='hidden' class='ltTime'>").val(item.time));
+			currentLossTimeRow.find(".lossTimeItemContainer").append(container);
+		});
+
+		// อัพเดต lossTime input (inputs.eq(8)) และ label แสดงผล
+		var inputs = currentLossTimeRow.find("input:not([type=hidden])");
+		inputs.eq(8).val(total);
+
+		// แสดง summary ของเหตุผล
+		var names = [];
+		currentLossTimeRow.find(".lossTimeItemContainer .lossTimeItem").each(function() {
+			var rid = $(this).find(".ltReasonId").val();
+			var sel = $("#lossTimePopupTable").find("select");
+			names.push($("#lossTimePopupTable tbody tr").eq(names.length).find("select option:selected").text());
+		});
+		currentLossTimeRow.find(".lossTimeSummary").html(items.length + " reason(s)");
+
+		$("#lossTimeDialog").dialog("close");
+	}
+
+	/* ── End Loss Time Popup ──────────────────────────────────────────── */
+
 	// <!-- Initial Processing. -->
 	comboBox.setCustomer(boxCustomer = $("<select id='customerId'></select>"));
 	comboBox.setPartNo(boxPartNo   = $("<select id='partId'></select>"));
@@ -583,18 +704,22 @@
 						<td align="center"><input size="4"  readonly="readonly" value="${detail.qty}" tabindex=-1/></td>
 						<td align="center"><input size="4"  maxlength="10" value="<fmt:formatNumber pattern="#,##0" value="${detail.timeUsed}"/>"/></td>
 						<td align="center"><input size="4"  maxlength="10" value="<fmt:formatNumber pattern="#,##0" value="${detail.manPower}"/>"/></td>
-						<td align="center"><input size="4"  maxlength="10" value="<fmt:formatNumber pattern="#,##0" value="${detail.lossTime}"/>"/></td>
+						<td align="center"><input size="4" maxlength="10" readonly="readonly" tabindex="-1" value="<fmt:formatNumber pattern="#,##0" value="${detail.lossTime}"/>"/></td>
 						<td align="center">
-							<select id='lossTimeReasonId'>
-								<c:forEach var="custom" items="${stopReasonMap}">
-									<c:if test="${custom.key == detail.lossTimeReasonId}">
-										<option value="${custom.key}" selected="selected">${custom.value}</option>
-									</c:if>
-									<c:if test="${custom.key != detail.lossTimeReasonId}">
-										<option value="${custom.key}">${custom.value}</option>
-									</c:if>
+							<button type="button" onclick="openLossTimeDialog(this)">Edit</button><br/>
+							<span class="lossTimeSummary" style="font-size:11px;color:#555;">
+								<c:if test="${not empty detail.lossTimeList}">
+									${fn:length(detail.lossTimeList)} reason(s)
+								</c:if>
+							</span>
+							<span class="lossTimeItemContainer">
+								<c:forEach var="lossItem" items="${detail.lossTimeList}">
+									<span class="lossTimeItem">
+										<input type="hidden" class="ltReasonId" value="${lossItem.lossTimeReasonId}"/>
+										<input type="hidden" class="ltTime"     value="${lossItem.lossTime}"/>
+									</span>
 								</c:forEach>
-							</select>
+							</span>
 						</td>
 						<td align="center"><input size="12" maxlength="50" value="${detail.staff}"/></td>
 						<c:if test="${fn:length(detail.ngReasonMap) > 0}">
@@ -633,6 +758,22 @@
 		</tr>
 	</table>
 	</form:form>
+
+	<!-- Loss Time Popup Dialog -->
+	<div id="lossTimeDialog" style="display:none;">
+		<table id="lossTimePopupTable" width="100%" border="1" cellpadding="4" cellspacing="0" class="ui-widget ui-widget-content">
+			<thead>
+				<tr>
+					<th>Loss Time Reason</th>
+					<th>Loss Time (min)</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+		<br/>
+		<button type="button" onclick="addLossTimePopupRow()">+ Add Reason</button>
+	</div>
 
 </body>
 </html>

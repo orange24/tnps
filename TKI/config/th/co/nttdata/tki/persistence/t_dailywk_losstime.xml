@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="t_dailywk_losstime">
+
+    <!-- ดึง loss time items ทั้งหมดของ dailyWKId หนึ่ง เรียงตาม detail แล้ว id -->
+    <select id="queryByDailyWK" parameterClass="th.co.nttdata.tki.bean.TDailyWK"
+            resultClass="th.co.nttdata.tki.bean.TDailyWKLossTime">
+        SELECT
+             lt.losstimedetailid   AS lossTimeDetailId
+            ,lt.dailywkid          AS dailyWKId
+            ,lt.dailywkdetailid    AS dailyWKDetailId
+            ,lt.losstime_reason_id AS lossTimeReasonId
+            ,lt.losstime           AS lossTime
+            ,r.reasonname          AS lossTimeReasonName
+        FROM  t_dailywk_losstime lt
+        LEFT  JOIN m_reason r ON r.reasonid = lt.losstime_reason_id
+        WHERE lt.dailywkid = #dailyWKId#
+        ORDER BY lt.dailywkdetailid, lt.losstimedetailid
+    </select>
+
+    <insert id="insert" parameterClass="th.co.nttdata.tki.bean.TDailyWKLossTime">
+        INSERT INTO t_dailywk_losstime(dailywkid, dailywkdetailid, losstime_reason_id, losstime)
+        VALUES(#dailyWKId#, #dailyWKDetailId#, #lossTimeReasonId#, #lossTime#)
+    </insert>
+
+</sqlMap>

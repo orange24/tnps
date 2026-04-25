@@ -1,5 +1,7 @@
 package th.co.nttdata.tki.dao.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,10 +12,12 @@ import th.co.nttdata.tki.bean.MWorkOrder;
 import th.co.nttdata.tki.bean.TDCPlan;
 import th.co.nttdata.tki.bean.TDailyWK;
 import th.co.nttdata.tki.bean.TDailyWKDetail;
+import th.co.nttdata.tki.bean.TDailyWKLossTime;
 import th.co.nttdata.tki.bean.TDailyWKNGReason;
 import th.co.nttdata.tki.dao.AbstractBaseDao;
 import th.co.nttdata.tki.dao.TDailyWKDao;
 import th.co.nttdata.tki.dao.TDailyWKDetailDao;
+import th.co.nttdata.tki.dao.TDailyWKLossTimeDao;
 import th.co.nttdata.tki.dao.TDailyWKNGReasonDao;
 
 @Repository
@@ -24,6 +28,8 @@ public class TDailyWKDaoImpl extends AbstractBaseDao implements TDailyWKDao {
 	private TDailyWKDetailDao dailyWKDetailDao;
 	@Autowired
 	private TDailyWKNGReasonDao dailyWKNGReasonDao;
+	@Autowired
+	private TDailyWKLossTimeDao dailyWKLossTimeDao;
 
 	@Override
 	public void delete( TDailyWK TDailyWK ) {
@@ -43,15 +49,19 @@ public class TDailyWKDaoImpl extends AbstractBaseDao implements TDailyWKDao {
 		// <!-- Insert to 't_dailywk_detail' -->
 		dailyWKDetailDao.insert(TDailyWK);
 
+		// <!-- Insert to 't_dailywk_losstime' -->
+		dailyWKLossTimeDao.insert(TDailyWK);
+
 		// <!-- Insert to 't_dailywk_ngreason' -->
 		dailyWKNGReasonDao.insert(TDailyWK);
 	}
 
 	@Override
 	public TDailyWK update( TDailyWK TDailyWK ) {
-		// <!-- Update to 't_dailywk_detail' & 't_dailywk_ngreason' -->
-		dailyWKDetailDao.delete(TDailyWK);
+		// <!-- Update to 't_dailywk_detail' & 't_dailywk_losstime' & 't_dailywk_ngreason' -->
+		dailyWKDetailDao.delete(TDailyWK);   // ลบทั้ง detail + losstime + ngreason
 		dailyWKDetailDao.insert(TDailyWK);
+		dailyWKLossTimeDao.insert(TDailyWK);
 		dailyWKNGReasonDao.insert(TDailyWK);
 
 		// <!-- Update to 't_dailywk' -->
@@ -67,6 +77,9 @@ public class TDailyWKDaoImpl extends AbstractBaseDao implements TDailyWKDao {
 
 		// <!-- Select from 't_dailywk_detail' -->
 		dailyWKDetailDao.query(TDailyWK);
+
+		// <!-- Select from 't_dailywk_losstime' -->
+		dailyWKLossTimeDao.query(TDailyWK);
 
 		// <!-- Select from 't_dailywk_ngreason' -->
 		dailyWKNGReasonDao.query(TDailyWK);
@@ -91,6 +104,21 @@ public class TDailyWKDaoImpl extends AbstractBaseDao implements TDailyWKDao {
 	public TDailyWK selectDAL_R03( TDailyWK TDailyWK ) {
 		List<TDailyWKDetail> detailList = queryForList("t_dailywk.selectDAL_R03", TDailyWK);
 		Map<String,TDailyWKNGReason> reasonMap = queryForMap("t_dailywk.selectDAL_R03NGReason", TDailyWK, "idRef");
+
+		// โหลด losstime items แล้ว attach ให้แต่ละ detail
+		List<TDailyWKLossTime> allLossTime = dailyWKLossTimeDao.selectDAL_R03LossTime(TDailyWK);
+		Map<String, List<TDailyWKLossTime>> ltByDetail = new HashMap<String, List<TDailyWKLossTime>>();
+		for (TDailyWKLossTime lt : allLossTime) {
+			String key = lt.getDailyWKId() + ":" + lt.getDailyWKDetailId();
+			List<TDailyWKLossTime> list = ltByDetail.get(key);
+			if (list == null) { list = new ArrayList<TDailyWKLossTime>(); ltByDetail.put(key, list); }
+			list.add(lt);
+		}
+		for (TDailyWKDetail detail : detailList) {
+			String key = detail.getDailyWKId() + ":" + detail.getDailyWKDetailId();
+			List<TDailyWKLossTime> items = ltByDetail.get(key);
+			detail.setLossTimeList(items != null ? items : new ArrayList<TDailyWKLossTime>());
+		}
 
 		TDailyWK.setDailyWKDetailList(detailList);
 		TDailyWK.setReasonMap(reasonMap);
