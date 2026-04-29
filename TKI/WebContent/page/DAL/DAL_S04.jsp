@@ -130,6 +130,7 @@
 				inputs.eq(7).attr("name", "dailyWKDetailList["+ index +"].manPower");
 				inputs.eq(8).attr("name", "dailyWKDetailList["+ index +"].lossTime");
 				inputs.eq(9).attr("name", "dailyWKDetailList["+ index +"].staff");
+				inputs.eq(10).attr("name", "dailyWKDetailList["+ index +"].stdTime");
 
 				// เก็บ lossTimeList items ไว้ใน temp array ก่อน (merge เข้า formDataArray ทีหลัง)
 				var ltIndex = 0;
@@ -142,9 +143,9 @@
 						ltIndex++;
 					}
 				});
-				for( var column = 10; column < inputs.length; column++ ) {
+				for( var column = 14; column < 14 + reasonHeaders.length; column++ ) {
 					// <!-- Finding the 'reasonId'. -->
-					var reasonId = reasonHeaders.eq(column-10).attr("id");
+					var reasonId = reasonHeaders.eq(column-14).attr("id");
 					inpRSSum += parseInt(inputs.eq(column).attr("name", "dailyWKDetailList["+ index +"].ngReasonMap["+ reasonId +"]").val() || 0);
 				}
 
@@ -292,6 +293,10 @@
 					.append( $("<span class='lossTimeItemContainer'></span>") )
 			);
 			rowTemplt.append( $("<td align='center'></td>").html( "<input size='12' maxlength='50'/>" ) );
+			rowTemplt.append( $("<td align='center'></td>").append( $("<input class='stdTime' size='6' maxlength='10' />").keypress(IntegerFilter) ) );
+			rowTemplt.append( $("<td align='center'></td>").html( "<input class='gtActualTime' size='6' readonly='readonly' tabindex='-1' />" ) );
+			rowTemplt.append( $("<td align='center'></td>").html( "<input class='diffTime' size='6' readonly='readonly' tabindex='-1' />" ) );
+			rowTemplt.append( $("<td align='center'></td>").html( "<input class='pctTime' size='7' readonly='readonly' tabindex='-1' />" ) );
 			if (cntColumn > 16) {
 				rowTemplt.append( $("<td align='center'></td>").attr('id','total').html('&nbsp;') );
 			}
@@ -438,19 +443,36 @@
 	
 	function setQtyCalculation( tr ) {
 		// <!-- Initial Event. -->
-		var inputs   = tr.find("input");
-		var inpWKQty = tr.find("td:eq(5)");
-		var inpOKQty = inputs.eq(2);
-		var inpNGQty = inputs.eq(3);
-		var inpPDQty = inputs.eq(4);
-		var inpTTQty = inputs.eq(5);
-		var inpTime = inputs.eq(6);
+		var inputs      = tr.find("input");
+		var inpWKQty    = tr.find("td:eq(5)");
+		var inpOKQty    = inputs.eq(2);
+		var inpNGQty    = inputs.eq(3);
+		var inpPDQty    = inputs.eq(4);
+		var inpTTQty    = inputs.eq(5);
+		var inpTime     = inputs.eq(6);
 		var inpManPower = inputs.eq(7);
-		var inpReason = tr.find("input#ngReasonQty");
+		var inpLossTime = inputs.eq(8);
+		var inpReason   = tr.find("input#ngReasonQty");
+		var inpStdTime  = tr.find("input.stdTime");
+		var inpGTTime   = tr.find("input.gtActualTime");
+		var inpDiff     = tr.find("input.diffTime");
+		var inpPct      = tr.find("input.pctTime");
+
 		var evtSMQty = function(){
 			inpTTQty.val( parseInt(inpOKQty.val() || 0) + parseInt(inpNGQty.val() || 0) + parseInt(inpPDQty.val() || 0) ).change();
 		};
-	
+
+		// คำนวณ Grand Total Actual Time, Difference, Percentage
+		var calcTimeFields = function() {
+			var timeVal = parseInt(inpTime.val().replace(/,/g,'') || 0);
+			var lossVal = parseInt(inpLossTime.val().replace(/,/g,'') || 0);
+			var stdVal  = parseInt(inpStdTime.val() || 0);
+			var gt = timeVal + lossVal;
+			inpGTTime.val(gt);
+			inpDiff.val(stdVal - gt);
+			inpPct.val(stdVal > 0 ? ((gt / stdVal) * 100).toFixed(2) + '%' : '');
+		};
+
 		// <!-- Assigning Behavior. -->
 		inpOKQty.keypress(IntegerFilter).keyup(evtSMQty);
 		inpNGQty.keypress(IntegerFilter).keyup(evtSMQty);
@@ -458,16 +480,19 @@
 		inpTTQty.change(function(){
 			var wrkQty = parseInt(inpWKQty.html().replace(/&nbsp;/, '') || 0);
 			var sumQty = parseInt(inpTTQty.val() || 0);
-	
+
 			// <!-- Validation: WARNING if 'qty' is more than 'workOrderQty'. -->
 			if( wrkQty < sumQty )
 				inpTTQty.css("background-color", "red");
 			else
 				inpTTQty.css("background-color", "");
 		}).change();
-		inpTime.keypress(IntegerFilter);
+		inpTime.keypress(IntegerFilter).keyup(calcTimeFields);
 		inpManPower.keypress(IntegerFilter);
 		inpReason.keypress(IntegerFilter);
+		inpStdTime.keypress(IntegerFilter).keyup(calcTimeFields);
+		inpLossTime.change(calcTimeFields);
+		calcTimeFields(); // คำนวณค่าเริ่มต้น (กรณี edit mode)
 	}
 	
 	function deleteRow(obj){
@@ -553,7 +578,7 @@
 
 		// อัพเดต lossTime input (inputs.eq(8)) และ label แสดงผล
 		var inputs = currentLossTimeRow.find("input:not([type=hidden])");
-		inputs.eq(8).val(total);
+		inputs.eq(8).val(total).trigger("change"); // trigger เพื่อให้ calcTimeFields คำนวณใหม่
 
 		// แสดง summary ของเหตุผล
 		var names = [];
@@ -562,7 +587,7 @@
 			var sel = $("#lossTimePopupTable").find("select");
 			names.push($("#lossTimePopupTable tbody tr").eq(names.length).find("select option:selected").text());
 		});
-		currentLossTimeRow.find(".lossTimeSummary").html(items.length + " reason(s)");
+		currentLossTimeRow.find(".lossTimeSummary").html(items.length + " reason");
 
 		$("#lossTimeDialog").dialog("close");
 	}
@@ -651,6 +676,10 @@
 						<th rowspan="2">Loss Time (min)</th>
 						<th rowspan="2">Reason</th>
 						<th rowspan="2">Worker</th>
+						<th rowspan="2">STD. Time<br/>(min)</th>
+						<th rowspan="2">Grand Total<br/>Actual Time<br/>(min)</th>
+						<th rowspan="2">Difference</th>
+						<th rowspan="2">Percentage</th>
 						<c:if test="${fn:length(reasonNGList) > 0}">
 						<th colspan="${fn:length(reasonNGList)+1}">NG Reason Qty <span class="textred">*</span></th>
 						</c:if>
@@ -709,7 +738,7 @@
 							<button type="button" onclick="openLossTimeDialog(this)">Edit</button><br/>
 							<span class="lossTimeSummary" style="font-size:11px;color:#555;">
 								<c:if test="${not empty detail.lossTimeList}">
-									${fn:length(detail.lossTimeList)} reason(s)
+									${fn:length(detail.lossTimeList)} reason
 								</c:if>
 							</span>
 							<span class="lossTimeItemContainer">
@@ -722,6 +751,10 @@
 							</span>
 						</td>
 						<td align="center"><input size="12" maxlength="50" value="${detail.staff}"/></td>
+						<td align="center"><input class="stdTime" size="6" maxlength="10" value="${detail.stdTime}"/></td>
+						<td align="center"><input class="gtActualTime" size="6" readonly="readonly" tabindex="-1"/></td>
+						<td align="center"><input class="diffTime" size="6" readonly="readonly" tabindex="-1"/></td>
+						<td align="center"><input class="pctTime" size="7" readonly="readonly" tabindex="-1"/></td>
 						<c:if test="${fn:length(detail.ngReasonMap) > 0}">
 						<td align="center" id="total" >
 							<c:set value="${0}" var="total"></c:set>

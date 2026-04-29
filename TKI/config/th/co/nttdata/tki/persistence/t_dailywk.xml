@@ -97,7 +97,7 @@
 	
 	<select id="selectDAL_R03" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKDetail">
 		SELECT TOP $maxRecord$
-			 CONVERT(VARCHAR(10),wk.reportDate,103) + ':' + wk.wip + ':' + CAST(d.customerId AS VARCHAR) + ':' + CAST(d.partId AS VARCHAR) as datailRef
+			 CAST(wk.dailywkid AS VARCHAR) + ':' + CAST(d.dailywkdetailid AS VARCHAR) as datailRef
 			,wk.dailywkid   AS dailyWKId
 			,d.dailywkdetailid AS dailyWKDetailId
 			,wk.reportDate
@@ -116,6 +116,7 @@
 			,ISNULL(SUM(d.manpower),0) as manPower
 			,ISNULL(SUM(d.losstime),0) as lossTime
 		 	,d.staff
+			,d.std_time as stdTime
 			,CASE wk.shift WHEN 'D' THEN 'Day' WHEN 'N' THEN 'Night' ELSE '' END AS shiftName
 		FROM t_dailywk_detail d
 		INNER JOIN t_dailywk wk ON wk.dailywkid = d.dailywkid
@@ -132,7 +133,7 @@
 				wk.shift IN <iterate property="shifts" open="(" close=")" conjunction=",">#shifts[]#</iterate>
 			</isNotEmpty>
 		</dynamic>
-		GROUP BY wk.dailywkid, d.dailywkdetailid, wk.reportdate, d.customerid, c.customercode, wk.wip, d.partid, p.partno, p.partname, wk.shift, d.staff
+		GROUP BY wk.dailywkid, d.dailywkdetailid, wk.reportdate, d.customerid, c.customercode, wk.wip, d.partid, p.partno, p.partname, wk.shift, d.staff, d.std_time
 		ORDER BY wk.reportdate, c.customercode, wk.wip, p.partno, p.partname, wk.shift, wk.dailywkid, d.dailywkdetailid
 	</select>
 
@@ -175,9 +176,9 @@
 		) c
 	</select>
 	
-	<select id="selectDAL_R03NGReason" resultClass="th.co.nttdata.tki.bean.TDailyWKNGReason">
+	<select id="selectDAL_R03NGReason" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKNGReason">
 		SELECT
-			 CONVERT(VARCHAR(10),wk.reportDate,103) + ':' + wk.wip + ':' + CAST(d.customerId AS VARCHAR) + ':' + CAST(d.partId AS VARCHAR) + ':' + CAST(ng.reasonId AS VARCHAR) as idRef
+			 CAST(ng.dailywkid AS VARCHAR) + ':' + CAST(ng.dailywkdetailid AS VARCHAR) + ':' + CAST(ng.reasonId AS VARCHAR) as idRef
 			,ISNULL(SUM(ng.ng),0) as ng
 		FROM t_dailywk_detail d
 		INNER JOIN t_dailywk wk ON wk.dailywkid = d.dailywkid
@@ -194,7 +195,7 @@
 				wk.shift IN <iterate property="shifts" open="(" close=")" conjunction=",">#shifts[]#</iterate>
 			</isNotEmpty>
 		</dynamic>
-		GROUP BY wk.reportdate, wk.wip, d.customerid, d.partid, ng.reasonid
+		GROUP BY ng.dailywkid, ng.dailywkdetailid, ng.reasonid
 	</select>
 	
 	<select id="selectMRDC_R10" parameterClass="th.co.nttdata.tki.bean.TDailyWK" resultClass="th.co.nttdata.tki.bean.TDailyWKDetail">
