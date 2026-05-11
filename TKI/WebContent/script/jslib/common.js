@@ -167,6 +167,7 @@
 				return;
 
 			var params = {};
+			if( wip ) params.wip = wip;
 			getJSON("getLossTimeReasonList",params,function(result){
 				selectElement.empty();
 				$.each(result,function(val, text){

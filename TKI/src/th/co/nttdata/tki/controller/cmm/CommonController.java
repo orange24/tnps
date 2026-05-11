@@ -291,8 +291,11 @@ public class CommonController extends AbstractBaseController {
 
 	@RequestMapping(value = "/getLossTimeReasonList", method = RequestMethod.GET)
 	public @ResponseBody
-	Map<Integer, String> getLossTimeReasonList() {
-		List<MReason> reasons = commonLogic.getReasonMCStopList();
+	Map<Integer, String> getLossTimeReasonList(
+			@RequestParam(value = "wip", required = false) String wip) {
+		List<MReason> reasons = (wip != null && !wip.isEmpty())
+				? commonLogic.getReasonMCStopByWip(wip)
+				: commonLogic.getReasonMCStopList();
 
 		Map<Integer, String> map = new LinkedHashMap<Integer, String>();
 		map.put(Integer.MIN_VALUE, "-- Select Reason --");

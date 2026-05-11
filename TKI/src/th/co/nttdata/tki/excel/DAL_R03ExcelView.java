@@ -373,7 +373,7 @@ public class DAL_R03ExcelView extends AbstractExcelView {
 		createCell(workbook, totalRow, COL_PERCENTAGE,      totalStdTime > 0 ? totalPctStyle  : totalBlankStyle).setValue(totalStdTime > 0 ? totalPctValue : null);
 		createCell(workbook, totalRow, COL_LOSS_TIME_TOTAL, totalNumStyle).setValue((int) totalLossTime);
 		createCell(workbook, totalRow, COL_LOSS_REASON,     totalBlankStyle);
-		createCell(workbook, totalRow, COL_LOSS_TIME_EACH,  totalBlankStyle);
+		createCell(workbook, totalRow, COL_LOSS_TIME_EACH,  totalNumStyle).setValue((int) totalLossTime);
 		createCell(workbook, totalRow, COL_STAFF,           totalBlankStyle);
 		createCell(workbook, totalRow, COL_GT_OK,           totalNumStyle).setValue((int) totalOk);
 		createCell(workbook, totalRow, COL_GT_NG,           totalNumStyle).setValue((int) totalNg);

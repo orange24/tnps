@@ -173,6 +173,11 @@ public class CommonLogicImpl extends AbstractBaseLogic implements CommonLogic {
 	}
 
 	@Override
+	public List<MReason> getReasonMCStopByWip(String wip) {
+		return reasonDao.getReasonMCStopByWip(wip);
+	}
+
+	@Override
 	public List<MReason> getReasonCat(String wip) {
 		MReason MReason = new MReason();
 		MReason.setReasonType(2);

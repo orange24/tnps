@@ -41,7 +41,13 @@ public class MReasonDaoImpl extends AbstractBaseDao implements MReasonDao {
 	}
 
 	@Override
+	public List<MReason> getReasonMCStopByWip(String wip) {
+		return (List<MReason>) queryForList("m_reason.queryReasonMCStopByWip", wip);
+	}
+
+	@Override
 	public List<MReason> getReasonInWip( MReason MReason ) {
+		System.out.println("MReason = " + MReason.getWip());
 		return (List<MReason>) queryForList("m_reason_wip.queryReasonInWip", MReason);
 	}
 

@@ -14,6 +14,8 @@ public interface MReasonDao {
 
 	public List<MReason> getReasonMCStopList();
 
+	public List<MReason> getReasonMCStopByWip(String wip);
+
 	public List<MReason> getReasonList(MReason MReason);
 
 	public List<MReason> getReasonInWip(MReason MReason);

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(jsp|java\\)$\")",
+      "Bash(grep -E \"\\\\.\\(xml|java\\)$\")"
+    ]
+  }
+}

@@ -158,8 +158,8 @@
 					errors.push({"code": "err.cmm.002", "arguments": [(index+1),"Partno/Partname"]});
 				if( isNaN(inpACQty) )
 					errors.push({"code": "err.dal.002"});
-				if( inpACQty === 0 && inpPDNum === 0 && inpNGNum === 0 && inpOKNum === 0 )
-					errors.push({"code": "err.cmm.009", "arguments": [(index+1),"Atleast 1 of Qty"]});
+				//if( inpACQty === 0 && inpPDNum === 0 && inpNGNum === 0 && inpOKNum === 0 )
+				//	errors.push({"code": "err.cmm.009", "arguments": [(index+1),"Atleast 1 of Qty"]});
 				if( inpTimeMin === 0 )
 					errors.push({"code": "err.cmm.009", "arguments": [(index+1),"Time (min)"]});
 				//if( inpACQty > inpWKQty )
@@ -256,6 +256,14 @@
 			};
 
 			getJSON("getReasonNGList", { "wip": $(this).val() }, initial);
+
+			// reload Loss Time Reason dropdown ตาม wip ที่เลือก
+			getJSON("getLossTimeReasonList", {"wip": $(this).val()}, function(result){
+				boxLossTimeReason.empty();
+				$.each(result, function(val, text){
+					boxLossTimeReason.append( $("<option></option>").val(val).html(text) );
+				});
+			});
 		});
 
 		btnAddRow.click(function(){
@@ -365,21 +373,22 @@
 				$(this).find("input:eq(0)").autocomplete(workOrderList);
 				setQtyCalculation( $(this) );
 			});
-			if(dailyWKdailyWKDetailList < 1){	
+
+			// โหลด Loss Time Reason dropdown ตาม WIP ทุกครั้งที่เข้า edit mode
+			getJSON("getLossTimeReasonList",{"wip": boxWIP.val()},function(result){
+				boxLossTimeReason.empty();
+				$.each(result,function(val, text){
+					boxLossTimeReason.append( $("<option></option>").val(val).html(text) );
+				});
+			});
+
+			if(dailyWKdailyWKDetailList < 1){
 				getJSON("boxCustomer1",{},function(result){
 					boxCustomer.empty();
 					$.each(result,function(val, text){
 						boxCustomer.append( $("<option></option>").val(val).html(text) );
 					});
 					btnAddRow.click();
-				});
-
-				getJSON("getLossTimeReasonList",{},function(result){
-					console.log("getLossTimeReasonList", result);
-					boxLossTimeReason.empty();
-					$.each(result,function(val, text){
-						boxLossTimeReason.append( $("<option></option>").val(val).html(text) );
-					});
 				});
 			}
 		}
@@ -597,7 +606,7 @@
 	// <!-- Initial Processing. -->
 	comboBox.setCustomer(boxCustomer = $("<select id='customerId'></select>"));
 	comboBox.setPartNo(boxPartNo   = $("<select id='partId'></select>"));
-	comboBox.setLossTimeReason(boxLossTimeReason   = $("<select id='lossTimeReasonId'></select>"));
+	comboBox.setLossTimeReason(boxLossTimeReason   = $("<select id='lossTimeReasonId'></select>"), boxWIP.val());
 </script>
 <style type="text/css">
 <!--

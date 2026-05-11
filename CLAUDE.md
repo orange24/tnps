@@ -109,3 +109,32 @@ Batch jobs run either as standalone JAR (`java -jar tki-batch.jar`) or async fro
 - **Dual datasources**: Any DAO touching TPICS data must inject `sqlMapClientTpics`, not the default `sqlMapClient`.
 - **Transaction management**: AOP-based via `tx:advice` in `app-config.xml`. Batch jobs rollback on any `Throwable`.
 - **Environment switching**: The Ant build copies the correct `jdbc-{env}.properties` to `jdbc.properties` and sets `log.file.path`; do not manually edit `jdbc.properties` for permanent env changes.
+
+## SQL Map Locations
+
+SQL map XML files live in **`config/th/co/nttdata/tki/persistence/`** (source) — Ant copies them to `WebContent/WEB-INF/classes/`. Always edit the `config/` version, not the compiled copy.
+
+## Adding a New Query (Full Stack Checklist)
+
+When adding a new filtered query, touch all 5 layers in order:
+
+1. **SQL XML** (`config/.../persistence/*.xml`) — add `<select id="...">` with correct `parameterClass`
+2. **DAO interface** (`business/.../dao/XxxDao.java`) — declare method signature
+3. **DAO impl** (`business/.../dao/impl/XxxDaoImpl.java`) — implement with `queryForList("namespace.id", param)`
+4. **Logic interface** (`business/.../blogic/cmm/CommonLogic.java` or module logic) — declare method
+5. **Logic impl** (`business/.../blogic/cmm/impl/CommonLogicImpl.java`) — implement calling DAO
+
+After changing any Java interface/impl, rebuild with `ant build-si` (or target env) before testing — Tomcat hot-reload does **not** pick up interface changes.
+
+## Reason / m_reason Table Notes
+
+- `reasonType = 1` → NG Reason, `reasonType = 2` → Machine Stop (Loss Time), `reasonType = 3` → Discast
+- **`m_reason_wip`** — junction table linking reasons to WIP codes; used to restrict which reasons apply per WIP
+- **`queryReasonInWip`** (`m_reason_wip.xml`) adds `AND parentreasonid IS NULL` when `reasonType` is set but `parentReasonId` is not — returns only root/parent reasons, **not all child reasons**. Do not use this query when you need the full flat list per WIP.
+- Use **`queryReasonMCStopByWip`** (`m_reason.xml`) for a flat list of all loss-time reasons filtered by WIP (JOIN `m_reason_wip` directly, no parent filter).
+
+## DAL Module Notes
+
+- **SQL maps**: `config/.../persistence/` — files prefixed `t_daily_wk*`
+- **Excel export** (`DAL_R03`): `src/.../excel/DAL_R03ExcelView.java` — column index constants defined at top of class; Grand Total row written at the end of `build()`. `COL_LOSS_TIME_EACH` (col 18) = per-reason loss time; `COL_LOSS_TIME_TOTAL` (col 16) = total per record.
+- **DAL_S04 Loss Time Popup**: `boxLossTimeReason` is a cloned `<select>` populated via `getLossTimeReasonList?wip=...`; when WIP changes (`boxWIP.change`) the dropdown reloads automatically. The `comboBox.setLossTimeReason(el, wip)` helper in `common.js` forwards the `wip` param.

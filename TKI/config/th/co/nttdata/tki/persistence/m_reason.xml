@@ -50,6 +50,27 @@
 		reasondigit,reasonCode
 	</select>
 
+	<select id="queryReasonMCStopByWip"
+		parameterClass="java.lang.String"
+		resultClass="th.co.nttdata.tki.bean.MReason">
+		SELECT
+		r.createDate
+		,r.lastUpdate
+		,r.parentReasonId
+		,r.reasonId
+		,r.reasonType
+		,r.createBy
+		,r.description
+		,r.reasonCode
+		,r.reasonName
+		,r.updateBy
+		,LEN(r.reasonCode) as reasondigit
+		FROM m_reason r
+		INNER JOIN m_reason_wip rw ON r.reasonId = rw.reasonId
+		WHERE r.reasonType = 2 AND rw.wip = #value#
+		ORDER BY reasondigit, r.reasonCode
+	</select>
+
 	<sql id="queryProperties">
 		FROM m_reason r
 		<dynamic prepend="WHERE">

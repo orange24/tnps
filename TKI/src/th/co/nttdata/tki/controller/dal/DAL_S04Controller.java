@@ -49,7 +49,7 @@ public class DAL_S04Controller extends AbstractBaseController {
 								.setReportCategory(new String[] { "wip" })))
 				.addObject("wipMap", commonController.getWIPSel(2))
 				.addObject("customerMap", commonController.getCustomerSel())
-				.addObject("stopReasonMap", commonController.getLossTimeReasonList())
+				.addObject("stopReasonMap", commonController.getLossTimeReasonList(null))
 				.addObject("partMap", commonController.getPartNameNo(null, null, null))
 				.addObject("minReportDate", settings.getProperty("DAL.reportDate.minDate", "-40d"));
 	}
@@ -95,7 +95,7 @@ public class DAL_S04Controller extends AbstractBaseController {
 								.setReportCategory(new String[] { "wip" })))
 				.addObject("wipMap", commonController.getWIPSel(2))
 				.addObject("customerMap", commonController.getCustomerSel())
-				.addObject("stopReasonMap", commonController.getLossTimeReasonList())
+				.addObject("stopReasonMap", commonController.getLossTimeReasonList(TDailyWK.getWip()))
 				.addObject("reasonNGList", commonController.getReasonNGList(TDailyWK.getWip()))
 				.addObject("minDate", calendar.getTime());
 	}
