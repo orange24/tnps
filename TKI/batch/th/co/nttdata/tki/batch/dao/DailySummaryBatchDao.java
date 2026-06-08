@@ -204,14 +204,14 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
     /** MERGE t_pending จาก t_dailymc สำหรับวันที่ reportDate */
     public void mergePendingMC(Date reportDate) {
         String sql =
-            "MERGE INTO t_pending pd "
+            "MERGE INTO t_pending WITH (UPDLOCK, ROWLOCK) AS pd "
           + "USING ( "
           + "    SELECT mc.reportdate, mc.reporttype, mc.wip, mc.partid, mc.customerid, "
           + "           SUM(ISNULL(d.pd,0)) AS pd, "
           + "           (SELECT TOP 1 t.lotno FROM t_dailymc_lot t "
           + "            INNER JOIN t_dailymc m ON m.dailymcid = t.dailymcid "
           + "            WHERE m.reportdate = mc.reportdate AND m.reporttype = mc.reporttype "
-          + "              AND m.wip = mc.wip AND m.customerid = mc.customerid "
+          + "              AND m.wip = mc.wip AND m.partid = mc.partid AND m.customerid = mc.customerid "
           + "            ORDER BY t.lotno) AS workorderno "
           + "    FROM t_dailymc mc "
           + "    INNER JOIN t_dailymc_detail d ON mc.dailymcid = d.dailymcid "
@@ -221,14 +221,12 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
           + ") dmc "
           + "ON (pd.reportdate = dmc.reportdate AND pd.reporttype = dmc.reporttype "
           + "    AND pd.wip = dmc.wip AND pd.partid = dmc.partid "
-          + "    AND pd.customerid = dmc.customerid "
-          + "    AND (pd.workorderno = dmc.workorderno "
-          + "         OR (pd.workorderno IS NULL AND dmc.workorderno IS NULL))) "
+          + "    AND ISNULL(pd.customerid, -1) = ISNULL(dmc.customerid, -1)) "
           + "WHEN NOT MATCHED THEN "
           + "  INSERT(reportdate,reporttype,wip,partid,customerid,pd,workorderno) "
           + "  VALUES(dmc.reportdate,dmc.reporttype,dmc.wip,dmc.partid,dmc.customerid,dmc.pd,dmc.workorderno) "
           + "WHEN MATCHED THEN "
-          + "  UPDATE SET pd.pd = dmc.pd;";
+          + "  UPDATE SET pd.pd = dmc.pd, pd.workorderno = dmc.workorderno;";
         java.sql.Date sqlDate = new java.sql.Date(reportDate.getTime());
         try (Connection c = dataSource.getConnection()) {
             c.setAutoCommit(false);
@@ -251,26 +249,24 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
     /** MERGE t_pending จาก t_dailywk สำหรับวันที่ reportDate */
     public void mergePendingWK(Date reportDate) {
         String sql =
-            "MERGE INTO t_pending pd "
+            "MERGE INTO t_pending WITH (UPDLOCK, ROWLOCK) AS pd "
           + "USING ( "
           + "    SELECT wk.reportdate, wk.reporttype, wk.wip, wkd.partid, wkd.customerid, "
-          + "           wkd.workorderno, wkd.lotno, SUM(ISNULL(wkd.pd,0)) AS pd "
+          + "           MAX(wkd.workorderno) AS workorderno, MAX(wkd.lotno) AS lotno, SUM(ISNULL(wkd.pd,0)) AS pd "
           + "    FROM t_dailywk wk "
           + "    INNER JOIN t_dailywk_detail wkd ON wk.dailywkid = wkd.dailywkid "
           + "    WHERE wk.reportdate = ? "
-          + "    GROUP BY wk.reportdate, wk.reporttype, wk.wip, wkd.partid, wkd.customerid, wkd.workorderno, wkd.lotno "
+          + "    GROUP BY wk.reportdate, wk.reporttype, wk.wip, wkd.partid, wkd.customerid "
           + "    HAVING SUM(ISNULL(wkd.pd,0)) > 0 "
           + ") dwk "
           + "ON (pd.reportdate = dwk.reportdate AND pd.reporttype = dwk.reporttype "
           + "    AND pd.wip = dwk.wip AND pd.partid = dwk.partid "
-          + "    AND pd.customerid = dwk.customerid "
-          + "    AND (pd.workorderno = dwk.workorderno OR (pd.workorderno IS NULL AND dwk.workorderno IS NULL)) "
-          + "    AND (pd.lotno = dwk.lotno OR (pd.lotno IS NULL AND dwk.lotno IS NULL))) "
+          + "    AND ISNULL(pd.customerid, -1) = ISNULL(dwk.customerid, -1)) "
           + "WHEN NOT MATCHED THEN "
           + "  INSERT(reportdate,reporttype,wip,partid,customerid,workorderno,lotno,pd) "
           + "  VALUES(dwk.reportdate,dwk.reporttype,dwk.wip,dwk.partid,dwk.customerid,dwk.workorderno,dwk.lotno,dwk.pd) "
           + "WHEN MATCHED THEN "
-          + "  UPDATE SET pd.pd = dwk.pd;";
+          + "  UPDATE SET pd.pd = dwk.pd, pd.workorderno = dwk.workorderno, pd.lotno = dwk.lotno;";
         java.sql.Date sqlDate = new java.sql.Date(reportDate.getTime());
         try (Connection c = dataSource.getConnection()) {
             c.setAutoCommit(false);
@@ -293,26 +289,24 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
     /** MERGE t_pending จาก t_dailymcwk สำหรับวันที่ reportDate */
     public void mergePendingMCWK(Date reportDate) {
         String sql =
-            "MERGE INTO t_pending pd "
+            "MERGE INTO t_pending WITH (UPDLOCK, ROWLOCK) AS pd "
           + "USING ( "
           + "    SELECT mcwk.reportdate, mcwk.reporttype, mcwk.wip, mcwkd.partid, mcwkd.customerid, "
-          + "           mcwkd.workorderno, mcwkd.lotno, SUM(ISNULL(mcwkd.pd,0)) AS pd "
+          + "           MAX(mcwkd.workorderno) AS workorderno, MAX(mcwkd.lotno) AS lotno, SUM(ISNULL(mcwkd.pd,0)) AS pd "
           + "    FROM t_dailymcwk mcwk "
           + "    INNER JOIN t_dailymcwk_detail mcwkd ON mcwk.dailymcwkid = mcwkd.dailymcwkid "
           + "    WHERE mcwk.reportdate = ? "
-          + "    GROUP BY mcwk.reportdate, mcwk.reporttype, mcwk.wip, mcwkd.partid, mcwkd.customerid, mcwkd.workorderno, mcwkd.lotno "
+          + "    GROUP BY mcwk.reportdate, mcwk.reporttype, mcwk.wip, mcwkd.partid, mcwkd.customerid "
           + "    HAVING SUM(ISNULL(mcwkd.pd,0)) > 0 "
           + ") dwkmc "
           + "ON (pd.reportdate = dwkmc.reportdate AND pd.reporttype = dwkmc.reporttype "
           + "    AND pd.wip = dwkmc.wip AND pd.partid = dwkmc.partid "
-          + "    AND pd.customerid = dwkmc.customerid "
-          + "    AND (pd.workorderno = dwkmc.workorderno OR (pd.workorderno IS NULL AND dwkmc.workorderno IS NULL)) "
-          + "    AND (pd.lotno = dwkmc.lotno OR (pd.lotno IS NULL AND dwkmc.lotno IS NULL))) "
+          + "    AND ISNULL(pd.customerid, -1) = ISNULL(dwkmc.customerid, -1)) "
           + "WHEN NOT MATCHED THEN "
           + "  INSERT(reportdate,reporttype,wip,partid,customerid,workorderno,lotno,pd) "
           + "  VALUES(dwkmc.reportdate,dwkmc.reporttype,dwkmc.wip,dwkmc.partid,dwkmc.customerid,dwkmc.workorderno,dwkmc.lotno,dwkmc.pd) "
           + "WHEN MATCHED THEN "
-          + "  UPDATE SET pd.pd = dwkmc.pd;";
+          + "  UPDATE SET pd.pd = dwkmc.pd, pd.workorderno = dwkmc.workorderno, pd.lotno = dwkmc.lotno;";
         java.sql.Date sqlDate = new java.sql.Date(reportDate.getTime());
         try (Connection c = dataSource.getConnection()) {
             c.setAutoCommit(false);
