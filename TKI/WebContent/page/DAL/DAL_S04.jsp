@@ -160,8 +160,8 @@
 					errors.push({"code": "err.dal.002"});
 				//if( inpACQty === 0 && inpPDNum === 0 && inpNGNum === 0 && inpOKNum === 0 )
 				//	errors.push({"code": "err.cmm.009", "arguments": [(index+1),"Atleast 1 of Qty"]});
-				if( inpTimeMin === 0 )
-					errors.push({"code": "err.cmm.009", "arguments": [(index+1),"Time (min)"]});
+				//if( inpTimeMin === 0 )
+				//	errors.push({"code": "err.cmm.009", "arguments": [(index+1),"Time (min)"]});
 				//if( inpACQty > inpWKQty )
 				//	errors.push({"code": "err.dal.006", "arguments": [(index+1)]});
 				if( inpNGNum != inpRSSum )

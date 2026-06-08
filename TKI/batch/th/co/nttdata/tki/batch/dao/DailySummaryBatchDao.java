@@ -211,7 +211,8 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
           + "           (SELECT TOP 1 t.lotno FROM t_dailymc_lot t "
           + "            INNER JOIN t_dailymc m ON m.dailymcid = t.dailymcid "
           + "            WHERE m.reportdate = mc.reportdate AND m.reporttype = mc.reporttype "
-          + "              AND m.wip = mc.wip AND m.customerid = mc.customerid) AS workorderno "
+          + "              AND m.wip = mc.wip AND m.customerid = mc.customerid "
+          + "            ORDER BY t.lotno) AS workorderno "
           + "    FROM t_dailymc mc "
           + "    INNER JOIN t_dailymc_detail d ON mc.dailymcid = d.dailymcid "
           + "    WHERE mc.reportdate = ? AND d.reporttime IN (25,26) "
@@ -220,7 +221,9 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
           + ") dmc "
           + "ON (pd.reportdate = dmc.reportdate AND pd.reporttype = dmc.reporttype "
           + "    AND pd.wip = dmc.wip AND pd.partid = dmc.partid "
-          + "    AND pd.customerid = dmc.customerid AND pd.workorderno = dmc.workorderno) "
+          + "    AND pd.customerid = dmc.customerid "
+          + "    AND (pd.workorderno = dmc.workorderno "
+          + "         OR (pd.workorderno IS NULL AND dmc.workorderno IS NULL))) "
           + "WHEN NOT MATCHED THEN "
           + "  INSERT(reportdate,reporttype,wip,partid,customerid,pd,workorderno) "
           + "  VALUES(dmc.reportdate,dmc.reporttype,dmc.wip,dmc.partid,dmc.customerid,dmc.pd,dmc.workorderno) "
@@ -231,10 +234,13 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
             c.setAutoCommit(false);
             try (PreparedStatement ps = c.prepareStatement(sql)) {
                 ps.setDate(1, sqlDate);
-                ps.executeUpdate();
+                int affected = ps.executeUpdate();
                 c.commit();
+                log.info("[DAL_B01] mergePendingMC(" + reportDate + ") affected=" + affected + " rows");
             } catch (SQLException e) {
                 c.rollback();
+                log.error("[DAL_B01] mergePendingMC failed for " + reportDate
+                         + " - SQLState=" + e.getSQLState() + ", ErrorCode=" + e.getErrorCode(), e);
                 throw e;
             }
         } catch (SQLException e) {
@@ -257,7 +263,9 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
           + ") dwk "
           + "ON (pd.reportdate = dwk.reportdate AND pd.reporttype = dwk.reporttype "
           + "    AND pd.wip = dwk.wip AND pd.partid = dwk.partid "
-          + "    AND pd.customerid = dwk.customerid AND pd.workorderno = dwk.workorderno AND pd.lotno = dwk.lotno) "
+          + "    AND pd.customerid = dwk.customerid "
+          + "    AND (pd.workorderno = dwk.workorderno OR (pd.workorderno IS NULL AND dwk.workorderno IS NULL)) "
+          + "    AND (pd.lotno = dwk.lotno OR (pd.lotno IS NULL AND dwk.lotno IS NULL))) "
           + "WHEN NOT MATCHED THEN "
           + "  INSERT(reportdate,reporttype,wip,partid,customerid,workorderno,lotno,pd) "
           + "  VALUES(dwk.reportdate,dwk.reporttype,dwk.wip,dwk.partid,dwk.customerid,dwk.workorderno,dwk.lotno,dwk.pd) "
@@ -268,10 +276,13 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
             c.setAutoCommit(false);
             try (PreparedStatement ps = c.prepareStatement(sql)) {
                 ps.setDate(1, sqlDate);
-                ps.executeUpdate();
+                int affected = ps.executeUpdate();
                 c.commit();
+                log.info("[DAL_B01] mergePendingWK(" + reportDate + ") affected=" + affected + " rows");
             } catch (SQLException e) {
                 c.rollback();
+                log.error("[DAL_B01] mergePendingWK failed for " + reportDate
+                         + " - SQLState=" + e.getSQLState() + ", ErrorCode=" + e.getErrorCode(), e);
                 throw e;
             }
         } catch (SQLException e) {
@@ -294,7 +305,9 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
           + ") dwkmc "
           + "ON (pd.reportdate = dwkmc.reportdate AND pd.reporttype = dwkmc.reporttype "
           + "    AND pd.wip = dwkmc.wip AND pd.partid = dwkmc.partid "
-          + "    AND pd.customerid = dwkmc.customerid AND pd.workorderno = dwkmc.workorderno AND pd.lotno = dwkmc.lotno) "
+          + "    AND pd.customerid = dwkmc.customerid "
+          + "    AND (pd.workorderno = dwkmc.workorderno OR (pd.workorderno IS NULL AND dwkmc.workorderno IS NULL)) "
+          + "    AND (pd.lotno = dwkmc.lotno OR (pd.lotno IS NULL AND dwkmc.lotno IS NULL))) "
           + "WHEN NOT MATCHED THEN "
           + "  INSERT(reportdate,reporttype,wip,partid,customerid,workorderno,lotno,pd) "
           + "  VALUES(dwkmc.reportdate,dwkmc.reporttype,dwkmc.wip,dwkmc.partid,dwkmc.customerid,dwkmc.workorderno,dwkmc.lotno,dwkmc.pd) "
@@ -305,10 +318,13 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
             c.setAutoCommit(false);
             try (PreparedStatement ps = c.prepareStatement(sql)) {
                 ps.setDate(1, sqlDate);
-                ps.executeUpdate();
+                int affected = ps.executeUpdate();
                 c.commit();
+                log.info("[DAL_B01] mergePendingMCWK(" + reportDate + ") affected=" + affected + " rows");
             } catch (SQLException e) {
                 c.rollback();
+                log.error("[DAL_B01] mergePendingMCWK failed for " + reportDate
+                         + " - SQLState=" + e.getSQLState() + ", ErrorCode=" + e.getErrorCode(), e);
                 throw e;
             }
         } catch (SQLException e) {
