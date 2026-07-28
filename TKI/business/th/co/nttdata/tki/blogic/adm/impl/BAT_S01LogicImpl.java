@@ -16,6 +16,7 @@ import th.co.nttdata.batch.BatchRunner;
 import th.co.nttdata.tki.batch.blogic.DailySummaryBatchJob;
 import th.co.nttdata.tki.batch.blogic.FGStockBatchJob;
 import th.co.nttdata.tki.batch.blogic.LeadtimeBatchJob;
+import th.co.nttdata.tki.batch.blogic.MachineCostCacheBatchJob;
 import th.co.nttdata.tki.batch.blogic.MoldShotBatchJob;
 import th.co.nttdata.tki.batch.blogic.WipDeadlineBatchJob;
 import th.co.nttdata.tki.batch.blogic.WipStockBatchJob;
@@ -65,6 +66,9 @@ public class BAT_S01LogicImpl extends AbstractBaseLogic implements BAT_S01Logic 
 	@Autowired
 	@Qualifier("Deadline")
 	private BatchLogic Deadline;
+	@Autowired
+	@Qualifier("SalesOrderCacheRefresh")
+	private BatchLogic SalesOrderCacheRefresh;
 	@Autowired
 	@Qualifier("TPC_B01")
 	private BatchLogic TPC_B01;
@@ -123,6 +127,11 @@ public class BAT_S01LogicImpl extends AbstractBaseLogic implements BAT_S01Logic 
 			} else if ("DAL_B01".equals(batch.getBatchCode())) {
 				Timer timer = new Timer("dal-summary-batch", true);
 				timer.schedule(new DailySummaryBatchJob(dataSource, batch.getExecuteDate(), batch.getUpdateBy()), 0L);
+			} else if ("DAL_B02".equals(batch.getBatchCode())) {
+				BatchRunner.execute(SalesOrderCacheRefresh, batch.getUpdateBy(), batch.getExecuteDate());
+			} else if ("MCC_B01".equals(batch.getBatchCode())) {
+				Timer timer = new Timer("machine-cost-cache-batch", true);
+				timer.schedule(new MachineCostCacheBatchJob(dataSource, batch.getUpdateBy()), 0L);
 			} else if ("WIP_B01".equals(batch.getBatchCode())) {
 				Timer timer = new Timer("wip-stock-batch", true);
 				timer.schedule(new WipStockBatchJob(dataSource, batch.getExecuteDate(), batch.getUpdateBy()), 0L);

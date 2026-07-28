@@ -5,7 +5,7 @@
 
 <sqlMap namespace="batch">	
 	<select id="queryBatch" parameterClass="th.co.nttdata.tki.bean.Batch" resultClass="th.co.nttdata.tki.bean.Batch">
-		SELECT 	batchId, batchCode,batchName,batchStatus,startDate,finishDate,runBy,isenable
+		SELECT 	batchId, batchCode,batchName,batchStatus,startDate,finishDate,runBy,isenable,errormessage
 		FROM	m_batch_control nolock
 		WHERE 	isenable = 1
 				<isNotEmpty property="batchId" prepend="AND"> batchid = #batchId#</isNotEmpty>
@@ -28,6 +28,7 @@
 	      ,finishDate
 	      ,runBy
 	      ,isenable
+	      ,errormessage
 	  FROM m_batch_control
 	  WHERE batchstatus <![CDATA[ <> ]]> 0 AND isenable = 1
 	</select>

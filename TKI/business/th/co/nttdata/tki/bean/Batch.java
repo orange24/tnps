@@ -14,6 +14,7 @@ public class Batch extends AbstractBaseBean {
 	private String 	batchName;
 	private String 	runBy;
 	private String 	spName;
+	private String 	errorMessage;
 	public Date getFinishDate() {
 		return finishDate;
 	}
@@ -80,5 +81,11 @@ public class Batch extends AbstractBaseBean {
 	}
 	public void setSpName(String spName) {
 		this.spName = spName;
-	}	
+	}
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
 }

@@ -51,8 +51,8 @@ public class WipStockBatchJob extends TimerTask {
     private static final String BATCH_NAME = "WIP Stock Calculate";
 
     /** จำนวน partId ต่อ 1 worker thread */
-    private static final int PARTITION_SIZE = 100;
-    private static final int THREAD_COUNT   = 4;
+    private static final int PARTITION_SIZE = 50;   // ลดลงจาก 100 → better load balancing
+    private static final int THREAD_COUNT   = 8;    // เพิ่มจาก 4 → more parallelism
 
     private final DataSource dataSource;
     private final Date       startDate;  // วันแรกที่ต้องการ recalculate

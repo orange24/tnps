@@ -28,7 +28,7 @@ public class DailySummaryBatchJob extends TimerTask {
 
     private static final String BATCH_CODE  = "DAL_B01";
     private static final String BATCH_NAME  = "Daily Actual and Pending Summary";
-    private static final int    THREAD_COUNT = 4;
+    private static final int    THREAD_COUNT = 2; // Reduced from 4 to reduce CPU load
 
     private final DataSource dataSource;
     private final Date       executeDate;

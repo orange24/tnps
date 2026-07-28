@@ -18,4 +18,6 @@ public interface TLotNoDao {
 	List<TDCPlan> getDataForPrint(TDCPlan param);
 
 	void updatePrintStatus(TDCPlan obj);
+
+	List<TDCPlan> getDataForPrintByDateRange(TDCPlan param);
 }

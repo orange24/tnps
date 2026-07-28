@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="v_sales_order_cache">
+
+	<!-- Truncate cache table -->
+	<update id="truncateCache">
+		TRUNCATE TABLE t_sales_order_detail_cache;
+	</update>
+
+	<!-- Populate cache from view -->
+	<update id="populateCache">
+		INSERT INTO t_sales_order_detail_cache
+		SELECT * FROM V_07_SalesOrderDetail WITH (NOLOCK);
+	</update>
+
+	<!-- Update statistics -->
+	<update id="updateStatistics">
+		UPDATE STATISTICS t_sales_order_detail_cache;
+	</update>
+
+</sqlMap>

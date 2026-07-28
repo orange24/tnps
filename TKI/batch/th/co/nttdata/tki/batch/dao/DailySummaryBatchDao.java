@@ -227,22 +227,38 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
           + "  VALUES(dmc.reportdate,dmc.reporttype,dmc.wip,dmc.partid,dmc.customerid,dmc.pd,dmc.workorderno) "
           + "WHEN MATCHED THEN "
           + "  UPDATE SET pd.pd = dmc.pd, pd.workorderno = dmc.workorderno;";
+
         java.sql.Date sqlDate = new java.sql.Date(reportDate.getTime());
-        try (Connection c = dataSource.getConnection()) {
-            c.setAutoCommit(false);
-            try (PreparedStatement ps = c.prepareStatement(sql)) {
-                ps.setDate(1, sqlDate);
-                int affected = ps.executeUpdate();
-                c.commit();
-                log.info("[DAL_B01] mergePendingMC(" + reportDate + ") affected=" + affected + " rows");
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try (Connection c = dataSource.getConnection()) {
+                c.setAutoCommit(false);
+                try (PreparedStatement ps = c.prepareStatement(sql)) {
+                    ps.setDate(1, sqlDate);
+                    int affected = ps.executeUpdate();
+                    c.commit();
+                    if (attempt > 1) {
+                        log.info("[DAL_B01] mergePendingMC(" + reportDate + ") succeeded on retry #" + attempt);
+                    }
+                    log.info("[DAL_B01] mergePendingMC(" + reportDate + ") affected=" + affected + " rows");
+                    return; // Success
+                } catch (SQLException e) {
+                    c.rollback();
+                    // Error 1205 = Deadlock victim
+                    if (e.getErrorCode() == 1205 && attempt < maxRetries) {
+                        log.warn("[DAL_B01] mergePendingMC(" + reportDate + ") deadlock on attempt " + attempt + ", retrying...");
+                        try { Thread.sleep(500 * attempt); } catch (InterruptedException ie) { } // Increased from 50ms to 500ms
+                        continue; // Retry
+                    }
+                    log.error("[DAL_B01] mergePendingMC failed for " + reportDate
+                             + " - SQLState=" + e.getSQLState() + ", ErrorCode=" + e.getErrorCode(), e);
+                    throw e;
+                }
             } catch (SQLException e) {
-                c.rollback();
-                log.error("[DAL_B01] mergePendingMC failed for " + reportDate
-                         + " - SQLState=" + e.getSQLState() + ", ErrorCode=" + e.getErrorCode(), e);
-                throw e;
+                if (e.getErrorCode() != 1205 || attempt == maxRetries) {
+                    throw new RuntimeException("mergePendingMC failed for " + reportDate, e);
+                }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("mergePendingMC failed for " + reportDate, e);
         }
     }
 
@@ -267,22 +283,38 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
           + "  VALUES(dwk.reportdate,dwk.reporttype,dwk.wip,dwk.partid,dwk.customerid,dwk.workorderno,dwk.lotno,dwk.pd) "
           + "WHEN MATCHED THEN "
           + "  UPDATE SET pd.pd = dwk.pd, pd.workorderno = dwk.workorderno, pd.lotno = dwk.lotno;";
+
         java.sql.Date sqlDate = new java.sql.Date(reportDate.getTime());
-        try (Connection c = dataSource.getConnection()) {
-            c.setAutoCommit(false);
-            try (PreparedStatement ps = c.prepareStatement(sql)) {
-                ps.setDate(1, sqlDate);
-                int affected = ps.executeUpdate();
-                c.commit();
-                log.info("[DAL_B01] mergePendingWK(" + reportDate + ") affected=" + affected + " rows");
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try (Connection c = dataSource.getConnection()) {
+                c.setAutoCommit(false);
+                try (PreparedStatement ps = c.prepareStatement(sql)) {
+                    ps.setDate(1, sqlDate);
+                    int affected = ps.executeUpdate();
+                    c.commit();
+                    if (attempt > 1) {
+                        log.info("[DAL_B01] mergePendingWK(" + reportDate + ") succeeded on retry #" + attempt);
+                    }
+                    log.info("[DAL_B01] mergePendingWK(" + reportDate + ") affected=" + affected + " rows");
+                    return; // Success
+                } catch (SQLException e) {
+                    c.rollback();
+                    // Error 1205 = Deadlock victim
+                    if (e.getErrorCode() == 1205 && attempt < maxRetries) {
+                        log.warn("[DAL_B01] mergePendingWK(" + reportDate + ") deadlock on attempt " + attempt + ", retrying...");
+                        try { Thread.sleep(500 * attempt); } catch (InterruptedException ie) { } // Increased from 50ms to 500ms
+                        continue; // Retry
+                    }
+                    log.error("[DAL_B01] mergePendingWK failed for " + reportDate
+                             + " - SQLState=" + e.getSQLState() + ", ErrorCode=" + e.getErrorCode(), e);
+                    throw e;
+                }
             } catch (SQLException e) {
-                c.rollback();
-                log.error("[DAL_B01] mergePendingWK failed for " + reportDate
-                         + " - SQLState=" + e.getSQLState() + ", ErrorCode=" + e.getErrorCode(), e);
-                throw e;
+                if (e.getErrorCode() != 1205 || attempt == maxRetries) {
+                    throw new RuntimeException("mergePendingWK failed for " + reportDate, e);
+                }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("mergePendingWK failed for " + reportDate, e);
         }
     }
 
@@ -307,22 +339,38 @@ public class DailySummaryBatchDao extends AbstractBatchDao {
           + "  VALUES(dwkmc.reportdate,dwkmc.reporttype,dwkmc.wip,dwkmc.partid,dwkmc.customerid,dwkmc.workorderno,dwkmc.lotno,dwkmc.pd) "
           + "WHEN MATCHED THEN "
           + "  UPDATE SET pd.pd = dwkmc.pd, pd.workorderno = dwkmc.workorderno, pd.lotno = dwkmc.lotno;";
+
         java.sql.Date sqlDate = new java.sql.Date(reportDate.getTime());
-        try (Connection c = dataSource.getConnection()) {
-            c.setAutoCommit(false);
-            try (PreparedStatement ps = c.prepareStatement(sql)) {
-                ps.setDate(1, sqlDate);
-                int affected = ps.executeUpdate();
-                c.commit();
-                log.info("[DAL_B01] mergePendingMCWK(" + reportDate + ") affected=" + affected + " rows");
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try (Connection c = dataSource.getConnection()) {
+                c.setAutoCommit(false);
+                try (PreparedStatement ps = c.prepareStatement(sql)) {
+                    ps.setDate(1, sqlDate);
+                    int affected = ps.executeUpdate();
+                    c.commit();
+                    if (attempt > 1) {
+                        log.info("[DAL_B01] mergePendingMCWK(" + reportDate + ") succeeded on retry #" + attempt);
+                    }
+                    log.info("[DAL_B01] mergePendingMCWK(" + reportDate + ") affected=" + affected + " rows");
+                    return; // Success
+                } catch (SQLException e) {
+                    c.rollback();
+                    // Error 1205 = Deadlock victim
+                    if (e.getErrorCode() == 1205 && attempt < maxRetries) {
+                        log.warn("[DAL_B01] mergePendingMCWK(" + reportDate + ") deadlock on attempt " + attempt + ", retrying...");
+                        try { Thread.sleep(500 * attempt); } catch (InterruptedException ie) { } // Increased from 50ms to 500ms
+                        continue; // Retry
+                    }
+                    log.error("[DAL_B01] mergePendingMCWK failed for " + reportDate
+                             + " - SQLState=" + e.getSQLState() + ", ErrorCode=" + e.getErrorCode(), e);
+                    throw e;
+                }
             } catch (SQLException e) {
-                c.rollback();
-                log.error("[DAL_B01] mergePendingMCWK failed for " + reportDate
-                         + " - SQLState=" + e.getSQLState() + ", ErrorCode=" + e.getErrorCode(), e);
-                throw e;
+                if (e.getErrorCode() != 1205 || attempt == maxRetries) {
+                    throw new RuntimeException("mergePendingMCWK failed for " + reportDate, e);
+                }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("mergePendingMCWK failed for " + reportDate, e);
         }
     }
 }

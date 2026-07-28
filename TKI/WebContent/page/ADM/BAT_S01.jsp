@@ -58,9 +58,16 @@
 				}else if(batchStatus === 2){
 					statusEl.html("<strong class='textred'>Fail</strong>");
 					btnRun.attr("disabled",false);
+					if(result.errorMessage){
+						$("#errorMessage").html(result.errorMessage);
+						$("#errorRow").show();
+					}else{
+						$("#errorRow").hide();
+					}
 				}else if(batchStatus === 3){
 					statusEl.html("<strong class='textorange'>Success with error.</strong>");
 					btnRun.attr("disabled",false);
+					$("#errorRow").hide();
 				}
 				var resultRunBy = result.runBy;
 				runBy.html(resultRunBy);
@@ -93,16 +100,25 @@
 					if(batchStatus === 0){
 						statusEl.html("<strong class='textgreen'>Success</strong>");
 						btnRun.attr("disabled",false);
+						$("#errorRow").hide();
 					}else if(batchStatus === 1){
 						statusEl.html("<strong class='textblue'>Running...</strong>");
 						btnRun.attr("disabled",true);
+						$("#errorRow").hide();
 					}else if(batchStatus === 2){
 						statusEl.html("<strong class='textred'>Fail</strong>");
 						btnRun.attr("disabled",false);
+						if(result.errorMessage){
+							$("#errorMessage").html(result.errorMessage);
+							$("#errorRow").show();
+						}else{
+							$("#errorRow").hide();
+						}
 					}else if(batchStatus === 3){
 						statusEl.html("<strong class='textorange'>Success with error.</strong>");
 						btnRun.attr("disabled",false);
-					}				
+						$("#errorRow").hide();
+					}
 					finishDateTime.html(finishDate);
 					runBy.html(resultRunBy);				
 				});
@@ -122,27 +138,40 @@
 		postJSON("BAT_S01_getBatchStatus", function(result) {
 			if (result.length > 0) {
 				$.each(result, function(rowIndex, data) {
+					var statusCell = getStatusLabel(data.batchStatus);
+					if(data.batchStatus === 2 && data.errorMessage){
+						statusCell += '<br/><span style="font-size:11px;color:darkred;" title="' + data.errorMessage + '">(' + data.errorMessage + ')</span>';
+					}
 					$('#tableStatus tr:last')
 							.after(
 									'<tr><td>'
 											+ data.batchName
 											+ '</td><td>'
-											+ getStatusLabel(data.batchStatus)
+											+ statusCell
 											+ '</td></tr>');
 					
 					if (data.batchId == selectBatch.val()) {
 						if (data.batchStatus === 0) {
 							statusEl.html("<strong class='textgreen'>Success</strong>");
 							btnRun.attr("disabled", false);
+							$("#errorRow").hide();
 						} else if (data.batchStatus === 1) {
 							statusEl.html("<strong class='textblue'>Running...</strong>");
 							btnRun.attr("disabled", true);
+							$("#errorRow").hide();
 						} else if (data.batchStatus === 2) {
 							statusEl.html("<strong class='textred'>Fail</strong>");
 							btnRun.attr("disabled", false);
+							if(data.errorMessage){
+								$("#errorMessage").html(data.errorMessage);
+								$("#errorRow").show();
+							}else{
+								$("#errorRow").hide();
+							}
 						} else if (data.batchStatus === 3) {
 							statusEl.html("<strong class='textorange'>Success with error.</strong>");
 							btnRun.attr("disabled", false);
+							$("#errorRow").hide();
 						}
 					}
 				});
@@ -208,9 +237,13 @@
 				<th width="12%" class="label">Last Run Time</th>
 		        <td width="35%"><div id="finishDateTime"><fmt:formatDate value="${batch.finishDate}" pattern="dd/MM/yyyy HH:mm:ss" /></div></td>
 			</tr>
-			<tr>		      	
+			<tr>
 				<th width="12%" class="label">Last Run By</th>
 		        <td width="35%" id="runBy"><c:out value="${batch.runBy}"/></td>
+			</tr>
+			<tr id="errorRow" <c:if test="${batch.batchStatus != 2 or empty batch.errorMessage}">style="display:none;"</c:if>>
+				<th width="12%" class="label">Error Message</th>
+		        <td width="35%" id="errorMessage" style="color:red;"><c:out value="${batch.errorMessage}"/></td>
 			</tr>
 		</table>
 		<table width="100%">

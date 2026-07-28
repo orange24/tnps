@@ -95,4 +95,54 @@
 		UPDATE t_lotno SET printstatus = 1, printdate = GETDATE(), printby = #updateBy#
 		WHERE lotno = #lotNo#
 	</update>
+
+	<!-- OPTIMIZED: Get all print data by date range (avoids N+1 query problem) -->
+	<select id="select_print_by_daterange" parameterClass="th.co.nttdata.tki.bean.TDCPlan" resultClass="th.co.nttdata.tki.bean.TDCPlan">
+		SELECT
+			LOT.LOTNO 		 AS lotNo,
+			CONVERT(VARCHAR(20), DCP.DCPLANDATE, 103) AS dcPlanDate,
+			CUS.CUSTOMERCODE AS customerCode,
+			CUS.CUSTOMERNAME AS customerName,
+			PART.PARTNO 	 AS partNo,
+			PART.PARTNAME    AS partName,
+			PART.snp_wip	 AS snpWip,
+			LOT.LOTQTY       AS quantity,
+			PW.WIPORDER      AS wipOrder,
+			CASE WHEN PW.remark IS NULL OR RTRIM(LTRIM(PW.remark)) = '' then WIP.WIP +' : '+WIP.WIPNAME ELSE PW.remark END AS wip,
+			WIP.WIP AS wipName,
+			REA.REASONNAME   AS reasonName,
+			MD.MOLDNO		 AS moldNo,
+			MD.CAVNO		 AS cavNo
+  		FROM
+  			T_LOTNO LOT WITH (NOLOCK)
+  		INNER JOIN
+  			T_DCPLAN DCP WITH (NOLOCK) ON DCP.DCPLANID = LOT.DCPLANID
+  		INNER JOIN
+  			M_WORKORDER WO WITH (NOLOCK) ON WO.DCPLANID = DCP.DCPLANID
+  		LEFT JOIN
+  			M_CUSTOMER CUS WITH (NOLOCK) ON CUS.CUSTOMERID = DCP.CUSTOMERID
+  		LEFT JOIN
+  			M_PART PART WITH (NOLOCK) ON PART.PARTID = DCP.PARTID
+  		LEFT JOIN
+  			M_PART_WIP PW WITH (NOLOCK) ON PW.PARTID = DCP.PARTID
+  		LEFT JOIN
+  			M_WIP WIP WITH (NOLOCK) ON WIP.WIP = PW.WIP
+  		LEFT JOIN
+  			M_REASON REA WITH (NOLOCK) ON REA.REASONID = DCP.REASONID
+  		LEFT JOIN
+  			M_MOLD_DETAIL MD WITH (NOLOCK) ON DCP.MOLDID = MD.MOLDID
+  		WHERE
+  			DCP.DCPLANDATE BETWEEN #dateFrom# AND #dateTo#
+  			<isNotEmpty property="customerId">
+  				AND DCP.CUSTOMERID = #customerId#
+  			</isNotEmpty>
+  			<isNotEmpty property="machineId">
+  				AND DCP.MACHINEID = #machineId#
+  			</isNotEmpty>
+  			<isNotEmpty property="wip">
+  				AND WO.WIP = #wip#
+  			</isNotEmpty>
+		ORDER BY
+			DCP.DCPLANDATE, LOT.LOTNO, PW.WIPORDER
+	</select>
 </sqlMap>

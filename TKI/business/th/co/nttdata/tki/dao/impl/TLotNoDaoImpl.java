@@ -41,6 +41,10 @@ public class TLotNoDaoImpl extends AbstractBaseDao implements TLotNoDao {
 	@Override
 	public void updatePrintStatus(TDCPlan obj) {
 		update("t_lotno.update_print_status", obj);
+	}
 
+	@Override
+	public List<TDCPlan> getDataForPrintByDateRange(TDCPlan param) {
+		return queryForList("t_lotno.select_print_by_daterange", param);
 	}
 }

@@ -47,7 +47,7 @@ public class WipStockBatchDao extends AbstractBatchDao {
     public List<Integer> getAllPartIds() {
         List<Integer> ids = new ArrayList<Integer>();
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT partid FROM m_part");
+             PreparedStatement ps = c.prepareStatement("SELECT partid FROM m_part WITH (NOLOCK)");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) ids.add(rs.getInt(1));
         } catch (SQLException e) {
@@ -61,7 +61,7 @@ public class WipStockBatchDao extends AbstractBatchDao {
         Map<Integer, NavigableMap<Integer, String>> result =
                 new HashMap<Integer, NavigableMap<Integer, String>>();
         for (List<Integer> chunk : toChunks(partIds)) {
-            String sql = "SELECT partid, wip, wiporder FROM m_part_wip "
+            String sql = "SELECT partid, wip, wiporder FROM m_part_wip WITH (NOLOCK) "
                        + "WHERE iscalc = 1 AND partid IN (" + ph(chunk.size()) + ")";
             try (Connection c = dataSource.getConnection();
                  PreparedStatement ps = c.prepareStatement(sql)) {
@@ -91,8 +91,8 @@ public class WipStockBatchDao extends AbstractBatchDao {
         for (List<Integer> chunk : toChunks(partIds)) {
             String sql = "SELECT ds.reportdate, ds.wip, ds.partid,"
                        + "  SUM(ds.ok) AS ok, SUM(ds.ng) AS ng, SUM(ds.pd) AS pd, SUM(ds.qty) AS qty "
-                       + "FROM t_daily_summary ds "
-                       + "INNER JOIN m_part_wip w ON ds.wip = w.wip AND ds.partid = w.partid "
+                       + "FROM t_daily_summary ds WITH (NOLOCK) "
+                       + "INNER JOIN m_part_wip w WITH (NOLOCK) ON ds.wip = w.wip AND ds.partid = w.partid "
                        + "WHERE ds.reportdate = ? AND ds.reporttype IN (1,2) AND w.iscalc = 1 "
                        + "  AND ds.partid IN (" + ph(chunk.size()) + ") "
                        + "GROUP BY ds.reportdate, ds.wip, ds.partid";
@@ -123,7 +123,7 @@ public class WipStockBatchDao extends AbstractBatchDao {
         java.sql.Date sqlDate = toSqlDate(prevDate);
         for (List<Integer> chunk : toChunks(partIds)) {
             String sql = "SELECT wip, partid, ISNULL(adjuststock, currentstock) AS stock "
-                       + "FROM t_wip_stock "
+                       + "FROM t_wip_stock WITH (NOLOCK) "
                        + "WHERE reportdate = ? AND partid IN (" + ph(chunk.size()) + ")";
             try (Connection c = dataSource.getConnection();
                  PreparedStatement ps = c.prepareStatement(sql)) {
@@ -146,7 +146,7 @@ public class WipStockBatchDao extends AbstractBatchDao {
         java.sql.Date sqlDate = toSqlDate(reportDate);
         for (List<Integer> chunk : toChunks(partIds)) {
             String sql = "SELECT wip, partid, reportdate, adjuststock "
-                       + "FROM t_wip_stockadjust "
+                       + "FROM t_wip_stockadjust WITH (NOLOCK) "
                        + "WHERE reportdate = ? AND partid IN (" + ph(chunk.size()) + ") "
                        + "ORDER BY wipstockadjustid DESC";
             try (Connection c = dataSource.getConnection();
@@ -179,9 +179,9 @@ public class WipStockBatchDao extends AbstractBatchDao {
 
         for (List<Integer> chunk : toChunks(partIds)) {
             String sql = "SELECT p.wip, p.partid, pa.pdadjustid, pa.ok, pa.ng "
-                       + "FROM t_pending p "
-                       + "INNER JOIN m_part_wip w ON p.wip = w.wip AND p.partid = w.partid AND w.iscalc = 1 "
-                       + "INNER JOIN t_pending_adjust pa ON p.pdid = pa.pdid AND pa.reportdate = ? "
+                       + "FROM t_pending p WITH (NOLOCK) "
+                       + "INNER JOIN m_part_wip w WITH (NOLOCK) ON p.wip = w.wip AND p.partid = w.partid AND w.iscalc = 1 "
+                       + "INNER JOIN t_pending_adjust pa WITH (NOLOCK) ON p.pdid = pa.pdid AND pa.reportdate = ? "
                        + "WHERE p.reporttype IN (1,2) AND p.partid IN (" + ph(chunk.size()) + ")";
             try (Connection c = dataSource.getConnection();
                  PreparedStatement ps = c.prepareStatement(sql)) {
@@ -226,10 +226,10 @@ public class WipStockBatchDao extends AbstractBatchDao {
 
         for (List<Integer> chunk : toChunks(partIds)) {
             String sql = "SELECT tra.ok, tra.ng, pr.wip, p.partid "
-                       + "FROM t_rework_adjust tra "
-                       + "INNER JOIN t_pending_rework pr  ON tra.pdreworkid = pr.pdreworkid "
-                       + "INNER JOIN t_pending_adjust  pa ON pr.pdadjustid  = pa.pdadjustid "
-                       + "INNER JOIN t_pending          p  ON pa.pdid        = p.pdid "
+                       + "FROM t_rework_adjust tra WITH (NOLOCK) "
+                       + "INNER JOIN t_pending_rework pr WITH (NOLOCK) ON tra.pdreworkid = pr.pdreworkid "
+                       + "INNER JOIN t_pending_adjust pa WITH (NOLOCK) ON pr.pdadjustid  = pa.pdadjustid "
+                       + "INNER JOIN t_pending p WITH (NOLOCK) ON pa.pdid = p.pdid "
                        + "WHERE tra.reportdate = ? AND p.partid IN (" + ph(chunk.size()) + ")";
             try (Connection c = dataSource.getConnection();
                  PreparedStatement ps = c.prepareStatement(sql)) {
@@ -260,7 +260,7 @@ public class WipStockBatchDao extends AbstractBatchDao {
     public Map<Integer, Integer> getPartToFgMap(List<Integer> partIds) {
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
         for (List<Integer> chunk : toChunks(partIds)) {
-            String sql = "SELECT partid, MIN(fgid) AS fgid FROM m_fg_part "
+            String sql = "SELECT partid, MIN(fgid) AS fgid FROM m_fg_part WITH (NOLOCK) "
                        + "WHERE isactive = 1 AND partid IN (" + ph(chunk.size()) + ") "
                        + "GROUP BY partid";
             try (Connection c = dataSource.getConnection();
@@ -279,7 +279,7 @@ public class WipStockBatchDao extends AbstractBatchDao {
         Map<Integer, List<Integer>> result = new HashMap<Integer, List<Integer>>();
         if (fgIds.isEmpty()) return result;
         for (List<Integer> chunk : toChunks(new ArrayList<Integer>(fgIds))) {
-            String sql = "SELECT fgid, partid FROM m_fg_part "
+            String sql = "SELECT fgid, partid FROM m_fg_part WITH (NOLOCK) "
                        + "WHERE isactive = 1 AND fgid IN (" + ph(chunk.size()) + ") "
                        + "ORDER BY fgid, partid";
             try (Connection c = dataSource.getConnection();
@@ -309,7 +309,7 @@ public class WipStockBatchDao extends AbstractBatchDao {
         java.sql.Date sqlDate = toSqlDate(reportDate);
         for (List<Integer> chunk : toChunks(new ArrayList<Integer>(fgIds))) {
             String sql = "SELECT fgid, ISNULL(SUM(fgin), 0) AS totalfgin "
-                       + "FROM t_fg_stock WHERE reportdate = ? AND fgid IN (" + ph(chunk.size()) + ") "
+                       + "FROM t_fg_stock WITH (NOLOCK) WHERE reportdate = ? AND fgid IN (" + ph(chunk.size()) + ") "
                        + "GROUP BY fgid";
             try (Connection c = dataSource.getConnection();
                  PreparedStatement ps = c.prepareStatement(sql)) {
@@ -327,7 +327,7 @@ public class WipStockBatchDao extends AbstractBatchDao {
     public Set<WipKey> getAdjustKeySet(List<Integer> partIds) {
         Set<WipKey> result = new HashSet<WipKey>();
         for (List<Integer> chunk : toChunks(partIds)) {
-            String sql = "SELECT DISTINCT wip, partid FROM t_wip_stockadjust "
+            String sql = "SELECT DISTINCT wip, partid FROM t_wip_stockadjust WITH (NOLOCK) "
                        + "WHERE partid IN (" + ph(chunk.size()) + ")";
             try (Connection c = dataSource.getConnection();
                  PreparedStatement ps = c.prepareStatement(sql)) {

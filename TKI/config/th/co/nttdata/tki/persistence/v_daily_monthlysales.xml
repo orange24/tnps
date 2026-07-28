@@ -125,7 +125,7 @@
 	      ,sCareerSheetNo
 	      ,nOrderReceiptionUnitPrice
 	      ,nOrderReceiptionPrice
-  		FROM V_07_SalesOrderDetail
+  		FROM t_sales_order_detail_cache WITH (NOLOCK)
   		<dynamic prepend="WHERE">
   			<isNotEmpty prepend="AND" property="reportDateFr"> dDeliveryDate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
 	  		<isNotEmpty prepend="AND" property="reportDateTo"> dDeliveryDate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
@@ -140,7 +140,7 @@
 	<select id="countMRDC_R06" resultClass="Integer">
 		SELECT 
 			COUNT(*)
-		FROM V_07_SalesOrderDetail
+		FROM t_sales_order_detail_cache WITH (NOLOCK)
 	</select>
 	
 	<select id="sizeMRDC_R06" parameterClass="th.co.nttdata.tki.bean.VDailyMonthlySales" resultClass="th.co.nttdata.tki.bean.VDailyMonthlySales">
@@ -163,7 +163,7 @@
 	      ,sCareerSheetNo
 	      ,nOrderReceiptionUnitPrice
 	      ,nOrderReceiptionPrice
-  		FROM V_07_SalesOrderDetail
+  		FROM t_sales_order_detail_cache WITH (NOLOCK)
   		<dynamic prepend="WHERE">
   			<isNotEmpty prepend="AND" property="reportDateFr"> dDeliveryDate <![CDATA[ >= ]]> #reportDateFr# </isNotEmpty>
 	  		<isNotEmpty prepend="AND" property="reportDateTo"> dDeliveryDate <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>

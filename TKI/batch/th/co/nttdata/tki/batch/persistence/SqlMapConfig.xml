@@ -35,5 +35,6 @@
 	<sqlMap resource="th/co/nttdata/tki/batch/persistence/Ss_dataexch3_batch.xml" />
 	<sqlMap resource="th/co/nttdata/tki/batch/persistence/t_fg_detail_batch.xml" />
 	<sqlMap resource="th/co/nttdata/tki/batch/persistence/t_nir_export_total_batch.xml" />
+	<sqlMap resource="th/co/nttdata/tki/batch/persistence/v_sales_order_cache.xml" />
 
 </sqlMapConfig>

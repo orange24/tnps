@@ -60,6 +60,7 @@
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_wip_junk.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_deliveryplan.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/v_daily_monthlysales.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/v_sales_order_cache.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/m_material.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/m_worker.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_dcplan.xml" />

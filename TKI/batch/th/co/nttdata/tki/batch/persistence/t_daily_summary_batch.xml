@@ -21,86 +21,118 @@
 	</delete>
 	
 	<insert id="insertQueryDailyDay" parameterClass="th.co.nttdata.tki.batch.bean.TDailySummary">
-		<!-- query daily (Day Shift)-->
+		<!-- query daily (Day Shift) - MERGE to handle duplicates-->
 		<!--25= total day shift-->
-		INSERT INTO t_daily_summary (reportdate,wip,partid,reporttype,shift,ok,ng,pd,qty)
-		SELECT d.reportDate, d.wip, d.partId, d.reportType, 
-			   'D' AS shift, 
-			   SUM(ISNULL(d.ok,0)) AS ok,
-			   SUM(ISNULL(d.ng,0)) AS ng,
-			   SUM(ISNULL(d.pd,0)) AS pd,
-			   SUM(ISNULL(d.qty,0)) AS qty
-		FROM 
-		(
-			SELECT mc.reportdate, mc.wip, mc.partid, mc.reporttype, 
-				   SUM(ISNULL(d.ok,0)) AS ok, SUM(ISNULL(d.ng,0)) AS ng,
-				   SUM(ISNULL(d.pd,0)) AS pd, SUM(ISNULL(d.qty,0)) AS qty
-			FROM t_dailymc mc
-			INNER JOIN t_dailymc_detail d ON mc.dailymcid = d.dailymcid
-			LEFT JOIN t_dailymc_lot l ON d.dailymcid = l.dailymcid
-			WHERE mc.reportdate = #reportDate# AND d.reporttime = 25 
-			GROUP BY mc.reportdate, mc.wip, mc.partid, mc.reporttype
-			UNION ALL
-			SELECT wk.reportdate, wk.wip, d.partid, wk.reporttype, 
-				   SUM(ISNULL(d.ok,0)) AS ok, SUM(ISNULL(d.ng,0)) AS ng,
-				   SUM(ISNULL(d.pd,0)) AS pd, SUM(ISNULL(d.qty,0)) AS qty
-			FROM t_dailywk wk
-			INNER JOIN t_dailywk_detail d ON wk.dailywkid = d.dailywkid
-			WHERE wk.reportdate = #reportDate# AND wk.shift = 'D' 
-			GROUP BY wk.reportdate, wk.wip, d.partid, wk.reporttype
-			UNION ALL   
-			SELECT mcwk.reportdate, mcwk.wip, d.partid, mcwk.reporttype,
-				   SUM(ISNULL(d.ok,0)) AS ok, SUM(ISNULL(d.ng,0)) AS ng,
-				   SUM(ISNULL(d.pd,0)) AS pd, SUM(ISNULL(d.qty,0)) AS qty
-			FROM t_dailymcwk mcwk
-			INNER JOIN t_dailymcwk_detail d ON mcwk.dailymcwkid = d.dailymcwkid
-			WHERE mcwk.reportdate = #reportDate# AND mcwk.shift = 'D' 
-			GROUP BY mcwk.reportdate, mcwk.wip, d.partid, mcwk.reporttype
-		) d
-		GROUP BY d.reportdate, d.wip, d.partid, d.reporttype;
+		MERGE INTO t_daily_summary AS target
+		USING (
+			SELECT d.reportDate, d.wip, d.partId, d.reportType,
+				   'D' AS shift,
+				   SUM(ISNULL(d.ok,0)) AS ok,
+				   SUM(ISNULL(d.ng,0)) AS ng,
+				   SUM(ISNULL(d.pd,0)) AS pd,
+				   SUM(ISNULL(d.qty,0)) AS qty
+			FROM
+			(
+				SELECT mc.reportdate, mc.wip, mc.partid, mc.reporttype,
+					   SUM(ISNULL(d.ok,0)) AS ok, SUM(ISNULL(d.ng,0)) AS ng,
+					   SUM(ISNULL(d.pd,0)) AS pd, SUM(ISNULL(d.qty,0)) AS qty
+				FROM t_dailymc mc
+				INNER JOIN t_dailymc_detail d ON mc.dailymcid = d.dailymcid
+				LEFT JOIN t_dailymc_lot l ON d.dailymcid = l.dailymcid
+				WHERE mc.reportdate = #reportDate# AND d.reporttime = 25
+				GROUP BY mc.reportdate, mc.wip, mc.partid, mc.reporttype
+				UNION ALL
+				SELECT wk.reportdate, wk.wip, d.partid, wk.reporttype,
+					   SUM(ISNULL(d.ok,0)) AS ok, SUM(ISNULL(d.ng,0)) AS ng,
+					   SUM(ISNULL(d.pd,0)) AS pd, SUM(ISNULL(d.qty,0)) AS qty
+				FROM t_dailywk wk
+				INNER JOIN t_dailywk_detail d ON wk.dailywkid = d.dailywkid
+				WHERE wk.reportdate = #reportDate# AND wk.shift = 'D'
+				GROUP BY wk.reportdate, wk.wip, d.partid, wk.reporttype
+				UNION ALL
+				SELECT mcwk.reportdate, mcwk.wip, d.partid, mcwk.reporttype,
+					   SUM(ISNULL(d.ok,0)) AS ok, SUM(ISNULL(d.ng,0)) AS ng,
+					   SUM(ISNULL(d.pd,0)) AS pd, SUM(ISNULL(d.qty,0)) AS qty
+				FROM t_dailymcwk mcwk
+				INNER JOIN t_dailymcwk_detail d ON mcwk.dailymcwkid = d.dailymcwkid
+				WHERE mcwk.reportdate = #reportDate# AND mcwk.shift = 'D'
+				GROUP BY mcwk.reportdate, mcwk.wip, d.partid, mcwk.reporttype
+			) d
+			GROUP BY d.reportdate, d.wip, d.partid, d.reporttype
+		) AS source (reportdate, wip, partid, reporttype, shift, ok, ng, pd, qty)
+		ON (target.reportdate = source.reportdate
+			AND target.wip = source.wip
+			AND target.partid = source.partid
+			AND target.reporttype = source.reporttype
+			AND target.shift = source.shift)
+		WHEN MATCHED THEN
+			UPDATE SET target.ok = source.ok,
+					   target.ng = source.ng,
+					   target.pd = source.pd,
+					   target.qty = source.qty
+		WHEN NOT MATCHED THEN
+			INSERT (reportdate, wip, partid, reporttype, shift, ok, ng, pd, qty)
+			VALUES (source.reportdate, source.wip, source.partid, source.reporttype,
+					source.shift, source.ok, source.ng, source.pd, source.qty);
 	</insert>
 	
 	<insert id="insertQueryDailyNight" parameterClass="th.co.nttdata.tki.batch.bean.TDailySummary">
-		<!-- query daily (Night Shift)-->
+		<!-- query daily (Night Shift) - MERGE to handle duplicates-->
 		<!--26= total night shift-->
-		INSERT INTO t_daily_summary (reportdate,wip,partid,reporttype,shift,ok,ng,pd,qty)
-		SELECT d.reportdate, d.wip, d.partid, d.reporttype, 
-			   'N'AS shift, 
-			   SUM(ISNULL(d.ok,0)) AS ok,
-			   SUM(ISNULL(d.ng,0)) AS ng,
-			   SUM(ISNULL(d.pd,0)) AS pd,
-			   SUM(ISNULL(d.qty,0)) AS qty
-		FROM 
-		(
-			SELECT mc.reportdate, mc.wip, mc.partid, mc.reporttype, 
-				   SUM(ISNULL(d.ok,0)) AS ok, SUM(ISNULL(d.ng,0)) AS ng,
-				   SUM(ISNULL(d.pd,0)) AS pd, SUM(ISNULL(d.qty,0)) AS qty
-			FROM t_dailymc mc
-			INNER JOIN t_dailymc_detail d ON mc.dailymcid = d.dailymcid
-			LEFT JOIN t_dailymc_lot l ON d.dailymcid = l.dailymcid
-			WHERE mc.reportdate = #reportDate# AND d.reporttime = 26 
-					AND (l.lotno IS NULL OR (l.lotno IS NOT NULL AND l.lotno NOT LIKE '%RE%'))
-			GROUP BY mc.reportdate, mc.wip, mc.partid, mc.reporttype
-			UNION ALL
-			SELECT wk.reportdate, wk.wip, d.partid, wk.reporttype, 
-				   SUM(ISNULL(d.ok,0)) AS ok, SUM(ISNULL(d.ng,0)) AS ng,
-				   SUM(ISNULL(d.pd,0)) AS pd, SUM(ISNULL(d.qty,0)) AS qty
-			FROM t_dailywk wk
-			INNER JOIN t_dailywk_detail d ON wk.dailywkid = d.dailywkid
-			WHERE wk.reportdate = #reportDate# AND wk.shift = 'N' 
-				AND (d.workorderno IS NULL OR (d.workorderno IS NOT NULL AND d.workorderno NOT LIKE '%RE%'))
-			GROUP BY wk.reportdate, wk.wip, d.partid, wk.reporttype
-			UNION ALL    
-			SELECT mcwk.reportdate, mcwk.wip, d.partid, mcwk.reporttype,
-				   SUM(ISNULL(d.ok,0)) AS ok, SUM(ISNULL(d.ng,0)) AS ng,
-				   SUM(ISNULL(d.pd,0)) AS pd, SUM(ISNULL(d.qty,0)) AS qty
-			FROM t_dailymcwk mcwk
-			INNER JOIN t_dailymcwk_detail d ON mcwk.dailymcwkid = d.dailymcwkid
-			WHERE mcwk.reportdate = #reportDate# AND mcwk.shift = 'N' 
-				AND (d.workorderno IS NULL OR (d.workorderno IS NOT NULL AND d.workorderno NOT LIKE '%RE%'))
-			GROUP BY mcwk.reportdate, mcwk.wip, d.partid, mcwk.reporttype
-		) d
-		GROUP BY d.reportdate, d.wip, d.partid, d.reporttype;
+		MERGE INTO t_daily_summary AS target
+		USING (
+			SELECT d.reportdate, d.wip, d.partid, d.reporttype,
+				   'N' AS shift,
+				   SUM(ISNULL(d.ok,0)) AS ok,
+				   SUM(ISNULL(d.ng,0)) AS ng,
+				   SUM(ISNULL(d.pd,0)) AS pd,
+				   SUM(ISNULL(d.qty,0)) AS qty
+			FROM
+			(
+				SELECT mc.reportdate, mc.wip, mc.partid, mc.reporttype,
+					   SUM(ISNULL(d.ok,0)) AS ok, SUM(ISNULL(d.ng,0)) AS ng,
+					   SUM(ISNULL(d.pd,0)) AS pd, SUM(ISNULL(d.qty,0)) AS qty
+				FROM t_dailymc mc
+				INNER JOIN t_dailymc_detail d ON mc.dailymcid = d.dailymcid
+				LEFT JOIN t_dailymc_lot l ON d.dailymcid = l.dailymcid
+				WHERE mc.reportdate = #reportDate# AND d.reporttime = 26
+						AND (l.lotno IS NULL OR (l.lotno IS NOT NULL AND l.lotno NOT LIKE '%RE%'))
+				GROUP BY mc.reportdate, mc.wip, mc.partid, mc.reporttype
+				UNION ALL
+				SELECT wk.reportdate, wk.wip, d.partid, wk.reporttype,
+					   SUM(ISNULL(d.ok,0)) AS ok, SUM(ISNULL(d.ng,0)) AS ng,
+					   SUM(ISNULL(d.pd,0)) AS pd, SUM(ISNULL(d.qty,0)) AS qty
+				FROM t_dailywk wk
+				INNER JOIN t_dailywk_detail d ON wk.dailywkid = d.dailywkid
+				WHERE wk.reportdate = #reportDate# AND wk.shift = 'N'
+					AND (d.workorderno IS NULL OR (d.workorderno IS NOT NULL AND d.workorderno NOT LIKE '%RE%'))
+				GROUP BY wk.reportdate, wk.wip, d.partid, wk.reporttype
+				UNION ALL
+				SELECT mcwk.reportdate, mcwk.wip, d.partid, mcwk.reporttype,
+					   SUM(ISNULL(d.ok,0)) AS ok, SUM(ISNULL(d.ng,0)) AS ng,
+					   SUM(ISNULL(d.pd,0)) AS pd, SUM(ISNULL(d.qty,0)) AS qty
+				FROM t_dailymcwk mcwk
+				INNER JOIN t_dailymcwk_detail d ON mcwk.dailymcwkid = d.dailymcwkid
+				WHERE mcwk.reportdate = #reportDate# AND mcwk.shift = 'N'
+					AND (d.workorderno IS NULL OR (d.workorderno IS NOT NULL AND d.workorderno NOT LIKE '%RE%'))
+				GROUP BY mcwk.reportdate, mcwk.wip, d.partid, mcwk.reporttype
+			) d
+			GROUP BY d.reportdate, d.wip, d.partid, d.reporttype
+		) AS source (reportdate, wip, partid, reporttype, shift, ok, ng, pd, qty)
+		ON (target.reportdate = source.reportdate
+			AND target.wip = source.wip
+			AND target.partid = source.partid
+			AND target.reporttype = source.reporttype
+			AND target.shift = source.shift)
+		WHEN MATCHED THEN
+			UPDATE SET target.ok = source.ok,
+					   target.ng = source.ng,
+					   target.pd = source.pd,
+					   target.qty = source.qty
+		WHEN NOT MATCHED THEN
+			INSERT (reportdate, wip, partid, reporttype, shift, ok, ng, pd, qty)
+			VALUES (source.reportdate, source.wip, source.partid, source.reporttype,
+					source.shift, source.ok, source.ng, source.pd, source.qty);
 	</insert>
 	
 </sqlMap>
