@@ -14,7 +14,8 @@
 	        ,PRINTDATE
 	        ,PRINTBY
 	  	FROM T_LOTNO
-	  	WHERE LOTNO like  '%'+#lotNo#+'%'
+	  	WHERE LOTNO like #lotNo#+'%'
+	  	ORDER BY LOTNO
 	</select>
 	
 	<delete id="delete_lotno" parameterClass="th.co.nttdata.tki.bean.TDCPlan">

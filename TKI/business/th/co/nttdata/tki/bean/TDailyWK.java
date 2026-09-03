@@ -21,6 +21,7 @@ public class TDailyWK extends AbstractBaseBean {
 	private String reportName;
 	private String shift;
 	private String shiftName;
+	private String staff;
 	private String wip;
 	private String wipName;
 	private String workOrderNo;
@@ -262,6 +263,14 @@ public class TDailyWK extends AbstractBaseBean {
 
 	public List<TDailyWKDetail> getDailyWKDetailList() {
 		return dailyWKDetailList;
+	}
+
+	public String getStaff() {
+		return staff;
+	}
+
+	public void setStaff(String staff) {
+		this.staff = staff;
 	}
 
 	public String getCurrency() {

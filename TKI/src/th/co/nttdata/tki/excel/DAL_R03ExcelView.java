@@ -33,7 +33,7 @@ public class DAL_R03ExcelView extends AbstractExcelView {
 	// Col 16   : Total Loss Time (min)
 	// Col 17   : Loss Time Reason (1 reason per sub-row)
 	// Col 18   : Individual Reason Loss Time
-	// Col 19   : Staff/Worker
+	// Col 19   : Staff/Worker (repeated on every loss-time sub-row, not merged)
 	// Col 20-23: Grand Total Actual Qty (OK, NG, PD, Total)
 	// Col 24+  : NG Reasons (dynamic)
 	private static final int COL_STD_TIME        = 12;
@@ -297,7 +297,7 @@ public class DAL_R03ExcelView extends AbstractExcelView {
 					createCell(workbook, extraRow, COL_DIFFERENCE,      eNum);
 					createCell(workbook, extraRow, COL_PERCENTAGE,      ePct);
 					createCell(workbook, extraRow, COL_LOSS_TIME_TOTAL, eNum);
-					createCell(workbook, extraRow, COL_STAFF,           eCenter);
+					createCell(workbook, extraRow, COL_STAFF,           eCenter).setValue(detail.getStaff());
 					createCell(workbook, extraRow, COL_GT_OK,           eNum);
 					createCell(workbook, extraRow, COL_GT_NG,           eNum);
 					createCell(workbook, extraRow, COL_GT_PD,           eNum);
@@ -317,7 +317,6 @@ public class DAL_R03ExcelView extends AbstractExcelView {
 				createMergedRegion(sheet, rowStart, rowEnd, COL_DIFFERENCE,      COL_DIFFERENCE);
 				createMergedRegion(sheet, rowStart, rowEnd, COL_PERCENTAGE,      COL_PERCENTAGE);
 				createMergedRegion(sheet, rowStart, rowEnd, COL_LOSS_TIME_TOTAL, COL_LOSS_TIME_TOTAL);
-				createMergedRegion(sheet, rowStart, rowEnd, COL_STAFF,           COL_STAFF);
 				createMergedRegion(sheet, rowStart, rowEnd, COL_GT_OK,           COL_GT_OK);
 				createMergedRegion(sheet, rowStart, rowEnd, COL_GT_NG,           COL_GT_NG);
 				createMergedRegion(sheet, rowStart, rowEnd, COL_GT_PD,           COL_GT_PD);

@@ -322,6 +322,10 @@
 			,nPercentage AS percentage
 			,sProcess AS wipName
 			,dReportDate AS reportDate
+			,sWorker AS staff
+			,nOperationTime_Sec AS operationTimeSec
+			,nLossTime_Min AS lossTime
+			,nStdTime_Min AS stdTime
 		FROM V_14_WorkerProductivityCheckList
   		<dynamic prepend="WHERE">
   			<isNotEmpty prepend="AND" property="wip"> sWip = #wip# </isNotEmpty>
@@ -329,8 +333,9 @@
 			<isNotEmpty prepend="AND" property="reportDateTo"> [dReportDate] <![CDATA[ <= ]]> #reportDateTo# </isNotEmpty>
   			<isNotEmpty prepend="AND" property="partNo"> sPartNo LIKE #partNo# +'%' </isNotEmpty>
   			<isNotEmpty prepend="AND" property="partName"> sPartName LIKE #partName# +'%' </isNotEmpty>
+  			<isNotEmpty prepend="AND" property="staff"> sWorker LIKE '%'+ #staff# +'%' </isNotEmpty>
   		</dynamic>
-  		ORDER BY dReportDate, sPartNo
+  		ORDER BY dReportDate, sPartNo, sWorker
 	</select>
 	
 	<select id="countMRDC_R13" resultClass="Integer">

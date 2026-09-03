@@ -13,6 +13,7 @@
 	var wip;
 	var partNo;
 	var partName;
+	var staff;
 	var reportDateFr;
 	var reportDateTo;
 	var btnExport;
@@ -22,6 +23,7 @@
 		wip				= $("select#wip");
 		partNo			= $("input#boxPartNo");
 		partName		= $("input#boxPartName");
+		staff			= $("input#boxStaff");
 		reportDateFr 	= $("input#reportDateFr");
 		reportDateTo 	= $("input#reportDateTo");
 		btnExport		= $("input#btnExport");
@@ -51,6 +53,7 @@
 			              ,"wip" 			: wip.val()
 			              ,"reportDateFr" 	: reportDateFr.val()
 			              ,"reportDateTo" 	: reportDateTo.val()
+			              ,"staff" 			: staff.val()
 				};
 				
 				getJSON("MRDC_R13_export_count", $.param(params), function( result ){
@@ -128,6 +131,10 @@
 				<td width="30%"><form:input path="partNo" id="boxPartNo"/></td>
 				<th width="20%" class="label">Part Name</th>
 				<td width="34%"><form:input path="partName" id="boxPartName" size="80"/></td>
+			</tr>
+			<tr>
+				<th width="16%" class="label">Code</th>
+				<td colspan="3"><form:input path="staff" id="boxStaff" title="Worker Code"/></td>
 			</tr>
 		</table>
 		<br/>

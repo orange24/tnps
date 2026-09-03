@@ -22,6 +22,7 @@ public class TDailyWKDetail {
 	private Integer lossTimeReasonId;
 	private Integer lossTime;
 	private Integer stdTime;
+	private Double operationTimeSec;
 	private String lossTimeReasonName;
 	private String customerCode;
 	private String datailRef;// idRef of DAL_R03
@@ -542,6 +543,14 @@ public class TDailyWKDetail {
 
 	public void setLossTime(Integer lossTime) {
 		this.lossTime = lossTime;
+	}
+
+	public Double getOperationTimeSec() {
+		return operationTimeSec;
+	}
+
+	public void setOperationTimeSec(Double operationTimeSec) {
+		this.operationTimeSec = operationTimeSec;
 	}
 
 	public Integer getStdTime() {

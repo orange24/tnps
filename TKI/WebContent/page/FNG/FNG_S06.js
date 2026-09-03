@@ -26,6 +26,10 @@ var btnPrintDialog;
 var btnClear;
 var mold;
 var moldNo;
+//---- performance: avoid duplicate lookups of the same lot no. ----
+var lastLoadedLotNo = null;
+var customerListCache = null;
+var fgListCache = {};
 
 $(function(){
 	//declaration
@@ -76,6 +80,10 @@ $(function(){
 	cancelDialog.click(closePrintDialog);
 	btnPrintDialog.click(printLabel);
 	btnClear.click(clearField);
+	//bind once - was previously re-bound on every lot lookup (handler leak)
+	selCustomer.change(function(){
+		getDataForFGPart({"customerId":selCustomer.val()});
+	});
 });
 function clearField(){
 	location.href = "FNG_S06.html";
@@ -114,7 +122,8 @@ function sendAlldata(){
 				};
 	var successFn = function(bean){
 		//get detail of lotNo again
-		getDataByLot(params);
+		lastLoadedLotNo = null;
+		getDataByLot({"lotNo": params.lotNo});
 
 		message.showMessage(bean);
 		//hideTagId.val(bean.tagId);
@@ -280,9 +289,9 @@ function getLotNoAutoComplete(){
 			source: function( request, response ) {
 				var lotNo = $('#lotNo').val();
 				if(lotNo.length==14){
-					var params 	= { "lotNo": lotNo };
-					getDataByLot(params);
-					hideGrid();
+					//full lot no. typed - load the detail directly, no suggestion list
+					response([]);
+					requestLotDetail(lotNo);
 				}else{
 					var params = { "lotNo": lotNo};
 					getJSON("FNG_S06_getLotNo", params, 
@@ -329,9 +338,7 @@ function getDataByLot(params){
 						fgIdByAuto = result.fgId;	
 						txtPrintQtyRemain.val(result.printQtyRemain);
 						
-						getCustomerData({});
-						getDataForFGPart({"customerId":selCustomer.val()});
-						selCustomer.change(function(){
+						getCustomerData(function(){
 							getDataForFGPart({"customerId":selCustomer.val()});
 						});
 						chkLabelType(result.labelType);
@@ -376,27 +383,63 @@ function detailSelection(event, ui){
 	}else{
 		lotNo = txtLotNo.val();
 	}
-	var params 	= { "lotNo": lotNo };
-	getDataByLot(params);
+	requestLotDetail(lotNo);
+}
+//Single entry point for loading a lot. Skips the call when the same lot no. is
+//already loaded - the autocomplete source and the change event used to fire
+//two identical requests for every lot no. that was typed.
+function requestLotDetail(lotNo){
+	lotNo = $.trim(lotNo == null ? "" : lotNo);
+	if(lotNo == ""){
+		lastLoadedLotNo = null;
+		return;
+	}
+	if(lotNo == lastLoadedLotNo){
+		return;
+	}
+	lastLoadedLotNo = lotNo;
+	getDataByLot({"lotNo": lotNo});
 	hideGrid();
 }
-function getCustomerData(params){
-	postJSONSync("FNG_S06_boxCustomer",params,function(result){
-		selCustomer.empty();
-			$.each(result,function(val, text){
-				selCustomer.append( $("<option></option>").val(val).html(text) );
-			});	
-			selCustomer.val(customerIdByAuto);
+//The customer master never changes while the page is open, so fetch it once and
+//re-render from the cache. Both dropdowns used to be loaded with a *synchronous*
+//POST on every single lot lookup, which froze the browser until they returned.
+function getCustomerData(onDone){
+	if(customerListCache != null){
+		renderCustomerBox(customerListCache);
+		if(onDone){ onDone(); }
+		return;
+	}
+	postJSON("FNG_S06_boxCustomer",{},function(result){
+		customerListCache = result;
+		renderCustomerBox(result);
+		if(onDone){ onDone(); }
 	});
 }
-function getDataForFGPart(params){
-	postJSONSync("boxFgNoNameByCustomer",params,function(result){
-		selFGNo.empty();
-			$.each(result,function(val, text){
-				selFGNo.append( $("<option></option>").val(text.fgId).html(text.fg));
-			});
-			selFGNo.val(fgIdByAuto);
+function renderCustomerBox(result){
+	selCustomer.empty();
+	$.each(result,function(val, text){
+		selCustomer.append( $("<option></option>").val(val).html(text) );
 	});
+	selCustomer.val(customerIdByAuto);
+}
+function getDataForFGPart(params){
+	var key = params.customerId;
+	if(fgListCache[key] != undefined){
+		renderFgBox(fgListCache[key]);
+		return;
+	}
+	postJSON("boxFgNoNameByCustomer",params,function(result){
+		fgListCache[key] = result;
+		renderFgBox(result);
+	});
+}
+function renderFgBox(result){
+	selFGNo.empty();
+	$.each(result,function(val, text){
+		selFGNo.append( $("<option></option>").val(text.fgId).html(text.fg));
+	});
+	selFGNo.val(fgIdByAuto);
 }
 function validateLotNo(e){
 	var keyCode = (e.keyCode || e.which);
