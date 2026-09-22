@@ -13,6 +13,7 @@ $(function($){
 	fgMstForm = $("#fgMstForm");
 	exportForm = $("#exportForm");
 	getUomList();
+	getCurrencyList();
 	getClassifyBusinessList();
 	getPlaceList();
 	getSubBusinessList();
@@ -113,17 +114,26 @@ function createFgMasterGrid(){
 		field          : "price",
 		width          : 80,
 		cssClass       : "cell-r",
+		headerCssClass : "editable-column",
 		resizable      : true,
 		filter         : common.SlickGrid.filterColumnsOptions.Fulltext,
 		sortable	   : true,
+		editor         : common.SlickGrid.Editor.TextEditor,
 		formatter 	   : common.SlickGrid.Formatters.DoubleFormatter
 	},{
 		id             : "currency",
 		name           : "Currency",
 		field          : "currency",
 		width          : 95,
+		headerCssClass : "editable-column",
 		resizable      : true,
 		filter         : common.SlickGrid.filterColumnsOptions.Fulltext,
+		editor         : common.SlickGrid.Editor.DropDownEditor,
+		editorArgs     : {
+		                   dataList : getCurrencyList(),
+		                    value   : "currency",
+		                    label   : "currency"
+		                 },
 		sortable	   : true
 	},{
 		id             : "vendorFgNo",

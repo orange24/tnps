@@ -46,7 +46,7 @@ public class DLV_S02LogicImpl extends AbstractBaseLogic implements DLV_S02Logic 
 		forcast.setDeliveryPlanId(deliveryPlanId);
 		forcast.setFgId(TDeliveryPlan.getFgId());
 		forcast.setYearmonth(TDeliveryPlan.getYearmonth());
-		if (TDeliveryPlan.getYearmonth() == null && TDeliveryPlan.getMonth() != null && TDeliveryPlan.getYear() != null) forcast.setYearmonth(TDeliveryPlan.getYear() + "" + (TDeliveryPlan.getMonth()<10? "0":"") + (TDeliveryPlan.getMonth() + 1));
+		if (TDeliveryPlan.getYearmonth() == null && TDeliveryPlan.getMonth() != null && TDeliveryPlan.getYear() != null) forcast.setYearmonth(String.format("%04d%02d", TDeliveryPlan.getYear(), TDeliveryPlan.getMonth() + 1));
 		// System.out.println("Save n1 = " + forcast.getN1() + ", n2 = " + forcast.getN2() + ", n3 = " + forcast.getN3());
 		// System.out.println("Save yearmonth = " + TDeliveryPlan.getYearmonth() + ", year = " + TDeliveryPlan.getYear() + ", month = " + TDeliveryPlan.getMonth());
 		// System.out.println("Save forcast.yearmonth = " + forcast.getYearmonth());
