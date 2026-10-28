@@ -17,8 +17,8 @@
 		DELETE FROM t_lotno
 		WHERE workorderno = (select distinct workorderno from t_lotno_gentmp);
 		
-		INSERT INTO t_lotno(LOTNO ,DCPLANID ,WORKORDERNO ,LOTQTY ,PRINTSTATUS) 
-		Select LOTNO ,DCPLANID ,WORKORDERNO ,LOTQTY ,PRINTSTATUS from t_lotno_gentmp;
+		INSERT INTO t_lotno(LOTNO ,DCPLANID ,WORKORDERNO ,LOTQTY ,PRINTSTATUS ,PRINTDATE ,PRINTBY) 
+		Select LOTNO ,DCPLANID ,WORKORDERNO ,LOTQTY ,PRINTSTATUS ,PRINTDATE ,PRINTBY from t_lotno_gentmp;
 		
 		DELETE FROM t_lotno_gentmp;
 	</update>

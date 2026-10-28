@@ -93,7 +93,7 @@
 			PW.WIPORDER
 	</select>
 	<update id="update_print_status" parameterClass="th.co.nttdata.tki.bean.TDCPlan">
-		UPDATE t_lotno SET printstatus = 1, printdate = GETDATE(), printby = #updateBy#
+		UPDATE t_lotno SET printstatus = 1, printdate = ISNULL(printdate, GETDATE()), printby = ISNULL(printby, #updateBy#)
 		WHERE lotno = #lotNo#
 	</update>
 

@@ -97,6 +97,12 @@ public class PRD_S03LogicImpl implements PRD_S03Logic {
 		return mCustomerDao.getCustomerMaster(param);
 	}
 
+	/* Lots re-generated at 3.02 keep printstatus but lose printdate,
+	 * so a re-print must stamp the date again even when status is already 1 */
+	private boolean isBlank(String param) {
+		return param == null || param.trim().length() == 0;
+	}
+
 	@SuppressWarnings("unused")
 	private Integer convertToInteger(String param) {
 		try {
@@ -205,7 +211,7 @@ public class PRD_S03LogicImpl implements PRD_S03Logic {
 		object.setPrinterName((String) request.getSession().getAttribute(
 				"prdS03Printer"));
 		for (TDCPlan obj : list) {
-			if (!obj.getPrintingStatus().booleanValue()) {
+			if (!obj.getPrintingStatus().booleanValue() || isBlank(obj.getPrintDate())) {
 				tLotNoDao.updatePrintStatus(obj);
 			}
 		}
@@ -296,7 +302,7 @@ public class PRD_S03LogicImpl implements PRD_S03Logic {
 			}
 		}
 		for (TDCPlan obj : list) {
-			if (!obj.getPrintingStatus().booleanValue()) {
+			if (!obj.getPrintingStatus().booleanValue() || isBlank(obj.getPrintDate())) {
 				tLotNoDao.updatePrintStatus(obj);
 			}
 		}
@@ -309,7 +315,7 @@ public class PRD_S03LogicImpl implements PRD_S03Logic {
 		object.setPrinterName((String) request.getSession().getAttribute(
 				"prdS03Printer"));
 		for (TDCPlan obj : list) {
-			if (!obj.getPrintingStatus().booleanValue()) {
+			if (!obj.getPrintingStatus().booleanValue() || isBlank(obj.getPrintDate())) {
 				tLotNoDao.updatePrintStatus(obj);
 			}
 		}
