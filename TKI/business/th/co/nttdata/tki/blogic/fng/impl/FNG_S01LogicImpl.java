@@ -16,10 +16,12 @@ import th.co.nttdata.tki.bean.Message;
 import th.co.nttdata.tki.bean.TFG;
 import th.co.nttdata.tki.bean.TFGDetail;
 import th.co.nttdata.tki.bean.TLotSequence;
+import th.co.nttdata.tki.bean.TMultiLotTag;
 import th.co.nttdata.tki.blogic.fng.FNG_S01Logic;
 import th.co.nttdata.tki.dao.MWorkOrderDao;
 import th.co.nttdata.tki.dao.TFGDetailDao;
 import th.co.nttdata.tki.dao.TLotSequenceDao;
+import th.co.nttdata.tki.dao.TMultiLotTagDao;
 
 @Service
 public class FNG_S01LogicImpl implements FNG_S01Logic {
@@ -29,6 +31,24 @@ public class FNG_S01LogicImpl implements FNG_S01Logic {
 	private MWorkOrderDao mWorkOrderDao;
 	@Autowired
 	private TLotSequenceDao tLotSequenceDao;
+	@Autowired
+	private TMultiLotTagDao tMultiLotTagDao;
+
+	@Override
+	public TMultiLotTag getMultiLotTagForScan(String refNo) {
+		TMultiLotTag tag = tMultiLotTagDao.findByRefNo(refNo);
+		if (tag == null) {
+			tag = new TMultiLotTag();
+			tag.getErrors().add(new Message("err.fng.018", new String[] { refNo }));
+			return tag;
+		}
+		if (!"A".equals(tag.getStatus())) {
+			tag.getErrors().add(new Message("err.fng.020", new String[] { refNo }));
+			return tag;
+		}
+		tag.setDetails(tMultiLotTagDao.findScanRows(refNo));
+		return tag;
+	}
 
 	@Override
 	public Map<String, Object> findLotQty(String lotNo) {
@@ -129,6 +149,14 @@ public class FNG_S01LogicImpl implements FNG_S01Logic {
 
 	@Override
 	public MWorkOrder getWorkOrderDetail(MWorkOrder workOrder) {
+		// a seq on an active QR tag (6.05) is scanned through the QR; its old single tag is void
+		String refNo = tMultiLotTagDao.findActiveRefNoForSeq(workOrder.getLotSeqNo());
+		if (refNo != null) {
+			MWorkOrder blocked = new MWorkOrder();
+			blocked.getErrors().add(new Message("err.fng.024", new String[] {
+					workOrder.getLotSeqNo(), refNo }));
+			return blocked;
+		}
 		return tLotSequenceDao.getWorkOrderDetail(workOrder);
 	}
 

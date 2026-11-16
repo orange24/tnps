@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- 6.05 Print Multi-Lot Tag (QR) / 6.01 QR scan -->
+<sqlMap namespace="t_multilot_tag">
+	<!-- UPDLOCK, HOLDLOCK: two prints on the same day must not get the same running number -->
+	<select id="select_next_running" parameterClass="String" resultClass="Integer">
+		SELECT ISNULL(MAX(CAST(RIGHT(refno, 4) AS int)), 0) + 1
+		FROM t_multilot_tag WITH (UPDLOCK, HOLDLOCK)
+		WHERE refno LIKE 'ML' + #value# + '%'
+	</select>
+
+	<insert id="insert_header" parameterClass="th.co.nttdata.tki.bean.TMultiLotTag">
+		INSERT INTO t_multilot_tag
+			(refno, customerid, fgid, wip, status, printcount, printername, createby, createdate, updateby, updatedate)
+		VALUES
+			(#refNo#, #customerId#, #fgId#, #wip#, 'A', 1, #printerName#, #updateBy#, GETDATE(), #updateBy#, GETDATE())
+	</insert>
+
+	<insert id="insert_details" parameterClass="th.co.nttdata.tki.bean.TMultiLotTag">
+		<iterate property="details">
+			INSERT INTO t_multilot_tag_detail (refno, [lineno], lotseqno, qty, datecode)
+			VALUES (#refNo#, #details[].lineNo#, #details[].lotSeqNo#, #details[].qty#, #details[].dateCode#);
+		</iterate>
+	</insert>
+
+	<select id="select_by_refno" parameterClass="String" resultClass="th.co.nttdata.tki.bean.TMultiLotTag">
+		SELECT ml.refno AS refNo
+			, ml.customerid AS customerId
+			, ml.fgid AS fgId
+			, ml.wip
+			, ml.status
+			, ml.printcount AS printCount
+			, ml.printername AS printerName
+			, cust.customername AS customerName
+			, fg.fgno AS fgNo
+			, fg.fgname AS fgName
+			, wip.wipname AS wipName
+		FROM t_multilot_tag ml
+		LEFT JOIN m_customer cust ON cust.customerid = ml.customerid
+		LEFT JOIN m_fg fg ON fg.fgid = ml.fgid
+		LEFT JOIN m_wip wip ON wip.wip = ml.wip
+		WHERE ml.refno = #value#
+	</select>
+
+	<select id="select_details" parameterClass="String" resultClass="th.co.nttdata.tki.bean.TMultiLotTagDetail">
+		SELECT refno AS refNo, [lineno] AS [lineNo], lotseqno AS lotSeqNo, qty, CAST(datecode AS datetime) AS dateCode
+		FROM t_multilot_tag_detail
+		WHERE refno = #value#
+		ORDER BY [lineno]
+	</select>
+
+	<!-- 6.01: same columns as t_lot_sequence.select_lotseq, one row per seq on the tag -->
+	<select id="select_scan_rows" parameterClass="String" resultClass="th.co.nttdata.tki.bean.TMultiLotTagDetail">
+		SELECT d.refno AS refNo
+			, d.[lineno] AS [lineNo]
+			, d.lotseqno AS lotSeqNo
+			, d.qty
+			, CAST(d.datecode AS datetime) AS dateCode
+			, cust.customerid AS customerId
+			, cust.customercode AS customerCode
+			, fg.fgid AS fgId
+			, fg.fgno AS fgNo
+			, fg.fgname AS fgName
+			, lots.lotseqqty AS lotSeqQty
+		FROM t_multilot_tag_detail d
+		INNER JOIN t_lot_sequence lots ON lots.lotseqno = d.lotseqno
+		INNER JOIN t_taglabel tag ON tag.tagid = lots.tagid
+		INNER JOIN m_customer cust ON cust.customerid = tag.customerid
+		INNER JOIN m_fg fg ON fg.fgid = tag.fgid
+		WHERE d.refno = #value#
+		ORDER BY d.[lineno]
+	</select>
+
+	<select id="select_active_by_seq" parameterClass="java.util.List" resultClass="th.co.nttdata.tki.bean.TMultiLotTagDetail">
+		SELECT d.refno AS refNo, d.lotseqno AS lotSeqNo, d.qty
+		FROM t_multilot_tag_detail d WITH (UPDLOCK, HOLDLOCK)
+		INNER JOIN t_multilot_tag ml ON ml.refno = d.refno
+		WHERE ml.status = 'A'
+		  AND d.lotseqno IN
+		<iterate open="(" close=")" conjunction=",">#[]#</iterate>
+	</select>
+
+	<!-- 6.01: a single seq barcode of a seq on an active ML must not be scanned (the QR tag replaces it) -->
+	<select id="select_active_refno_by_seq" parameterClass="String" resultClass="String">
+		SELECT TOP 1 d.refno
+		FROM t_multilot_tag_detail d
+		INNER JOIN t_multilot_tag ml ON ml.refno = d.refno
+		WHERE ml.status = 'A'
+		  AND d.lotseqno = #value#
+	</select>
+
+	<!-- 6.05: seqs already scanned IN cannot go on a QR tag; t_fg_detail.lot_seqno is the 4-digit seq -->
+	<select id="select_scanned_in_seqs" parameterClass="java.util.List" resultClass="String">
+		SELECT fgd.lotno + '-' + fgd.lot_seqno
+		FROM t_fg_detail fgd
+		WHERE
+		<iterate open="(" close=")" conjunction="OR">(fgd.lotno = LEFT(#[]#, 14) AND fgd.lot_seqno = RIGHT(#[]#, 4))</iterate>
+		GROUP BY fgd.lotno, fgd.lot_seqno
+		HAVING SUM(fgd.fgin) > 0
+	</select>
+
+	<select id="select_active_by_lotno" parameterClass="String" resultClass="th.co.nttdata.tki.bean.TMultiLotTagDetail">
+		SELECT d.refno AS refNo, d.lotseqno AS lotSeqNo, d.qty
+		FROM t_multilot_tag_detail d
+		INNER JOIN t_multilot_tag ml ON ml.refno = d.refno
+		WHERE ml.status = 'A'
+		  AND LEFT(d.lotseqno, 14) = #value#
+	</select>
+
+	<!-- 6.05 prefills SNP from the FG master, even for a lot whose tag label saved another SNP -->
+	<select id="select_fg_snp" parameterClass="Integer" resultClass="Integer">
+		SELECT snpfg FROM m_fg WHERE fgid = #value#
+	</select>
+
+	<select id="select_lot_printdate" parameterClass="String" resultClass="java.util.Date">
+		SELECT printdate FROM t_lotno WHERE lotno = #value#
+	</select>
+
+	<!-- t_fg_detail.lot_seqno is the 4-digit seq ('1001'), the same value 6.01 saves -->
+	<select id="select_sum_fgin" parameterClass="String" resultClass="Integer">
+		SELECT ISNULL(SUM(fgd.fgin), 0)
+		FROM t_multilot_tag_detail d
+		INNER JOIN t_fg_detail fgd ON fgd.lotno = LEFT(d.lotseqno, 14) AND fgd.lot_seqno = RIGHT(d.lotseqno, 4)
+		WHERE d.refno = #value#
+	</select>
+
+	<update id="update_reprint" parameterClass="th.co.nttdata.tki.bean.TMultiLotTag">
+		UPDATE t_multilot_tag
+		SET printcount = printcount + 1
+			, printername = #printerName#
+			, updateby = #updateBy#
+			, updatedate = GETDATE()
+		WHERE refno = #refNo#
+	</update>
+
+	<update id="update_cancel" parameterClass="th.co.nttdata.tki.bean.TMultiLotTag">
+		UPDATE t_multilot_tag
+		SET status = 'C'
+			, cancelby = #updateBy#
+			, canceldate = GETDATE()
+			, updateby = #updateBy#
+			, updatedate = GETDATE()
+		WHERE refno = #refNo# AND status = 'A'
+	</update>
+</sqlMap>

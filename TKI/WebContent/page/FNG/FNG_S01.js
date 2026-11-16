@@ -12,6 +12,10 @@ var txtLotSeqOptions;
 var customerAndFgObj = [];
 var lotSeqNoKeyObj = [];
 var isGetDetail = false;
+// 6.05 multi-lot QR tag scanned into a Lot Seq. box: one row per seq on the tag
+var QR_RE = /^(ML\d{10});(LOT[1-4]:[A-Za-z0-9-]{19},Q\d+,DC(\d{4}-\d{2}-\d{2})?;){1,4}$/;
+var scannedRefNos = {};	// refNo -> lot seq nos that scan put in the table
+var qrTimer = null;
 
 $(function(){
 	btnAdd		= $('#btnAdd');
@@ -38,7 +42,7 @@ $(function(){
 				var tr 			= this.element.parent().parent();
 				var params 		= { "lotSeqNo": request.term };
 
-				if(request.term.length == 19){
+				if(request.term.length == 19 && !isQrInput(request.term)){
 					// add new row after get lotSeq
 //					var last = tblDynamic.find('tbody>tr:last');
 //					if(!last.find("td").find("input").val() == ''){
@@ -71,6 +75,33 @@ $(function(){
 	
 	
 	
+	// QR scan: the scanner ends with Enter; without Enter, a value ending in ';' that stops
+	// changing for 300 ms counts as a finished scan
+	$('input[name=lotSeqNo]').live('keydown', function(e){
+		if((e.keyCode || e.which) == 13){
+			e.preventDefault();
+			if(isQrInput($(this).val())){
+				handleQrScan($(this));
+			}
+			return false;
+		}
+	});
+	$('input[name=lotSeqNo]').live('keyup', function(){
+		var input = $(this);
+		var value = input.val();
+		clearTimeout(qrTimer);
+		if(/^ML/.test(value) && value.charAt(value.length - 1) == ';'){
+			qrTimer = setTimeout(function(){
+				if(input.val() == value){
+					handleQrScan(input);
+				}
+			}, 300);
+		}
+	});
+	$('input[name=fgIn],input[name=fgOut]').live('keyup', function(){
+		markQtyReduced($(this));
+	});
+
 	//delete row
 	$('table#dynamictbl td img.delete').click(function(){
 		var rowNo = $("table#dynamictbl td img.delete").index($(this)) + 1;
@@ -409,6 +440,9 @@ $(function(){
 	function detailSelection( e ) {
 		var element = $(e.target || e.srcElement);		
 		var tr 		= $($(this).parent().parent());
+		if(isQrInput(element.val()) || element.attr('data-scanned') == element.val()){
+			return;
+		}
 		if(!isGetDetail){
 			getLotSeqDetail(tr , element.val());
 			isGetDetail = false;
@@ -421,35 +455,122 @@ $(function(){
 				function(result){
 					
 					if (result) {
-						// set value to other field
-						var cust 	= tr.find("#customerCode");
-						var fg   	= tr.find("#fgId");
-						var fgId	= tr.find('#hideFgId');
-						var fgNo	= tr.find('#hideFgNo');
-						var custId	= tr.find('#hideCustId');
-						var custCode	= tr.find('#hideCustCode');
-						var lotQty 	= fg.parent().parent().find("input:gt(2):not(:disabled)");
-											
 						if( result.errors && result.errors.length > 0 ) {
 							message.setErrors(result.errors);
+							// e.g. err.fng.024: the seq is on a QR tag, its single tag must not stay in the row
+							tr.find("input[name=lotSeqNo]").val("").focus();
 							return false;
 						}					
-					
-						//Set default customer value.
-						lotQty.val(result.lotSeqQty);
-						customerCodeDefault = result.customerCode;
-						custId.val(result.customerId);
-						custCode.val(result.customerCode);
-						cust.text(customerCodeDefault);
-						fgId.val(result.fgId);
-						fgNo.val(result.fgNo);
-						fg.text(result.fgNo + " : "+ result.fgName);
-						
-						//cal fg In/Out
-						getTotalFgIn();
-						getTotalFgOut();
+						applyLotSeqDetail(tr, result);
 					}
 			});
+	}
+	// sets customer / FG / qty of one row; returns the enabled qty box (In or Out)
+	function applyLotSeqDetail(tr, result){
+		// set value to other field
+		var cust 	= tr.find("#customerCode");
+		var fg   	= tr.find("#fgId");
+		var fgId	= tr.find('#hideFgId');
+		var fgNo	= tr.find('#hideFgNo');
+		var custId	= tr.find('#hideCustId');
+		var custCode	= tr.find('#hideCustCode');
+		var lotQty 	= fg.parent().parent().find("input:gt(2):not(:disabled)");
+
+		//Set default customer value.
+		lotQty.val(result.lotSeqQty);
+		customerCodeDefault = result.customerCode;
+		custId.val(result.customerId);
+		custCode.val(result.customerCode);
+		cust.text(customerCodeDefault);
+		fgId.val(result.fgId);
+		fgNo.val(result.fgNo);
+		fg.text(result.fgNo + " : "+ result.fgName);
+		
+		//cal fg In/Out
+		getTotalFgIn();
+		getTotalFgOut();
+		// lotQty above also matches the hidden fields; the qty box alone is fgIn or fgOut
+		var qtyBox = tr.find("input[name=fgIn]:not(:disabled),input[name=fgOut]:not(:disabled)");
+		qtyBox.removeAttr('data-tagqty').removeClass('qty-reduced');
+		return qtyBox;
+	}
+	function isQrInput(value){
+		// a lot seq barcode is 19 ASCII chars with no ';'. Anything else typed by a scanner is a
+		// QR attempt, including one read with the Thai keyboard layout (no ';', no "ML")
+		return value != null && (value.indexOf(';') >= 0 || /^ML\d{10}/.test(value)
+				|| value.length > 19 || /[^\x20-\x7E]/.test(value));
+	}
+	// lot seq no -> line no of every filled row
+	function lotSeqNosInTable(){
+		var map = {};
+		tblDynamic.find("tr:gt(1)").each(function(i){
+			var v = $(this).find("input[name=lotSeqNo]").val();
+			if(v){ map[v] = i + 1; }
+		});
+		return map;
+	}
+	function handleQrScan(input){
+		clearTimeout(qrTimer);
+		var text = $.trim(input.val());
+		var match = QR_RE.exec(text);
+		input.val("");
+		if(!match){
+			message.setError("err.fng.023");
+			input.focus();
+			return;
+		}
+		var refNo = match[1];
+		var inTable = lotSeqNosInTable();
+		var before = scannedRefNos[refNo] || [];
+		for(var i = 0; i < before.length; i++){
+			if(inTable[before[i]]){
+				message.setError("err.fng.022", [refNo]);
+				input.focus();
+				return;
+			}
+		}
+		getJSON("FNG_S01_getMultiLotTag", {"refNo": refNo}, function(tag){
+			if(tag.errors && tag.errors.length > 0){
+				message.setErrors(tag.errors);
+				input.focus();
+				return;
+			}
+			var row = input.closest("tr");
+			var added = [];
+			$.each(tag.details, function(i, d){
+				var lines = lotSeqNosInTable();
+				if(lines[d.lotSeqNo]){
+					message.setError("err.cmm.020", [lines[d.lotSeqNo], "Lot Seq."]);
+					return;
+				}
+				if(row == null){
+					btnAdd.click();
+					row = tblDynamic.find("tbody>tr:last");
+				}
+				row.find("input[name=lotSeqNo]").val(d.lotSeqNo).attr("data-scanned", d.lotSeqNo);
+				var qtyBox = applyLotSeqDetail(row, d);
+				qtyBox.val(d.qty).attr("data-tagqty", d.qty);
+				added.push(d.lotSeqNo);
+				row = null;
+			});
+			scannedRefNos[refNo] = added;
+			getTotalFgIn();
+			getTotalFgOut();
+			if(row == null){
+				btnAdd.click();	// fresh empty row, focused
+			}else{
+				input.focus();
+			}
+		});
+	}
+	// a qty lowered below what the QR tag says is highlighted
+	function markQtyReduced(qtyBox){
+		var tagQty = qtyBox.attr("data-tagqty");
+		if(tagQty != undefined && tagQty !== "" && (qtyBox.val() * 1) < (tagQty * 1)){
+			qtyBox.addClass("qty-reduced");
+		}else{
+			qtyBox.removeClass("qty-reduced");
+		}
 	}
 	function fngIntegerFilter(e) {
 		var code = (e.which || e.keyCode);
@@ -482,7 +603,7 @@ $(function(){
 	
 	function checkscanlot(inp){
 		 var lot = $(inp).val();
-		 if(lot.length == 19){
+		 if(lot.length == 19 && !isQrInput(lot)){
 			var last = tblDynamic.find('tbody>tr:last');
 			if(!last.find("td").find("input").val() == ''){
 				 btnAdd.click();

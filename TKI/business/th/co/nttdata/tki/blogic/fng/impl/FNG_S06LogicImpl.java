@@ -3,7 +3,10 @@ package th.co.nttdata.tki.blogic.fng.impl;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.print.Doc;
 import javax.print.DocFlavor;
@@ -27,12 +30,17 @@ import th.co.nttdata.tki.bean.PrintTagLabel;
 import th.co.nttdata.tki.bean.TFGStock;
 import th.co.nttdata.tki.bean.TLotNo;
 import th.co.nttdata.tki.bean.TLotSequence;
+import th.co.nttdata.tki.bean.TMultiLotTagDetail;
 import th.co.nttdata.tki.bean.TTagLabelDetail;
 import th.co.nttdata.tki.bean.TTaglabelHistory;
 import th.co.nttdata.tki.blogic.fng.FNG_S06Logic;
+import th.co.nttdata.tki.blogic.fng.MultiLotValidationException;
+import th.co.nttdata.tki.blogic.fng.multilot.MultiLotRules;
+import th.co.nttdata.tki.blogic.fng.multilot.SeqEdit;
 import th.co.nttdata.tki.dao.TFGStockDao;
 import th.co.nttdata.tki.dao.TLotNoDao;
 import th.co.nttdata.tki.dao.TLotSequenceDao;
+import th.co.nttdata.tki.dao.TMultiLotTagDao;
 import th.co.nttdata.tki.dao.TTagLabelDao;
 import th.co.nttdata.tki.dao.TTaglabelHistoryDao;
 
@@ -52,6 +60,9 @@ public class FNG_S06LogicImpl implements FNG_S06Logic {
 
 	@Autowired
 	private TLotSequenceDao tLotSequenceDao;
+
+	@Autowired
+	private TMultiLotTagDao tMultiLotTagDao;
 
 //	private static final Log logger = LogFactory.getLog("FNG_S06LogicImpl");
 
@@ -140,12 +151,11 @@ public class FNG_S06LogicImpl implements FNG_S06Logic {
 	}
 
 	@Override
-	public TTagLabelDetail printLabel(TTagLabelDetail tagLabel)
-			throws Exception {
-		// To declare variable for returning msg
-		TTagLabelDetail param = new TTagLabelDetail();
+	public Integer saveTagAndSequences(TTagLabelDetail tagLabel) {
 		String lotNo = tagLabel.getLotNo();
 		TTagLabelDetail oldData = null;
+
+		checkMultiLotTag(tagLabel);
 
 		TTagLabelDetail temp = this.getLotNoDetailExisting(lotNo);
 		if (null != temp
@@ -216,6 +226,77 @@ public class FNG_S06LogicImpl implements FNG_S06Logic {
 			if (!insertLot.getLotSequenceList().isEmpty()) {
 				tLotSequenceDao.insertLotSequence(insertLot);
 			}
+		}
+		return tagId;
+	}
+
+	/**
+	 * A seq on an active multi-lot QR tag (6.05) may not be deleted, re-split or printed on its
+	 * own. Runs before anything is written.
+	 */
+	private void checkMultiLotTag(TTagLabelDetail tagLabel) {
+		List<TMultiLotTagDetail> onTag = tMultiLotTagDao
+				.findActiveDetailsByLotNo(tagLabel.getLotNo());
+		if (onTag.isEmpty()) {
+			return;
+		}
+		Map<String, Object[]> mlSeqs = new HashMap<String, Object[]>();
+		for (TMultiLotTagDetail d : onTag) {
+			mlSeqs.put(d.getLotSeqNo(), new Object[] { d.getRefNo(), d.getQty() });
+		}
+		List<SeqEdit> edits = new ArrayList<SeqEdit>();
+		if (tagLabel.getLotSequenceList() != null) {
+			for (TLotSequence seq : tagLabel.getLotSequenceList()) {
+				edits.add(new SeqEdit(seq.getLotSeqNo(),
+						seq.getLotSeqQty() == null ? 0 : seq.getLotSeqQty(),
+						seq.isDelete(), seq.getFlagPrint() != null
+								&& seq.getFlagPrint().intValue() == 1));
+			}
+		}
+		String refNo = MultiLotRules.checkTagEdit(mlSeqs, edits);
+		if (refNo != null) {
+			throw new MultiLotValidationException(
+					Collections.singletonList(new String[] { "err.fng.021", refNo }));
+		}
+		// the save rewrites flagprint from the screen; a seq on a QR tag stays printed
+		for (TLotSequence seq : tagLabel.getLotSequenceList()) {
+			if (mlSeqs.containsKey(seq.getLotSeqNo())) {
+				seq.setPrintStatus(1);
+			}
+		}
+	}
+
+	@Override
+	public boolean sendRaw(String printerName, byte[] data) throws Exception {
+		DocFlavor flavor = DocFlavor.BYTE_ARRAY.AUTOSENSE;
+		PrintService[] printService = PrintServiceLookup.lookupPrintServices(
+				flavor, null);
+		if (printService != null) {
+			for (int i = 0; i < printService.length; i++) {
+				if (printService[i].getName().equals(printerName)) {
+					Doc doc = new SimpleDoc(data, flavor, null);
+					DocPrintJob ps = printService[i].createPrintJob();
+					ps.print(doc, null);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public TTagLabelDetail printLabel(TTagLabelDetail tagLabel)
+			throws Exception {
+		// To declare variable for returning msg
+		TTagLabelDetail param = new TTagLabelDetail();
+		String lotNo = tagLabel.getLotNo();
+
+		try {
+			saveTagAndSequences(tagLabel);
+		} catch (MultiLotValidationException e) {
+			// nothing was written yet: the check runs first
+			param.getErrors().addAll(e.getErrors());
+			return param;
 		}
 
 		// get session for get or set printer value
@@ -296,30 +377,14 @@ public class FNG_S06LogicImpl implements FNG_S06Logic {
 						is.close();
 					}
 
-					// prepare for print
-					DocFlavor flavor = DocFlavor.BYTE_ARRAY.AUTOSENSE;
-					PrintService[] printService = PrintServiceLookup
-							.lookupPrintServices(flavor, null);
-
-					// check printService
-					if (printService != null) {
-						// print
-						for (int i = 0; i < printService.length; i++) {
-							if (printService[i].getName().equals(printerName)) {
-								data = printData.toString().getBytes();
-								Doc doc = new SimpleDoc(data, flavor, null);
-								DocPrintJob ps = printService[i]
-										.createPrintJob();
-								ps.print(doc, null);
-								tLotSequenceDao.updatePrintStatus(lot);
-								param.getInfos().clear();
-								param.getInfos().add(
-										new Message("inf.cmm.006",
-												new String[] {}));
-								break;
-							}
-						}
-
+					// print
+					data = printData.toString().getBytes();
+					if (sendRaw(printerName, data)) {
+						tLotSequenceDao.updatePrintStatus(lot);
+						param.getInfos().clear();
+						param.getInfos().add(
+								new Message("inf.cmm.006",
+										new String[] {}));
 					}
 
 				}

@@ -20,6 +20,7 @@ import th.co.nttdata.tki.bean.Message;
 import th.co.nttdata.tki.bean.TFG;
 import th.co.nttdata.tki.bean.TFGDetail;
 import th.co.nttdata.tki.bean.TLotSequence;
+import th.co.nttdata.tki.bean.TMultiLotTag;
 import th.co.nttdata.tki.blogic.fng.FNG_S01Logic;
 import th.co.nttdata.tki.controller.AbstractBaseController;
 import th.co.nttdata.tki.controller.cmm.CommonController;
@@ -86,6 +87,12 @@ public class FNG_S01Controller extends AbstractBaseController {
 	public @ResponseBody
 	MWorkOrder getWorkOrderDetail(MWorkOrder workOrder) {
 		return fng_S01Logic.getWorkOrderDetail(workOrder);
+	}
+
+	@RequestMapping(value = "/FNG_S01_getMultiLotTag", method = RequestMethod.GET)
+	public @ResponseBody
+	TMultiLotTag getMultiLotTag(String refNo) {
+		return fng_S01Logic.getMultiLotTagForScan(refNo == null ? "" : refNo.trim().toUpperCase());
 	}
 
 	@RequestMapping(value = "/FNG_S01_CheckLotNoAndSave")

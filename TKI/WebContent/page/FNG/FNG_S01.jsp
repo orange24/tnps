@@ -15,6 +15,10 @@ String contextPath = request.getContextPath();
 <title></title>
 <%@ include file="../importResources.jsp" %>
 <script src="page/FNG/FNG_S01.js" language="javascript"></script>
+<style>
+/* qty lowered below the QR tag qty */
+.qty-reduced { background:#fff6cc; }
+</style>
 </head>
 <body>
 <h1><spring:message code='menu.FGStockIn/Out'/></h1>

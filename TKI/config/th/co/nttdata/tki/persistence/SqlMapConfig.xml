@@ -69,6 +69,7 @@
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_taglabel.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_lot_sequence.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_taglabel_history.xml" />
+	<sqlMap resource="th/co/nttdata/tki/persistence/t_multilot_tag.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/m_doccontrol.xml" />
 	<sqlMap resource="th/co/nttdata/tki/persistence/t_wip_check_stock.xml" />
 

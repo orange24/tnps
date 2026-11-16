@@ -7,6 +7,7 @@ import th.co.nttdata.tki.bean.MWorkOrder;
 import th.co.nttdata.tki.bean.TFG;
 import th.co.nttdata.tki.bean.TFGDetail;
 import th.co.nttdata.tki.bean.TLotSequence;
+import th.co.nttdata.tki.bean.TMultiLotTag;
 
 public interface FNG_S01Logic {
 
@@ -25,5 +26,8 @@ public interface FNG_S01Logic {
 	public TFG skipBlankRow(TFG tfg);
 
 	public TFG checkNotExist(TFG tfg);
+
+	/** QR scan: one row per seq on the multi-lot tag; err.fng.018 not found, err.fng.020 cancelled. */
+	public TMultiLotTag getMultiLotTagForScan(String refNo);
 
 }

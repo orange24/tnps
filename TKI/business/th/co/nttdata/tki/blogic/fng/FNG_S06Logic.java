@@ -24,4 +24,10 @@ public interface FNG_S06Logic {
 
 	public Integer getPrintQtyRemain(Integer tagId);
 
+	/** Saves t_taglabel and its t_lot_sequence rows exactly as printLabel does; returns tagId. */
+	public Integer saveTagAndSequences(TTagLabelDetail tagLabel);
+
+	/** Sends raw printer bytes to the printer with this name; false = no printer by that name. */
+	public boolean sendRaw(String printerName, byte[] data) throws Exception;
+
 }
