@@ -14,6 +14,8 @@ var lotSeqNoKeyObj = [];
 var isGetDetail = false;
 // 6.05 multi-lot QR tag scanned into a Lot Seq. box: one row per seq on the tag
 var QR_RE = /^(ML\d{10});(LOT[1-4]:[A-Za-z0-9-]{19},Q\d+,DC(\d{4}-\d{2}-\d{2})?;){1,4}$/;
+// QR Tag No. typed by hand (QR damaged or not readable); the rows come from the server either way
+var REF_RE = /^ML\d{10}$/;
 var scannedRefNos = {};	// refNo -> lot seq nos that scan put in the table
 var qrTimer = null;
 
@@ -90,7 +92,8 @@ $(function(){
 		var input = $(this);
 		var value = input.val();
 		clearTimeout(qrTimer);
-		if(/^ML/.test(value) && value.charAt(value.length - 1) == ';'){
+		// like a 19-char lot seq, a complete QR Tag No. loads without Enter
+		if(/^ML/i.test(value) && (value.charAt(value.length - 1) == ';' || REF_RE.test(value.toUpperCase()))){
 			qrTimer = setTimeout(function(){
 				if(input.val() == value){
 					handleQrScan(input);
@@ -511,8 +514,8 @@ $(function(){
 	}
 	function handleQrScan(input){
 		clearTimeout(qrTimer);
-		var text = $.trim(input.val());
-		var match = QR_RE.exec(text);
+		var text = $.trim(input.val()).toUpperCase();
+		var match = REF_RE.test(text) ? [text, text] : QR_RE.exec(text);
 		input.val("");
 		if(!match){
 			message.setError("err.fng.023");
