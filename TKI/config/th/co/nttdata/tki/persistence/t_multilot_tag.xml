@@ -22,7 +22,7 @@
 	<insert id="insert_details" parameterClass="th.co.nttdata.tki.bean.TMultiLotTag">
 		<iterate property="details">
 			INSERT INTO t_multilot_tag_detail (refno, [lineno], lotseqno, qty, datecode)
-			VALUES (#refNo#, #details[].lineNo#, #details[].lotSeqNo#, #details[].qty#, #details[].dateCode#);
+			VALUES (#refNo#, #details[].lineNo#, #details[].lotSeqNo#, #details[].qty#, #details[].dateCode,jdbcType=DATE#);
 		</iterate>
 	</insert>
 

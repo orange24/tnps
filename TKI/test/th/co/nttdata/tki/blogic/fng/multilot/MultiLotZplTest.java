@@ -74,19 +74,39 @@ public class MultiLotZplTest {
 	@Test public void buildHasSizeAndQr() {
 		String z = build(sample4());
 		assertTrue(z.startsWith("^XA") && z.trim().endsWith("^XZ"));
-		assertTrue(z.contains("^PW800") && z.contains("^LL400") && z.contains("^BQN,2,3^FDLA," + qrText(sample4()) + "^FS"));
+		assertTrue(z.contains("^PW800") && z.contains("^LL400") && z.contains("^BQN,2,4^FDLA," + qrText(sample4()) + "^FS"));
 		assertTrue(z.contains("ML2611110002") && z.contains("A016828DX-1011-1001"));
 	}
-	/** ECC L keeps a 4-lot tag with 4-digit qtys at QR version 8 (49 modules, <=192 bytes): 147 dots wide. */
-	@Test public void qrFitsRightColumnBelowGrid() {
-		LabelData d = sample4();
-		for (LabelLine l : d.lines) l.qty = 1000;
-		assertTrue(qrText(d).length() <= 192);
-		java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\^FO(\\d+),(\\d+)\\^BQN").matcher(build(d));
-		assertTrue(m.find());
-		int x = Integer.parseInt(m.group(1)), y = Integer.parseInt(m.group(2));
-		assertTrue("QR right edge " + (x + 147), x >= 625 && x + 147 <= 790);
-		assertTrue("QR top " + y + " must clear the grid line at 200", y >= 205);
+	/** every lot count fills the QR column: printed square within the column, clear of the grid line and the QR Tag No. */
+	@Test public void qrFitsRightColumnForEveryLotCount() {
+		LabelData four = sample4();
+		for (LabelLine l : four.lines) l.qty = 1000;
+		assertTrue(qrText(four).length() <= 192);
+		for (LabelData d : new LabelData[] { four, sample3(), sample1(), sampleNullDate() }) {
+			String z = build(d);
+			java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\^FO(\\d+),(\\d+)\\^BQN,2,(\\d+)").matcher(z);
+			assertTrue(m.find());
+			int x = Integer.parseInt(m.group(1)), y = Integer.parseInt(m.group(2)) + 10, mag = Integer.parseInt(m.group(3));
+			int size = qrModules(qrText(d)) * mag;
+			assertEquals(qrMagnification(qrText(d)), mag);
+			assertTrue("QR " + size + " dots, at least x4", size <= QR_MAX && mag >= 4);
+			assertTrue("QR left " + x, x >= 586);
+			assertTrue("QR right " + (x + size), x + size <= 793);
+			assertTrue("QR top " + y + " must clear the grid line at 152", y >= 156);
+			java.util.regex.Matcher r = java.util.regex.Pattern.compile("\\^FO\\d+,(\\d+)\\^A0N,18,0\\^FB\\d+,1,0,C,0\\^FDML").matcher(z);
+			assertTrue(r.find());
+			assertTrue("QR bottom " + (y + size) + " must clear the QR Tag No.", y + size + 3 <= Integer.parseInt(r.group(1)));
+		}
+	}
+	@Test public void qrVersionFromLength() {
+		assertEquals(49, qrModules(qrText(sample4())));
+		assertEquals(6, qrMagnification(qrText(sample1()))); // 55 bytes: version 4, 33 x 6 = 198 dots
+	}
+	/** headings keep LABEL_FONT and the longest lot seq no. keeps the biggest font */
+	@Test public void headingsAndLotSeqFitTheirColumns() {
+		assertTrue(estimateWidth("CUSTOMER NAME", LABEL_FONT) <= HEAD_W - 2 * PAD);
+		assertTrue(build(sample4()).contains("^A0N," + LABEL_FONT + ",0^FDCUSTOMER NAME^FS"));
+		assertTrue(build(sample4()).contains("^A0N,30,0^FDA016828DX-1011-1001^FS"));
 	}
 	@Test public void buildTotalQty() { assertTrue(build(sample4()).contains("^FD35^FS")); } // 5+10+10+10
 
